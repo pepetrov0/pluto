@@ -1,7 +1,6 @@
 use axum::{routing, Router};
+use pluto::{ping, shutdown};
 use tower_http::trace::TraceLayer;
-
-mod ping;
 
 #[tokio::main]
 async fn main() {
@@ -16,5 +15,10 @@ async fn main() {
         .layer(TraceLayer::new_for_http());
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
-    axum::serve(listener, app).await.unwrap();
+    axum::serve(listener, app)
+        .with_graceful_shutdown(shutdown::signal())
+        .await
+        .unwrap();
+
+    tracing::info!("shutting down..");
 }
