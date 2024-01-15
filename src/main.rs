@@ -1,6 +1,6 @@
 use axum::{routing, Router};
 use pluto::{config::Configuration, database, ping, shutdown};
-use tower_http::trace::TraceLayer;
+use tower_http::{services::ServeDir, trace::TraceLayer};
 
 #[tokio::main]
 async fn main() {
@@ -21,6 +21,7 @@ async fn main() {
     // initialize router
     let router = Router::new()
         .route("/api/ping", routing::get(ping::handler))
+        .nest_service("/", ServeDir::new("static"))
         .layer(TraceLayer::new_for_http())
         .with_state(pluto::RouterState {
             configuration: config.clone(),
