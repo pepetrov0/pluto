@@ -10,12 +10,16 @@ async fn main() {
         .with_max_level(tracing::Level::TRACE)
         .init();
 
-    let app = Router::new()
+    // initialize router
+    let router = Router::new()
         .route("/api/ping", routing::get(ping::handler))
         .layer(TraceLayer::new_for_http());
 
+    // initialize listener
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
-    axum::serve(listener, app)
+
+    // serve on listener
+    axum::serve(listener, router)
         .with_graceful_shutdown(shutdown::signal())
         .await
         .unwrap();
