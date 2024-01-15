@@ -31,3 +31,7 @@ features = ["trace"]
 [dependencies.sqlx]
 version = "0"
 features = ["postgres", "runtime-tokio"]
+
+[dependencies.askama]
+version = "0"
+features = ["with-axum"]
