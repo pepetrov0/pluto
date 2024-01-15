@@ -1,4 +1,7 @@
+use axum::{async_trait, extract::FromRequestParts, http::request::Parts};
 use config::Config;
+
+use crate::RouterState;
 
 #[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub struct Configuration {
@@ -20,5 +23,17 @@ impl Configuration {
             .ok()?
             .try_deserialize()
             .ok()
+    }
+}
+
+#[async_trait]
+impl FromRequestParts<RouterState> for Configuration {
+    type Rejection = ();
+
+    async fn from_request_parts(
+        _: &mut Parts,
+        state: &RouterState,
+    ) -> Result<Self, Self::Rejection> {
+        Ok(state.configuration.clone())
     }
 }

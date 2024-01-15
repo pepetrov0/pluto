@@ -1,8 +1,9 @@
 use std::time::Duration;
 
+use axum::{async_trait, extract::FromRequestParts, http::request::Parts};
 use sqlx::{postgres::PgPoolOptions, PgPool};
 
-use crate::config::Configuration;
+use crate::{config::Configuration, RouterState};
 
 pub type Database = PgPool;
 
@@ -19,4 +20,16 @@ pub async fn connect(cfg: &Configuration) -> Result<Database, sqlx::Error> {
     sqlx::migrate!().run(&pool).await?;
 
     Ok(pool)
+}
+
+#[async_trait]
+impl FromRequestParts<RouterState> for Database {
+    type Rejection = ();
+
+    async fn from_request_parts(
+        _: &mut Parts,
+        state: &RouterState,
+    ) -> Result<Self, Self::Rejection> {
+        Ok(state.database.clone())
+    }
 }
