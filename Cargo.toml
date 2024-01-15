@@ -30,4 +30,4 @@ features = ["trace"]
 
 [dependencies.sqlx]
 version = "0"
-features = ["postgres"]
+features = ["postgres", "runtime-tokio"]

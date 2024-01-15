@@ -1,5 +1,5 @@
 use axum::{routing, Router};
-use pluto::{config::Configuration, ping, shutdown};
+use pluto::{config::Configuration, database, ping, shutdown};
 use tower_http::trace::TraceLayer;
 
 #[tokio::main]
@@ -13,11 +13,17 @@ async fn main() {
     // load in configuration
     let config = Configuration::read().expect("could not load in configuration");
 
+    // connect to database
+    let database = database::connect(&config)
+        .await
+        .expect("could not connect to database");
+
     // initialize router
     let router = Router::new()
         .route("/api/ping", routing::get(ping::handler))
         .layer(TraceLayer::new_for_http())
-        .with_state(config);
+        .with_state(config)
+        .with_state(database.clone());
 
     // initialize listener
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
@@ -28,5 +34,6 @@ async fn main() {
         .await
         .unwrap();
 
+    database.close().await;
     tracing::info!("shutting down..");
 }
