@@ -10,7 +10,12 @@ impl Configuration {
         dotenv::dotenv().ok();
 
         Config::builder()
-            .add_source(config::Environment::with_prefix("PLUTO"))
+            .add_source(
+                config::Environment::default()
+                    .prefix("PLUTO")
+                    .prefix_separator("__")
+                    .separator("__"),
+            )
             .build()
             .ok()?
             .try_deserialize()
