@@ -22,8 +22,10 @@ async fn main() {
     let router = Router::new()
         .route("/api/ping", routing::get(ping::handler))
         .layer(TraceLayer::new_for_http())
-        .with_state(config)
-        .with_state(database.clone());
+        .with_state(pluto::RouterState {
+            configuration: config.clone(),
+            database: database.clone(),
+        });
 
     // initialize listener
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
