@@ -1,0 +1,102 @@
+body {
+  background-color: var(--color-background);
+}
+
+.card {
+  background-color: var(--color-background-card);
+  border-radius: var(--radius-border-card);
+  box-shadow:
+    rgba(0, 0, 0, 0.1) 0px 20px 25px -5px,
+    rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
+}
+
+.single-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: var(--width-single-form);
+  max-width: var(--max-width-single-form);
+
+  gap: var(--gap-single-form);
+  padding: var(--padding-single-form);
+
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.single-form > * {
+  width: 100%;
+}
+
+.single-form > h1,
+.single-form > h2,
+.single-form > h3,
+.single-form > h4,
+.single-form > h5,
+.single-form > h6 {
+  margin-bottom: var(--margin-bottom-single-form-title);
+  text-align: center;
+}
+
+p {
+  font-size: 1rem;
+}
+
+h6 {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+h5 {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+h4 {
+  font-size: 1.75rem;
+  font-weight: bold;
+}
+
+h3 {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+h2 {
+  font-size: 2.25rem;
+  font-weight: bold;
+}
+
+h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+button {
+  border: 0;
+  color: var(--color-foreground-primary);
+  background-color: var(--color-background-primary);
+  border-radius: var(--radius-border-primary);
+  padding: var(--padding-vertical-primary) var(--padding-horizontal-primary);
+  font-size: 1rem;
+}
+
+button:hover {
+  cursor: pointer;
+}
+
+input {
+  outline: none;
+  border: 2px solid var(--color-background-input);
+  background-color: var(--color-background-input);
+  border-radius: var(--radius-border-primary);
+  padding: var(--padding-vertical-primary) var(--padding-horizontal-primary);
+  font-size: 1rem;
+}
+
+input:focus {
+  border: 2px solid var(--color-background-primary);
+}

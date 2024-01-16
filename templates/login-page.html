@@ -1,0 +1,14 @@
+{% extends "page.html" %} 
+
+{% block head %} 
+  <title>Sign In</title>
+{% endblock %} 
+
+{% block content %}
+  <form class="single-form card" action="/login" method="post">
+    <h4 >SIGN IN</h4>
+    <input name="email" type="email" placeholder="email.." required />
+    <input name="password" type="password" placeholder="password.." required />
+    <button type="submit">sign in</button>
+  </form>
+{% endblock %}

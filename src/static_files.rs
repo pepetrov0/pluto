@@ -20,7 +20,11 @@ where
         match StaticFiles::get(path.as_str()) {
             Some(content) => {
                 let mime = mime_guess::from_path(path).first_or_octet_stream();
-                ([(header::CONTENT_TYPE, mime.as_ref())], content.data).into_response()
+                let headers = [
+                    (header::CONTENT_TYPE, mime.as_ref()),
+                    (header::CACHE_CONTROL, "max-age=3600"),
+                ];
+                (headers, content.data).into_response()
             }
             None => (StatusCode::NOT_FOUND).into_response(),
         }

@@ -1,0 +1,24 @@
+{% extends "page.html" %} 
+
+{% block head %} 
+  <title>Sign Up</title>
+  <script>
+    function validate() {
+      const password = document.getElementById("password");
+      const confirmPassword = document.getElementById("confirm-password");
+
+      confirmPassword.setCustomValidity(password.value !== confirmPassword.value ? "Passwords do not match!" : "");
+      confirmPassword.reportValidity();
+    }
+  </script>
+{% endblock %} 
+
+{% block content %}
+  <form class="single-form card" action="/register" method="post">
+    <h4 >SIGN UP</h4>
+    <input name="email" type="email" placeholder="email.." required />
+    <input id="password" name="password" type="password" placeholder="password.." minlength="12" required />
+    <input id="confirm-password" type="password" placeholder="confirm password.." oninput="validate()" minlength="12" required />
+    <button type="submit">sign up</button>
+  </form>
+{% endblock %}
