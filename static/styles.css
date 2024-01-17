@@ -1,3 +1,25 @@
+:root {
+  --color-background: #efefef;
+
+  --color-background-primary: #3dfc49;
+  --color-foreground-primary: #000000;
+  --radius-border-primary: 0.5rem;
+  --padding-horizontal-primary: 1rem;
+  --padding-vertical-primary: 0.5rem;
+
+  --color-background-input: #f7f7f8;
+
+  --width-single-form: 22.5rem;
+  --max-width-single-form: 90%;
+  --gap-single-form: 0.75rem;
+  --padding-single-form: 1.5rem;
+  --margin-bottom-single-form-title: 2.25rem;
+
+  /* cards */
+  --color-background-card: #ffffff;
+  --radius-border-card: 1rem;
+}
+
 body {
   background-color: var(--color-background);
 }
