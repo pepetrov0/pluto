@@ -14,6 +14,7 @@ dotenv = "0"
 rust-embed = "8"
 mime_guess = "2"
 askama_axum = "0"
+nanoid = "0"
 
 [dependencies.tokio]
 version = "1"

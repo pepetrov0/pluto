@@ -2,6 +2,7 @@
 
 {% block head %} 
   <title>Sign Up</title>
+  <link rel="stylesheet" href="/static/auth-pages.css" />
   <script>
     function validate() {
       const password = document.getElementById("password");
@@ -14,11 +15,12 @@
 {% endblock %} 
 
 {% block content %}
-  <form class="single-form card" action="/register" method="post">
-    <h4 >SIGN UP</h4>
+  <form class="auth-form card" action="/register" method="post">
+    <h4 class="title">SIGN UP</h4>
     <input name="email" type="email" placeholder="email.." required />
     <input id="password" name="password" type="password" placeholder="password.." minlength="12" required />
     <input id="confirm-password" type="password" placeholder="confirm password.." oninput="validate()" minlength="12" required />
     <button type="submit">sign up</button>
+    <a class="secondary-action" href="/login">Already have an account?</a>
   </form>
 {% endblock %}

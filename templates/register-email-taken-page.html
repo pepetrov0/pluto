@@ -1,0 +1,13 @@
+{% extends "page.html" %} 
+
+{% block head %} 
+  <title>Error - Email Taken</title>
+  <link rel="stylesheet" href="/static/auth-pages.css" />
+{% endblock %} 
+
+{% block content %}
+  <section class="auth-form card">
+    <p>ERROR: Email is already taken!</p>
+    <a class="secondary-action" href="/register">Go back</a>
+  </section>
+{% endblock %}
