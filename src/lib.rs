@@ -4,7 +4,7 @@ pub mod shutdown;
 pub mod static_files;
 
 // api
-pub mod ping;
+pub mod ping_api;
 
 // pages
 pub mod login_page;

@@ -1,6 +1,6 @@
 use axum::{routing, Router};
 use pluto::{
-    config::Configuration, database, login_page, ping, register_page, shutdown, static_files,
+    config::Configuration, database, login_page, ping_api, register_page, shutdown, static_files,
 };
 use tower_http::trace::TraceLayer;
 
@@ -26,7 +26,7 @@ async fn main() {
         .route("/login", routing::get(login_page::handler))
         .route("/register", routing::get(register_page::handler))
         // apis
-        .route("/api/ping", routing::get(ping::handler))
+        .route("/api/ping", routing::get(ping_api::handler))
         // static files
         .route("/static/*file", routing::get(static_files::handler))
         .layer(TraceLayer::new_for_http())
