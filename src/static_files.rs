@@ -32,10 +32,6 @@ where
 }
 
 pub async fn handler(uri: Uri) -> impl IntoResponse {
-    let path = uri
-        .path()
-        .trim_start_matches('/')
-        .trim_start_matches("static/")
-        .to_string();
+    let path = uri.path().trim_start_matches('/').to_string();
     StaticFile(path)
 }

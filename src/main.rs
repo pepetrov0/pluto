@@ -34,7 +34,7 @@ async fn main() {
         .route("/ping", routing::get(ping_api::handler))
         .route("/register", routing::post(register_api::handler))
         // static files
-        .route("/static/*file", routing::get(static_files::handler))
+        .route("/*file", routing::get(static_files::handler))
         .layer(TraceLayer::new_for_http())
         .with_state(pluto::RouterState {
             configuration: config.clone(),
