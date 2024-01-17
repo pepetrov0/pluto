@@ -1,6 +1,6 @@
-use axum::Json;
+use axum::{extract::State, Json};
 
-use crate::{config::Configuration, database::Database};
+use crate::{config::Configuration, AppState};
 
 #[derive(serde::Serialize)]
 pub struct Ping {
@@ -13,17 +13,17 @@ pub struct Ping {
 pub struct DatabaseStatus {
     pub open: bool,
     pub size: u32,
-    pub idle: usize,
+    pub idle: u32,
 }
 
-pub async fn handler(configuration: Configuration, database: Database) -> Json<Ping> {
+pub async fn handler(State(state): State<AppState>) -> Json<Ping> {
     Json(Ping {
         message: "pong".to_string(),
-        configuration,
+        configuration: state.configuration,
         database_status: DatabaseStatus {
-            open: !database.is_closed(),
-            size: database.size(),
-            idle: database.num_idle(),
+            open: state.database.is_open(),
+            size: state.database.size(),
+            idle: state.database.num_idle(),
         },
     })
 }

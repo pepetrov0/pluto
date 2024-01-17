@@ -1,3 +1,8 @@
+use std::sync::Arc;
+
+use database::Database;
+use user::UserRepository;
+
 // core
 pub mod config;
 pub mod database;
@@ -17,7 +22,8 @@ pub mod register_email_taken_page;
 pub mod register_page;
 
 #[derive(Clone)]
-pub struct RouterState {
+pub struct AppState {
     pub configuration: config::Configuration,
-    pub database: database::Database,
+    pub database: Arc<dyn Database>,
+    pub user_repository: Arc<dyn UserRepository>,
 }

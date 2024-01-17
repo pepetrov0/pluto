@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::{routing, Router};
 use pluto::{
     config::Configuration, database, login_page, ping_api, register_api, register_email_taken_page,
@@ -17,9 +19,11 @@ async fn main() {
     let config = Configuration::read().expect("could not load in configuration");
 
     // connect to database
-    let database = database::connect(&config)
-        .await
-        .expect("could not connect to database");
+    let database = Arc::new(
+        database::connect(&config)
+            .await
+            .expect("could not connect to database"),
+    );
 
     // initialize router
     let router = Router::new()
@@ -36,9 +40,10 @@ async fn main() {
         // static files
         .route("/*file", routing::get(static_files::handler))
         .layer(TraceLayer::new_for_http())
-        .with_state(pluto::RouterState {
+        .with_state(pluto::AppState {
             configuration: config.clone(),
             database: database.clone(),
+            user_repository: database.clone(),
         });
 
     // initialize listener

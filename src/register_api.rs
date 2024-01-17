@@ -1,6 +1,6 @@
-use axum::{response::Redirect, Form};
+use axum::{extract::State, response::Redirect, Form};
 
-use crate::{database::Database, user::UserRepository};
+use crate::AppState;
 
 #[derive(serde::Deserialize)]
 pub struct CreateUserForm {
@@ -8,8 +8,9 @@ pub struct CreateUserForm {
     pub password: String,
 }
 
-pub async fn handler(database: Database, Form(input): Form<CreateUserForm>) -> Redirect {
-    database
+pub async fn handler(State(state): State<AppState>, Form(input): Form<CreateUserForm>) -> Redirect {
+    state
+        .user_repository
         .create_user(input.email, input.password)
         .await
         .ok()

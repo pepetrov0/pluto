@@ -1,13 +1,16 @@
 use std::time::Duration;
 
-use axum::{async_trait, extract::FromRequestParts, http::request::Parts};
 use sqlx::{postgres::PgPoolOptions, PgPool};
 
-use crate::{config::Configuration, RouterState};
+use crate::config::Configuration;
 
-pub type Database = PgPool;
+pub trait Database: Send + Sync {
+    fn is_open(&self) -> bool;
+    fn size(&self) -> u32;
+    fn num_idle(&self) -> u32;
+}
 
-pub async fn connect(cfg: &Configuration) -> Result<Database, sqlx::Error> {
+pub async fn connect(cfg: &Configuration) -> Result<PgPool, sqlx::Error> {
     // connect to database
     let pool = PgPoolOptions::new()
         .acquire_timeout(Duration::from_secs(5))
@@ -22,14 +25,16 @@ pub async fn connect(cfg: &Configuration) -> Result<Database, sqlx::Error> {
     Ok(pool)
 }
 
-#[async_trait]
-impl FromRequestParts<RouterState> for Database {
-    type Rejection = ();
+impl Database for PgPool {
+    fn is_open(&self) -> bool {
+        !self.is_closed()
+    }
 
-    async fn from_request_parts(
-        _: &mut Parts,
-        state: &RouterState,
-    ) -> Result<Self, Self::Rejection> {
-        Ok(state.database.clone())
+    fn size(&self) -> u32 {
+        self.size()
+    }
+
+    fn num_idle(&self) -> u32 {
+        self.num_idle() as u32
     }
 }
