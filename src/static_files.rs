@@ -1,9 +1,16 @@
+use std::time::Duration;
+
 use axum::{
     http::{header, StatusCode, Uri},
     response::{IntoResponse, Response},
     routing, Router,
 };
+use axum_extra::{
+    headers::{CacheControl, ContentType},
+    TypedHeader,
+};
 use rust_embed::RustEmbed;
+use tower_http::compression::CompressionLayer;
 
 use crate::AppState;
 
@@ -23,11 +30,13 @@ where
         match StaticFiles::get(path.as_str()) {
             Some(content) => {
                 let mime = mime_guess::from_path(path).first_or_octet_stream();
-                let headers = [
-                    (header::CONTENT_TYPE, mime.as_ref()),
-                    (header::CACHE_CONTROL, "max-age=3600"),
-                ];
-                (headers, content.data).into_response()
+
+                (
+                    TypedHeader(ContentType::from(mime)),
+                    TypedHeader(CacheControl::new().with_max_age(Duration::from_secs(3600))),
+                    content.data,
+                )
+                    .into_response()
             }
             None => (StatusCode::NOT_FOUND).into_response(),
         }
@@ -40,5 +49,7 @@ async fn handler(uri: Uri) -> impl IntoResponse {
 }
 
 pub fn router() -> Router<AppState> {
-    Router::new().route("/*file", routing::get(handler))
+    Router::new()
+        .route("/*file", routing::get(handler))
+        .layer(CompressionLayer::new().gzip(true))
 }

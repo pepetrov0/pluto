@@ -30,7 +30,7 @@ features = ["tracing"]
 
 [dependencies.axum-extra]
 version = "0"
-features = []
+features = ["typed-header"]
 
 [dependencies.tower]
 version = "0"
@@ -38,7 +38,7 @@ features = ["util"]
 
 [dependencies.tower-http]
 version = "0"
-features = ["fs", "trace"]
+features = ["fs", "trace", "compression-gzip"]
 
 [dependencies.sqlx]
 version = "0"
