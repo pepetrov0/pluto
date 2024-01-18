@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use argon2::Argon2;
 use axum::Router;
 use pluto::{config::Configuration, database, shutdown, static_files};
 use tower_http::trace::TraceLayer;
@@ -22,6 +23,13 @@ async fn main() {
             .expect("could not connect to database"),
     );
 
+    let state = pluto::AppState {
+        configuration: config.clone(),
+        database: database.clone(),
+        password_hasher: Arc::new(Argon2::default()),
+        user_repository: database.clone(),
+    };
+
     // initialize router
     let router = Router::new()
         // healthcheck
@@ -30,11 +38,7 @@ async fn main() {
         .merge(static_files::router())
         // trace and state
         .layer(TraceLayer::new_for_http())
-        .with_state(pluto::AppState {
-            configuration: config.clone(),
-            database: database.clone(),
-            user_repository: database.clone(),
-        });
+        .with_state(state);
 
     // initialize listener
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
