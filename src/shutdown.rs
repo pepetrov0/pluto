@@ -1,3 +1,5 @@
+//! Enables graceful shutdown
+
 use tokio::signal;
 
 pub async fn signal() {

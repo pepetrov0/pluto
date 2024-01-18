@@ -1,7 +1,9 @@
+//! Enables serving of static files
+
 use std::time::Duration;
 
 use axum::{
-    http::{header, StatusCode, Uri},
+    http::{StatusCode, Uri},
     response::{IntoResponse, Response},
     routing, Router,
 };

@@ -6,12 +6,12 @@ use user::UserRepository;
 // components
 pub mod config;
 pub mod database;
-pub mod shutdown;
-pub mod static_files;
 pub mod user;
 
 // features
 pub mod healthcheck;
+pub mod shutdown;
+pub mod static_files;
 
 #[derive(Clone)]
 pub struct AppState {

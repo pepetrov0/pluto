@@ -1,3 +1,5 @@
+//! Provides an endpoint for querying server health
+
 use axum::{extract::State, routing, Json, Router};
 
 use crate::{config::Configuration, AppState};
