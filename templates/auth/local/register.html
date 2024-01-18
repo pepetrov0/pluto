@@ -1,0 +1,46 @@
+{% extends "page.html" %}
+
+{% block head %}
+<title>Sign up</title>
+<style>
+  form > h3 {
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+</style>
+<script>
+  function validatePasswords() {
+    const password = document.getElementById("password");
+    const confirmPassword = document.getElementById("confirm-password");
+    confirmPassword.setCustomValidity(
+      password.value !== confirmPassword.value ? "Passwords do not match!" : "",
+    );
+    confirmPassword.reportValidity();
+  }
+</script>
+{% endblock %} 
+
+{% block content %}
+<form method="POST" action="/register" class="card column m">
+  <h3>Sign up</h3>
+  <input name="email" type="email" placeholder="Email.." required />
+  <input
+    id="password"
+    name="password"
+    type="password"
+    placeholder="Password.."
+    minlength="12"
+    required
+  />
+  <input
+    id="confirm-password"
+    name="confirm_password"
+    type="password"
+    placeholder="Confirm password.."
+    minlength="12"
+    oninput="validatePasswords()"
+    required
+  />
+  <button type="submit">Submit</button>
+</form>
+{% endblock %}

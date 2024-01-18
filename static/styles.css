@@ -1,56 +1,35 @@
+@import "/styles/clear.css";
+@import "/styles/typography.css";
+@import "/styles/forms.css";
+@import "/styles/card.css";
+
 :root {
-  --color-background: #efefef;
+  --background-default: #efefef;
+  --background-elevated: #ffffff;
+  --background-primary: #0f1108;
 
-  /* text sizes */
+  --color-primary: #ffffff;
+
   --font-size-text: 1rem;
-  --font-size-h6: 1.25rem;
-  --font-size-h5: 1.5rem;
-  --font-size-h4: 1.75rem;
-  --font-size-h3: 2rem;
-  --font-size-h2: 2.25rem;
-  --font-size-h1: 2.5rem;
 
-  /* cards */
-  --color-background-card: #ffffff;
-  --padding-card: 1rem;
-  --radius-border-card: 1rem;
+  --border-radius-m: 0.5rem;
+  --border-radius-l: 1rem;
+  --border-size-m: 2px;
+  --spacing-m: 0.5rem;
+  --spacing-l: 0.75rem;
+  --spacing-xl: 1rem;
+  --spacing-xxl: 1.25rem;
+  --spacing-xxxl: 1.5rem;
+
+  --shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
+    rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
 }
 
 body {
-  background-color: var(--color-background);
+  background-color: var(--background-default);
 }
 
 html {
   font-size: var(--font-size-text);
   font-family: "Open Sans", sans-serif;
-}
-
-h6 {
-  font-size: var(--font-size-h6);
-  font-weight: bold;
-}
-
-h5 {
-  font-size: var(--font-size-h5);
-  font-weight: bold;
-}
-
-h4 {
-  font-size: var(--font-size-h4);
-  font-weight: bold;
-}
-
-h3 {
-  font-size: var(--font-size-h3);
-  font-weight: bold;
-}
-
-h2 {
-  font-size: var(--font-size-h2);
-  font-weight: bold;
-}
-
-h1 {
-  font-size: var(--font-size-h1);
-  font-weight: bold;
 }

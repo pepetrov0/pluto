@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use argon2::Argon2;
 use axum::Router;
-use pluto::{config::Configuration, database, shutdown, static_files};
+use pluto::{auth, config::Configuration, database, shutdown, static_files};
 use tower_http::trace::TraceLayer;
 
 #[tokio::main]
@@ -34,6 +34,8 @@ async fn main() {
     let router = Router::new()
         // healthcheck
         .merge(pluto::healthcheck::router())
+        // auth
+        .merge(auth::router())
         // static files
         .merge(static_files::router())
         // trace and state
