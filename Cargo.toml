@@ -28,6 +28,10 @@ features = ["derive"]
 version = "0"
 features = ["tracing"]
 
+[dependencies.axum-extra]
+version = "0"
+features = []
+
 [dependencies.tower]
 version = "0"
 features = ["util"]
