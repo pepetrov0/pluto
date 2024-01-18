@@ -1,10 +1,7 @@
 use std::sync::Arc;
 
-use axum::{routing, Router};
-use pluto::{
-    config::Configuration, database, login_page, ping_api, register_api, register_email_taken_page,
-    register_page, shutdown, static_files,
-};
+use axum::Router;
+use pluto::{config::Configuration, database, local_auth, shutdown, static_files};
 use tower_http::trace::TraceLayer;
 
 #[tokio::main]
@@ -27,18 +24,12 @@ async fn main() {
 
     // initialize router
     let router = Router::new()
-        // pages
-        .route("/login", routing::get(login_page::handler))
-        .route("/register", routing::get(register_page::handler))
-        .route(
-            "/register-email-taken",
-            routing::get(register_email_taken_page::handler),
-        )
-        // apis
-        .route("/ping", routing::get(ping_api::handler))
-        .route("/register", routing::post(register_api::handler))
+        // status
+        .merge(pluto::status::router())
+        // local_auth
+        .merge(local_auth::router())
         // static files
-        .route("/*file", routing::get(static_files::handler))
+        .merge(static_files::router())
         .layer(TraceLayer::new_for_http())
         .with_state(pluto::AppState {
             configuration: config.clone(),

@@ -1,4 +1,4 @@
-use axum::{extract::State, Json};
+use axum::{extract::State, routing, Json, Router};
 
 use crate::{config::Configuration, AppState};
 
@@ -16,7 +16,7 @@ pub struct DatabaseStatus {
     pub idle: u32,
 }
 
-pub async fn handler(State(state): State<AppState>) -> Json<Ping> {
+async fn handler(State(state): State<AppState>) -> Json<Ping> {
     Json(Ping {
         message: "pong".to_string(),
         configuration: state.configuration,
@@ -26,4 +26,8 @@ pub async fn handler(State(state): State<AppState>) -> Json<Ping> {
             idle: state.database.num_idle(),
         },
     })
+}
+
+pub fn router() -> Router<AppState> {
+    Router::new().route("/ping", routing::get(handler))
 }

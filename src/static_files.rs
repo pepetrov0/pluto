@@ -1,8 +1,11 @@
 use axum::{
     http::{header, StatusCode, Uri},
     response::{IntoResponse, Response},
+    routing, Router,
 };
 use rust_embed::RustEmbed;
+
+use crate::AppState;
 
 #[derive(RustEmbed)]
 #[folder = "static"]
@@ -31,7 +34,11 @@ where
     }
 }
 
-pub async fn handler(uri: Uri) -> impl IntoResponse {
+async fn handler(uri: Uri) -> impl IntoResponse {
     let path = uri.path().trim_start_matches('/').to_string();
     StaticFile(path)
+}
+
+pub fn router() -> Router<AppState> {
+    Router::new().route("/*file", routing::get(handler))
 }
