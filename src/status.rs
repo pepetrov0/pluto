@@ -3,14 +3,14 @@ use axum::{extract::State, routing, Json, Router};
 use crate::{config::Configuration, AppState};
 
 #[derive(serde::Serialize)]
-pub struct Ping {
+struct Ping {
     pub message: String,
     pub configuration: Configuration,
     pub database_status: DatabaseStatus,
 }
 
 #[derive(serde::Serialize)]
-pub struct DatabaseStatus {
+struct DatabaseStatus {
     pub open: bool,
     pub size: u32,
     pub idle: u32,
