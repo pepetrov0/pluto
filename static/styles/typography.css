@@ -1,10 +1,16 @@
 :root {
+  --font-size-size: 1rem;
   --font-size-h6: 1.25rem;
   --font-size-h5: 1.5rem;
   --font-size-h4: 1.75rem;
   --font-size-h3: 2rem;
   --font-size-h2: 2.25rem;
   --font-size-h1: 2.5rem;
+}
+
+html {
+  font-size: var(--font-size-text);
+  font-family: "Open Sans", sans-serif;
 }
 
 h6 {
