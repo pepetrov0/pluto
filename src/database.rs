@@ -4,7 +4,7 @@ use sqlx::{postgres::PgPoolOptions, PgPool};
 
 use crate::config::Configuration;
 
-pub trait Database: Send + Sync {
+pub trait Pool: Send + Sync {
     fn is_open(&self) -> bool;
     fn size(&self) -> u32;
     fn num_idle(&self) -> u32;
@@ -25,7 +25,7 @@ pub async fn connect(cfg: &Configuration) -> Result<PgPool, sqlx::Error> {
     Ok(pool)
 }
 
-impl Database for PgPool {
+impl Pool for PgPool {
     fn is_open(&self) -> bool {
         !self.is_closed()
     }

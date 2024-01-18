@@ -20,6 +20,7 @@
 
   /* cards */
   --color-background-card: #ffffff;
+  --padding-card: 1rem;
   --radius-border-card: 1rem;
 }
 
@@ -30,6 +31,7 @@ body {
 .card {
   background-color: var(--color-background-card);
   border-radius: var(--radius-border-card);
+  padding: var(--padding-card);
   box-shadow:
     rgba(0, 0, 0, 0.1) 0px 20px 25px -5px,
     rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
