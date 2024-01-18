@@ -1,14 +1,6 @@
 :root {
   --color-background: #efefef;
 
-  --color-background-button-primary: #3dfc49;
-  --color-foreground-button-primary: #000000;
-  --radius-border-button-primary: 0.5rem;
-  --padding-horizontal-button-primary: 1rem;
-  --padding-vertical-button-primary: 0.5rem;
-
-  --color-background-input: #f7f7f8;
-
   /* text sizes */
   --font-size-text: 1rem;
   --font-size-h6: 1.25rem;
@@ -26,15 +18,6 @@
 
 body {
   background-color: var(--color-background);
-}
-
-.card {
-  background-color: var(--color-background-card);
-  border-radius: var(--radius-border-card);
-  padding: var(--padding-card);
-  box-shadow:
-    rgba(0, 0, 0, 0.1) 0px 20px 25px -5px,
-    rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
 }
 
 html {
@@ -70,32 +53,4 @@ h2 {
 h1 {
   font-size: var(--font-size-h1);
   font-weight: bold;
-}
-
-button {
-  border: 0;
-  color: var(--color-foreground-button-primary);
-  background-color: var(--color-background-button-primary);
-  border-radius: var(--radius-border-button-primary);
-  padding: var(--padding-vertical-button-primary)
-    var(--padding-horizontal-button-primary);
-  font-size: 1rem;
-}
-
-button:hover {
-  cursor: pointer;
-}
-
-input {
-  outline: none;
-  border: 2px solid var(--color-background-input);
-  background-color: var(--color-background-input);
-  border-radius: var(--radius-border-button-primary);
-  padding: var(--padding-vertical-button-primary)
-    var(--padding-horizontal-button-primary);
-  font-size: 1rem;
-}
-
-input:focus {
-  border: 2px solid var(--color-background-button-primary);
 }
