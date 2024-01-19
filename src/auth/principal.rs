@@ -12,6 +12,7 @@ use crate::{user::User, AppState};
 use super::session::Session;
 
 /// Represent an authentication/authorization principal
+#[derive(Debug)]
 pub struct AuthPrincipal(pub User);
 
 #[async_trait]

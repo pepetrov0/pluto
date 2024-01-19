@@ -4,7 +4,7 @@ use axum::async_trait;
 use sqlx::FromRow;
 
 /// Represents a user
-#[derive(FromRow)]
+#[derive(Debug, FromRow)]
 pub struct User {
     pub id: String,
     pub email: String,

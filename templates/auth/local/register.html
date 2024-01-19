@@ -12,7 +12,7 @@
         <input id="password" name="password" type="password" placeholder="Password.." minlength="12" class="input"
             required />
         <input id="confirm-password" name="confirm_password" type="password" placeholder="Confirm password.."
-            minlength="12" oninput="validatePasswords()" class="input" required />
+            minlength="12" class="input" required />
         <button type="submit" class="button">Sign up</button>
     </form>
     {% if let Some(error) = error %}

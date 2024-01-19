@@ -4,7 +4,7 @@ use axum::{
     Form,
 };
 
-use crate::{validation, AppState};
+use crate::{auth::session_providers::cookie::SetCookieSession, validation, AppState};
 
 use super::error::RegistrationError;
 
@@ -44,7 +44,10 @@ pub async fn handler(State(state): State<AppState>, Form(details): Form<Register
         .await
     {
         // create a session and redirect to /
-        Some(_) => Redirect::to("/register").into_response(),
+        Some(user) => match state.session_repository.create_session(user.id).await {
+            Some(session) => (SetCookieSession(session), Redirect::to("/")).into_response(),
+            None => Redirect::to("/").into_response(),
+        },
         None => RegistrationError::Unknown.into_response(),
     }
 }
