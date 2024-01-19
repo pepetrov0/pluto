@@ -20,12 +20,12 @@
   action="/register"
   class="flex flex-col gap-3 bg-white p-3 rounded shadow mt-8 w-80 mx-auto"
 >
-  <h3>Sign up</h3>
+  <h3 class="heading-3 mb-4">Sign up</h3>
   <input
     name="email"
     type="email"
     placeholder="Email.."
-    class="inpt"
+    class="input"
     required
   />
   <input
@@ -34,7 +34,7 @@
     type="password"
     placeholder="Password.."
     minlength="12"
-    class="inpt"
+    class="input"
     required
   />
   <input
@@ -44,9 +44,9 @@
     placeholder="Confirm password.."
     minlength="12"
     oninput="validatePasswords()"
-    class="inpt"
+    class="input"
     required
   />
-  <button type="submit" class="btn">Submit</button>
+  <button type="submit" class="button">Sign up</button>
 </form>
 {% endblock %}

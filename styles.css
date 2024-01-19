@@ -9,11 +9,29 @@
 }
 
 @layer components {
-  .btn {
-    @apply bg-green-400 px-4 py-2 rounded shadow;
+  .button {
+    @apply bg-gray-900 text-white px-4 py-2 rounded shadow;
   }
 
-  .inpt {
-    @apply appearance-none px-4 py-2 rounded shadow;
+  .input {
+    @apply appearance-none outline-none  px-4 py-2 rounded shadow border-gray-200;
+    @apply focus:outline-none focus:ring-0 focus:border-gray-900;
+    @apply invalid:border-red-600;
+  }
+
+  .heading-6 {
+    @apply text-lg font-bold;
+  }
+
+  .heading-5 {
+    @apply text-xl font-bold;
+  }
+
+  .heading-4 {
+    @apply text-2xl font-bold;
+  }
+
+  .heading-3 {
+    @apply text-3xl font-bold;
   }
 }
