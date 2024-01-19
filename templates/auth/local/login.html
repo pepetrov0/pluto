@@ -1,0 +1,28 @@
+{% extends "page.html" %}
+
+{% block head %}
+<title>Sign in</title>
+{% endblock %}
+
+{% block content %}
+<main class="flex flex-col mt-8 w-80 mx-auto max-w-[90%] gap-3">
+    <h3 class="heading-3">Sign in</h3>
+    <form method="POST" action="/login" class="card flex flex-col gap-3 bg-default">
+        <input name="email" type="email" placeholder="Email.." class="input" required />
+        <input id="password" name="password" type="password" placeholder="Password.." class="input"
+            required />
+        <button type="submit" class="button">Sign in</button>
+        <span class="text-center">Don't have an account? <a class="link" href="/register">Sign up now.</a></span>
+    </form>
+    {% if let Some(error) = error %}
+    <section class="card bg-danger border-danger-darker border-2">
+        {% match error %}
+        {% when LoginError::InvalidCredentials %}
+        Invalid user credentials!
+        {% when LoginError::Unknown %}
+        Something went wrong, please try again later!
+        {% endmatch %}
+    </section>
+    {% endif %}
+</main>
+{% endblock %}

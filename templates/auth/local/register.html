@@ -14,6 +14,7 @@
         <input id="confirm-password" name="confirm_password" type="password" placeholder="Confirm password.."
             minlength="12" class="input" required />
         <button type="submit" class="button">Sign up</button>
+        <span class="text-center">Already have an account? <a class="link" href="/login">Sign in now.</a></span>
     </form>
     {% if let Some(error) = error %}
     <section class="card bg-danger border-danger-darker border-2">

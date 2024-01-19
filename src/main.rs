@@ -22,14 +22,14 @@ async fn main() {
             .expect("could not connect to database"),
     );
 
+    // create password hasher
+    let password_hasher = Arc::new(Argon2::default());
+
     let state = pluto::AppState {
         configuration: config.clone(),
-        cookie_jar_key: config
-            .cookie_jar_secret
-            .map(|v| Key::from(v.as_bytes()))
-            .unwrap_or_else(Key::generate),
+        cookie_jar_key: Key::from(config.secret.as_bytes()),
         database: database.clone(),
-        password_hasher: Arc::new(Argon2::default()),
+        password_hasher,
         user_repository: database.clone(),
         session_repository: Arc::new(InMemoryKeyValueStore::default()),
     };

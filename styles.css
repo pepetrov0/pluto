@@ -10,6 +10,10 @@
 }
 
 @layer components {
+  .link {
+    @apply underline text-accent;
+  }
+
   .button {
     @apply bg-accent text-accent-contrast px-4 py-2 rounded shadow disabled:bg-disabled disabled:text-disabled-darker disabled:cursor-not-allowed;
   }
@@ -17,7 +21,7 @@
   .input {
     @apply appearance-none outline-none px-4 py-2 bg-default text-default-contrast rounded shadow border-default-darker invalid:border-danger-darker;
     @apply focus:outline-none focus:ring-0 focus:border-accent;
-    @apply  invalid:border-danger-darker;
+    @apply invalid:border-danger-darker;
   }
 
   .heading-6 {

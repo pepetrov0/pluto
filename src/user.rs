@@ -10,6 +10,14 @@ pub struct User {
     pub email: String,
 }
 
+/// Represents a user with password
+#[derive(Debug, FromRow)]
+pub struct UserWithPassword {
+    pub id: String,
+    pub email: String,
+    pub password: Option<String>
+}
+
 /// A user repository
 #[async_trait]
 pub trait UserRepository: Send + Sync {
@@ -18,6 +26,9 @@ pub trait UserRepository: Send + Sync {
 
     /// Finds a user by id or by email
     async fn find_user(&self, id_or_email: &str) -> Option<User>;
+
+    /// Retrieve password
+    async fn find_user_with_password(&self, id_or_email: &str) -> Option<UserWithPassword>;
 }
 
 #[async_trait]
@@ -38,6 +49,15 @@ impl UserRepository for sqlx::PgPool {
     #[tracing::instrument]
     async fn find_user(&self, id_or_email: &str) -> Option<User> {
         sqlx::query_as::<_, User>("select id, email from users where id=$1 or email=$1")
+            .bind(id_or_email)
+            .fetch_one(self)
+            .await
+            .ok()
+    }
+
+    #[tracing::instrument]
+    async fn find_user_with_password(&self, id_or_email: &str) -> Option<UserWithPassword> {
+        sqlx::query_as::<_, UserWithPassword>("select id, email, password from users where id=$1 or email=$1")
             .bind(id_or_email)
             .fetch_one(self)
             .await

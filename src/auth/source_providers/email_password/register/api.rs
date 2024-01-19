@@ -21,7 +21,7 @@ pub async fn handler(
     State(state): State<AppState>,
     Form(details): Form<RegisterForm>,
 ) -> Result<(SetCookieSession, Redirect), RegistrationError> {
-    if validation::is_email(&details.email) {
+    if !validation::is_email(&details.email) {
         return Err(RegistrationError::InvalidEmail);
     }
 
@@ -38,7 +38,7 @@ pub async fn handler(
         return Err(RegistrationError::EmailTaken);
     }
 
-    let hash = match state.password_hasher.hash(details.password) {
+    let hash = match state.password_hasher.hash(details.password.as_bytes()) {
         Some(hash) => hash,
         None => return Err(RegistrationError::Unknown),
     };

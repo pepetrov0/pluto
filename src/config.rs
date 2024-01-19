@@ -1,13 +1,17 @@
 //! Implements configuration
 
 use config::Config;
+use rand::{distributions, rngs::OsRng, Rng};
+
+const DEFAULT_SECRET_LENGTH: usize = 64;
 
 /// Basic configuration structure providing needed variables
 #[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub struct Configuration {
-    /// A secret for generating cookie jar keys
+    /// A secret for generating keys
     #[serde(skip_serializing)]
-    pub cookie_jar_secret: Option<String>,
+    #[serde(default = "random_secret")]
+    pub secret: String,
     /// Session cookie name
     pub session_cookie_name: Option<String>,
     /// Database URL to connect to
@@ -32,4 +36,12 @@ impl Configuration {
             .try_deserialize()
             .ok()
     }
+}
+
+fn random_secret() -> String {
+    let bytes = (&mut OsRng)
+        .sample_iter(distributions::Alphanumeric)
+        .take(DEFAULT_SECRET_LENGTH)
+        .collect();
+    String::from_utf8(bytes).expect("msg")
 }
