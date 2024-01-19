@@ -7,7 +7,7 @@ create extension if not exists pgcrypto;
 create table if not exists users(
 	id varchar(21) primary key,
 	email varchar(255) not null unique,
-	password varchar(60)
+	password varchar(128)
 );
 
 commit;

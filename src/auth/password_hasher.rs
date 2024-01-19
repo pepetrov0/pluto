@@ -11,6 +11,7 @@ pub trait PasswordHasher: Send + Sync {
 }
 
 impl PasswordHasher for Argon2<'_> {
+    #[tracing::instrument(skip(password))]
     fn hash(&self, password: String) -> Option<String> {
         let salt = SaltString::generate(&mut OsRng);
         let hash = argon2::PasswordHasher::hash_password(self, password.as_bytes(), &salt)
@@ -19,6 +20,7 @@ impl PasswordHasher for Argon2<'_> {
         Some(hash)
     }
 
+    #[tracing::instrument(skip(password))]
     fn verify(&self, password: String, hash: String) -> bool {
         let hash = match PasswordHash::new(&hash) {
             Ok(v) => v,

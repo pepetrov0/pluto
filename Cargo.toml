@@ -6,17 +6,18 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+argon2 = "0"
+askama = "0"
+config = "0"
+dotenv = "0"
+mime_guess = "2"
+minify-html-onepass = "0"
+nanoid = "0"
+regex = "1"
+rust-embed = "8"
 serde_json = "1"
 tracing = "0"
 tracing-subscriber = "0"
-config = "0"
-dotenv = "0"
-rust-embed = "8"
-mime_guess = "2"
-nanoid = "0"
-argon2 = "0"
-askama = "0"
-minify-html-onepass = "0"
 
 [dependencies.tokio]
 version = "1"

@@ -1,8 +1,10 @@
 use std::sync::Arc;
 
 use argon2::Argon2;
-use axum::Router;
-use pluto::{auth, config::Configuration, database, shutdown, static_files};
+use axum::{middleware, Router};
+use pluto::{
+    auth, config::Configuration, content_security_policy, database, shutdown, static_files,
+};
 use tower_http::trace::TraceLayer;
 
 #[tokio::main]
@@ -40,6 +42,7 @@ async fn main() {
         .merge(static_files::router())
         // trace and state
         .layer(TraceLayer::new_for_http())
+        .layer(middleware::from_fn(content_security_policy::middleware))
         .with_state(state);
 
     // initialize listener

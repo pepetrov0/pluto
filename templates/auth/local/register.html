@@ -2,51 +2,32 @@
 
 {% block head %}
 <title>Sign up</title>
-<script>
-  function validatePasswords() {
-    const password = document.getElementById("password");
-    const confirmPassword = document.getElementById("confirm-password");
-    confirmPassword.setCustomValidity(
-      password.value !== confirmPassword.value ? "Passwords do not match!" : "",
-    );
-    confirmPassword.reportValidity();
-  }
-</script>
 {% endblock %}
 
 {% block content %}
-<form
-  method="POST"
-  action="/register"
-  class="flex flex-col gap-3 bg-white p-3 rounded shadow mt-8 w-80 mx-auto max-w-[90%]"
->
-  <h3 class="heading-3 mb-4">Sign up</h3>
-  <input
-    name="email"
-    type="email"
-    placeholder="Email.."
-    class="input"
-    required
-  />
-  <input
-    id="password"
-    name="password"
-    type="password"
-    placeholder="Password.."
-    minlength="12"
-    class="input"
-    required
-  />
-  <input
-    id="confirm-password"
-    name="confirm_password"
-    type="password"
-    placeholder="Confirm password.."
-    minlength="12"
-    oninput="validatePasswords()"
-    class="input"
-    required
-  />
-  <button type="submit" class="button">Sign up</button>
-</form>
+<main class="flex flex-col mt-8 w-80 mx-auto max-w-[90%] gap-3">
+    <h3 class="heading-3">Sign up</h3>
+    <form method="POST" action="/register" class="card flex flex-col gap-3 bg-default">
+        <input name="email" type="email" placeholder="Email.." class="input" required />
+        <input id="password" name="password" type="password" placeholder="Password.." minlength="12" class="input"
+            required />
+        <input id="confirm-password" name="confirm_password" type="password" placeholder="Confirm password.."
+            minlength="12" oninput="validatePasswords()" class="input" required />
+        <button type="submit" class="button">Sign up</button>
+    </form>
+    {% if let Some(error) = error %}
+    <section class="card bg-danger border-danger-darker border-2">
+        {% match error %}
+        {% when RegistrationError::InvalidEmail %}
+        Invalid email!
+        {% when RegistrationError::PasswordsMismatch %}
+        Passwords do not match!
+        {% when RegistrationError::EmailTaken %}
+        The email address provided is already registered!
+        {% when RegistrationError::Unknown %}
+        Something went wrong, please try again later!
+        {% endmatch %}
+    </section>
+    {% endif %}
+</main>
 {% endblock %}

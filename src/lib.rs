@@ -10,6 +10,8 @@ pub mod database;
 pub mod user;
 pub mod templates;
 pub mod compression;
+pub mod validation;
+pub mod content_security_policy;
 
 // features
 pub mod auth;
