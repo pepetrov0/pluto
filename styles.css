@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: "Open Sans", sans-serif;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply bg-green-400 px-4 py-2 rounded shadow;
+  }
+
+  .inpt {
+    @apply appearance-none px-4 py-2 rounded shadow;
+  }
+}
