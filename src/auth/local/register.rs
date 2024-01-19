@@ -3,16 +3,19 @@
 use askama::Template;
 use axum::{routing, Router};
 
-use crate::AppState;
+use crate::{templates::HtmlTemplate, AppState, compression};
 
 #[derive(Template)]
 #[template(path = "auth/local/register.html")]
 struct RegisterPage;
 
-async fn page() -> RegisterPage {
-    RegisterPage
+async fn page() -> HtmlTemplate<RegisterPage> {
+    HtmlTemplate(RegisterPage)
 }
 
 pub fn router() -> Router<AppState> {
-    Router::new().route("/register", routing::get(page))
+    Router::new().route(
+        "/register",
+        routing::get(page).layer(compression::default()),
+    )
 }

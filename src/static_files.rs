@@ -12,9 +12,8 @@ use axum_extra::{
     TypedHeader,
 };
 use rust_embed::RustEmbed;
-use tower_http::compression::CompressionLayer;
 
-use crate::AppState;
+use crate::{AppState, compression};
 
 #[derive(RustEmbed)]
 #[folder = "static"]
@@ -53,5 +52,5 @@ async fn handler(uri: Uri) -> impl IntoResponse {
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/*file", routing::get(handler))
-        .layer(CompressionLayer::new().gzip(true))
+        .layer(compression::default())
 }

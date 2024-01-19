@@ -8,6 +8,8 @@ use user::UserRepository;
 pub mod config;
 pub mod database;
 pub mod user;
+pub mod templates;
+pub mod compression;
 
 // features
 pub mod auth;
