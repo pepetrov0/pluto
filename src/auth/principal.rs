@@ -1,7 +1,7 @@
 //! Implements extraction of auth principal in axum handlers
 
 use axum::{
-    async_trait, extract::FromRequestParts, http::request::Parts, Extension,
+    async_trait, extract::FromRequestParts, http::request::Parts,
     RequestPartsExt, response::Redirect,
 };
 
@@ -41,9 +41,9 @@ impl FromRequestParts<AppState> for AuthPrincipal {
         state: &AppState,
     ) -> Result<Self, Self::Rejection> {
         let user = parts
-            .extract_with_state::<Extension<Session>, _>(state)
+            .extract_with_state::<Session, _>(state)
             .await
-            .map(|v| v.0.user)
+            .map(|v| v.user)
             .map_err(|_| Redirect::to("/login"))?;
 
         state
