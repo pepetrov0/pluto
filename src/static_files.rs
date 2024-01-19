@@ -3,7 +3,7 @@
 use std::time::Duration;
 
 use axum::{
-    http::Uri,
+    http::{Uri, StatusCode},
     response::{IntoResponse, Response},
     routing, Router,
 };
@@ -13,7 +13,7 @@ use axum_extra::{
 };
 use rust_embed::RustEmbed;
 
-use crate::{compression, errors::AppError, AppState};
+use crate::{compression, AppState};
 
 #[derive(RustEmbed)]
 #[folder = "static"]
@@ -39,7 +39,7 @@ where
                 )
                     .into_response()
             }
-            None => AppError::NotFound.into_response(),
+            None => StatusCode::NOT_FOUND.into_response(),
         }
     }
 }

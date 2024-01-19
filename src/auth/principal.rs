@@ -2,10 +2,10 @@
 
 use axum::{
     async_trait, extract::FromRequestParts, http::request::Parts, Extension,
-    RequestPartsExt,
+    RequestPartsExt, response::Redirect,
 };
 
-use crate::{errors::AppError, user::User, AppState};
+use crate::{user::User, AppState};
 
 use super::session::Session;
 
@@ -18,7 +18,7 @@ pub struct AuthPrincipal(pub User);
 
 #[async_trait]
 impl FromRequestParts<AppState> for NoAuthPrincipal {
-    type Rejection = AppError;
+    type Rejection = Redirect;
 
     async fn from_request_parts(
         parts: &mut Parts,
@@ -28,13 +28,13 @@ impl FromRequestParts<AppState> for NoAuthPrincipal {
             .await
             .err()
             .map(|_| Self)
-            .ok_or_else(|| AppError::NotAllowedHere)
+            .ok_or_else(|| Redirect::to("/"))
     }
 }
 
 #[async_trait]
 impl FromRequestParts<AppState> for AuthPrincipal {
-    type Rejection = AppError;
+    type Rejection = Redirect;
 
     async fn from_request_parts(
         parts: &mut Parts,
@@ -44,13 +44,13 @@ impl FromRequestParts<AppState> for AuthPrincipal {
             .extract_with_state::<Extension<Session>, _>(state)
             .await
             .map(|v| v.0.user)
-            .map_err(|_| AppError::Unauthorized)?;
+            .map_err(|_| Redirect::to("/login"))?;
 
         state
             .user_repository
             .find_user(&user)
             .await
-            .map(|v| AuthPrincipal(v))
-            .ok_or(AppError::Unauthorized)
+            .map(AuthPrincipal)
+            .ok_or(Redirect::to("/login"))
     }
 }

@@ -16,7 +16,6 @@ pub mod imkvs;
 mod templates;
 mod user;
 mod validation;
-mod errors;
 
 // features
 mod auth;

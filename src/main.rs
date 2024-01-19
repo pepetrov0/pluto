@@ -27,7 +27,7 @@ async fn main() {
         cookie_jar_key: config
             .cookie_jar_secret
             .map(|v| Key::from(v.as_bytes()))
-            .unwrap_or_else(|| Key::generate()),
+            .unwrap_or_else(Key::generate),
         database: database.clone(),
         password_hasher: Arc::new(Argon2::default()),
         user_repository: database.clone(),

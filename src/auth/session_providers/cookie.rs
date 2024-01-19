@@ -14,7 +14,7 @@ use axum_extra::extract::{
 
 use crate::{auth::session::Session, AppState};
 
-const DEFAULT_SESSION_COOKIE_NAME: &'static str = "x-pluto-session";
+const DEFAULT_SESSION_COOKIE_NAME: &str = "x-pluto-session";
 
 /// An extension to set a session cookie
 #[derive(Debug, Clone)]
@@ -83,4 +83,3 @@ impl IntoResponseParts for SetCookieSession {
         Extension(self).into_response_parts(res)
     }
 }
-
