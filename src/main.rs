@@ -1,13 +1,8 @@
 use std::sync::Arc;
 
 use argon2::Argon2;
-use axum::{middleware, Router};
 use axum_extra::extract::cookie::Key;
-use pluto::{
-    auth::{self}, config::Configuration, content_security_policy, database, imkvs::InMemoryKeyValueStore,
-    shutdown, static_files,
-};
-use tower_http::trace::TraceLayer;
+use pluto::{config::Configuration, database, imkvs::InMemoryKeyValueStore, shutdown};
 
 #[tokio::main]
 async fn main() {
@@ -40,22 +35,7 @@ async fn main() {
     };
 
     // initialize router
-    let router = Router::new()
-        // healthcheck
-        .merge(pluto::healthcheck::router())
-        // auth router
-        .merge(auth::router())
-        // static files
-        .merge(static_files::router())
-        // auth middlewares
-        .layer(middleware::from_fn_with_state(
-            state.clone(),
-            auth::session_providers::cookie::middleware,
-        ))
-        // trace and state
-        .layer(TraceLayer::new_for_http())
-        .layer(middleware::from_fn(content_security_policy::middleware))
-        .with_state(state);
+    let router = pluto::router(state);
 
     // initialize listener
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();

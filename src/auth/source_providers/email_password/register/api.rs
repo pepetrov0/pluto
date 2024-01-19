@@ -1,12 +1,11 @@
 //! Implements the API relevant for user registration
 
-use axum::{
-    extract::State,
-    response::{IntoResponse, Redirect, Response},
-    Form,
-};
+use axum::{extract::State, response::Redirect, Form};
 
-use crate::{auth::session_providers::cookie::SetCookieSession, validation, AppState};
+use crate::{
+    auth::{principal::NoAuthPrincipal, session_providers::cookie::SetCookieSession},
+    validation, AppState,
+};
 
 use super::error::RegistrationError;
 
@@ -17,13 +16,17 @@ pub struct RegisterForm {
     pub confirm_password: String,
 }
 
-pub async fn handler(State(state): State<AppState>, Form(details): Form<RegisterForm>) -> Response {
+pub async fn handler(
+    _: NoAuthPrincipal,
+    State(state): State<AppState>,
+    Form(details): Form<RegisterForm>,
+) -> Result<(SetCookieSession, Redirect), RegistrationError> {
     if validation::is_email(&details.email) {
-        return RegistrationError::InvalidEmail.into_response();
+        return Err(RegistrationError::InvalidEmail);
     }
 
     if details.password != details.confirm_password {
-        return RegistrationError::PasswordsMismatch.into_response();
+        return Err(RegistrationError::PasswordsMismatch);
     }
 
     if state
@@ -32,12 +35,12 @@ pub async fn handler(State(state): State<AppState>, Form(details): Form<Register
         .await
         .is_some()
     {
-        return RegistrationError::EmailTaken.into_response();
+        return Err(RegistrationError::EmailTaken);
     }
 
     let hash = match state.password_hasher.hash(details.password) {
         Some(hash) => hash,
-        None => return RegistrationError::Unknown.into_response(),
+        None => return Err(RegistrationError::Unknown),
     };
 
     match state
@@ -47,9 +50,9 @@ pub async fn handler(State(state): State<AppState>, Form(details): Form<Register
     {
         // create a session and redirect to /
         Some(user) => match state.session_repository.create_session(user.id).await {
-            Some(session) => (SetCookieSession(session), Redirect::to("/")).into_response(),
-            None => Redirect::to("/").into_response(),
+            Some(session) => Ok((SetCookieSession(session), Redirect::to("/"))),
+            None => Err(RegistrationError::SessionCreationError),
         },
-        None => RegistrationError::Unknown.into_response(),
+        None => Err(RegistrationError::Unknown),
     }
 }

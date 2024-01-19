@@ -8,6 +8,7 @@ pub enum RegistrationError {
     InvalidEmail,
     PasswordsMismatch,
     EmailTaken,
+    SessionCreationError,
     Unknown,
 }
 
@@ -23,6 +24,7 @@ impl IntoResponse for RegistrationError {
             RegistrationError::EmailTaken => {
                 Redirect::to("/register?error=email-taken").into_response()
             }
+            RegistrationError::SessionCreationError => Redirect::to("/login").into_response(),
             RegistrationError::Unknown => Redirect::to("/register?error=unknown").into_response(),
         }
     }

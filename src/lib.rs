@@ -1,26 +1,29 @@
 use std::sync::Arc;
 
 use auth::{password_hasher::PasswordHasher, session::SessionRepository};
-use axum::extract::FromRef;
+use axum::{extract::FromRef, middleware, Router};
 use axum_extra::extract::cookie::Key;
 use database::Pool;
+use tower_http::trace::TraceLayer;
 use user::UserRepository;
 
 // components
-pub mod compression;
+mod compression;
 pub mod config;
-pub mod content_security_policy;
+mod content_security_policy;
 pub mod database;
 pub mod imkvs;
-pub mod templates;
-pub mod user;
-pub mod validation;
+mod templates;
+mod user;
+mod validation;
+mod errors;
 
 // features
-pub mod auth;
-pub mod healthcheck;
+mod auth;
+mod dashboard;
+mod healthcheck;
 pub mod shutdown;
-pub mod static_files;
+mod static_files;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -36,4 +39,25 @@ impl FromRef<AppState> for Key {
     fn from_ref(state: &AppState) -> Self {
         state.cookie_jar_key.clone()
     }
+}
+
+pub fn router(state: AppState) -> Router {
+    Router::new()
+        // healthcheck
+        .merge(healthcheck::router())
+        // auth router
+        .merge(auth::router())
+        // dashboard
+        .merge(dashboard::router())
+        // static files
+        .merge(static_files::router())
+        // auth middlewares
+        .layer(middleware::from_fn_with_state(
+            state.clone(),
+            auth::session_providers::cookie::middleware,
+        ))
+        // trace and state
+        .layer(middleware::from_fn(content_security_policy::middleware))
+        .layer(TraceLayer::new_for_http())
+        .with_state(state)
 }

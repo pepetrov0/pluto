@@ -3,7 +3,7 @@
 use askama::Template;
 use axum::extract::Query;
 
-use crate::templates::HtmlTemplate;
+use crate::{templates::HtmlTemplate, auth::principal::NoAuthPrincipal};
 
 use super::error::RegistrationError;
 
@@ -18,6 +18,6 @@ pub struct RegisterPage {
     pub error: Option<RegistrationError>,
 }
 
-pub async fn handler(Query(query): Query<RegisterQuery>) -> HtmlTemplate<RegisterPage> {
+pub async fn handler(_: NoAuthPrincipal, Query(query): Query<RegisterQuery>) -> HtmlTemplate<RegisterPage> {
     HtmlTemplate(RegisterPage { error: query.error })
 }
