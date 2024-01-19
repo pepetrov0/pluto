@@ -1,16 +1,20 @@
+//! Implements a database connection
+
 use std::time::Duration;
 
 use sqlx::{postgres::PgPoolOptions, PgPool};
 
 use crate::config::Configuration;
 
+/// A database connection pool
 pub trait Pool: Send + Sync {
     fn is_open(&self) -> bool;
     fn size(&self) -> u32;
     fn num_idle(&self) -> u32;
 }
 
-pub async fn connect(cfg: &Configuration) -> Result<PgPool, sqlx::Error> {
+/// Connects to a postgres database
+pub async fn connect_to_postgres(cfg: &Configuration) -> Result<PgPool, sqlx::Error> {
     // connect to database
     let pool = PgPoolOptions::new()
         .acquire_timeout(Duration::from_secs(5))

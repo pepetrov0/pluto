@@ -7,7 +7,7 @@ use super::error::RegistrationError;
 
 #[derive(serde::Deserialize)]
 pub struct RegisterQuery {
-    pub error: Option<RegistrationError>
+    pub error: Option<RegistrationError>,
 }
 
 #[derive(Template, Debug, Default)]
@@ -17,7 +17,5 @@ pub struct RegisterPage {
 }
 
 pub async fn handler(Query(query): Query<RegisterQuery>) -> HtmlTemplate<RegisterPage> {
-    HtmlTemplate(RegisterPage {
-        error: query.error
-    })
+    HtmlTemplate(RegisterPage { error: query.error })
 }

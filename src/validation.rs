@@ -1,7 +1,10 @@
+//! Implements various data validation methods
+
 use regex::Regex;
 
-pub fn email(email: &str) -> bool {
+/// Validate a string being an email
+pub fn is_email(input: &str) -> bool {
     Regex::new(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$")
-        .map(|v| v.is_match(email))
+        .map(|v| v.is_match(input))
         .unwrap_or_default()
 }

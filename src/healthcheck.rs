@@ -1,4 +1,4 @@
-//! Provides an endpoint for querying server health
+//! Implements a healthcheck endpoint
 
 use axum::{extract::State, routing, Json, Router};
 

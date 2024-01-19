@@ -1,4 +1,4 @@
-//! Enables serving of static files
+//! Implements serving of static files
 
 use std::time::Duration;
 
@@ -13,7 +13,7 @@ use axum_extra::{
 };
 use rust_embed::RustEmbed;
 
-use crate::{AppState, compression};
+use crate::{compression, AppState};
 
 #[derive(RustEmbed)]
 #[folder = "static"]

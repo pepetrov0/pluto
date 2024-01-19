@@ -16,7 +16,7 @@ pub struct RegisterForm {
 }
 
 pub async fn handler(State(state): State<AppState>, Form(details): Form<RegisterForm>) -> Response {
-    if validation::email(&details.email) {
+    if validation::is_email(&details.email) {
         return RegistrationError::InvalidEmail.into_response();
     }
 
@@ -26,9 +26,9 @@ pub async fn handler(State(state): State<AppState>, Form(details): Form<Register
 
     if state
         .user_repository
-        .find_user_by_email(&details.email)
+        .find_user(&details.email)
         .await
-        .is_ok()
+        .is_some()
     {
         return RegistrationError::EmailTaken.into_response();
     }
@@ -44,7 +44,7 @@ pub async fn handler(State(state): State<AppState>, Form(details): Form<Register
         .await
     {
         // create a session and redirect to /
-        Ok(_) => Redirect::to("/register").into_response(),
-        Err(_) => RegistrationError::Unknown.into_response(),
+        Some(_) => Redirect::to("/register").into_response(),
+        None => RegistrationError::Unknown.into_response(),
     }
 }

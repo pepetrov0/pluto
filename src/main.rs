@@ -2,8 +2,10 @@ use std::sync::Arc;
 
 use argon2::Argon2;
 use axum::{middleware, Router};
+use axum_extra::extract::cookie::Key;
 use pluto::{
-    auth, config::Configuration, content_security_policy, database, shutdown, static_files,
+    auth, config::Configuration, content_security_policy, database, imkvs::InMemoryKeyValueStore,
+    shutdown, static_files,
 };
 use tower_http::trace::TraceLayer;
 
@@ -20,26 +22,36 @@ async fn main() {
 
     // connect to database
     let database = Arc::new(
-        database::connect(&config)
+        database::connect_to_postgres(&config)
             .await
             .expect("could not connect to database"),
     );
 
     let state = pluto::AppState {
         configuration: config.clone(),
+        cookie_jar_key: config
+            .cookie_jar_secret
+            .map(|v| Key::from(v.as_bytes()))
+            .unwrap_or_else(|| Key::generate()),
         database: database.clone(),
         password_hasher: Arc::new(Argon2::default()),
         user_repository: database.clone(),
+        session_repository: Arc::new(InMemoryKeyValueStore::default()),
     };
 
     // initialize router
     let router = Router::new()
         // healthcheck
         .merge(pluto::healthcheck::router())
-        // auth
+        // auth router
         .merge(auth::router())
         // static files
         .merge(static_files::router())
+        // auth middlewares
+        .layer(middleware::from_fn_with_state(
+            state.clone(),
+            auth::session_providers::cookie::middleware,
+        ))
         // trace and state
         .layer(TraceLayer::new_for_http())
         .layer(middleware::from_fn(content_security_policy::middleware))

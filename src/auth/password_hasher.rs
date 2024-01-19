@@ -1,12 +1,15 @@
-//! Enables password hashing
+//! Implements password hashing
 
 use argon2::{
     password_hash::{rand_core::OsRng, SaltString},
     Argon2, PasswordHash,
 };
 
+/// Provides creation and verification of password hashes
 pub trait PasswordHasher: Send + Sync {
+    /// Hashes a password
     fn hash(&self, password: String) -> Option<String>;
+    /// Verifies that a password and a hash match
     fn verify(&self, password: String, hash: String) -> bool;
 }
 

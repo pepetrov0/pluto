@@ -5,8 +5,8 @@ use axum::{routing, Router};
 use crate::{compression, AppState};
 
 mod api;
-mod page;
 mod error;
+mod page;
 
 pub fn router() -> Router<AppState> {
     Router::new()

@@ -33,7 +33,7 @@ features = ["tracing"]
 
 [dependencies.axum-extra]
 version = "0"
-features = ["typed-header"]
+features = ["typed-header", "cookie", "cookie-private"]
 
 [dependencies.tower]
 version = "0"

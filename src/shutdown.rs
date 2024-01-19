@@ -1,7 +1,8 @@
-//! Enables graceful shutdown
+//! Implements graceful shutdown
 
 use tokio::signal;
 
+/// A signal function for axum to use
 pub async fn signal() {
     let ctrl_c = async {
         signal::ctrl_c()
