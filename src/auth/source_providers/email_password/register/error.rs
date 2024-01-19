@@ -1,3 +1,5 @@
+//! Implements error enums relevant to user registration
+
 use axum::response::{IntoResponse, Redirect};
 
 #[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize)]

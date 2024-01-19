@@ -1,3 +1,5 @@
+//! Implements the API relevant for user registration
+
 use axum::{
     extract::State,
     response::{IntoResponse, Redirect, Response},

@@ -1,4 +1,4 @@
-//! Enables the users to register locally
+//! Implements user registration into local database
 
 use axum::{routing, Router};
 

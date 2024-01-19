@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
 use argon2::Argon2;
-use axum::{middleware, Router, routing};
+use axum::{middleware, Router};
 use axum_extra::extract::cookie::Key;
 use pluto::{
-    auth::{self, principal::AuthPrincipal}, config::Configuration, content_security_policy, database, imkvs::InMemoryKeyValueStore,
+    auth::{self}, config::Configuration, content_security_policy, database, imkvs::InMemoryKeyValueStore,
     shutdown, static_files,
 };
 use tower_http::trace::TraceLayer;
@@ -47,10 +47,6 @@ async fn main() {
         .merge(auth::router())
         // static files
         .merge(static_files::router())
-        // testing
-        .route("/me", routing::get(|user: Option<AuthPrincipal>| async move {
-            format!("{:?}", user)
-        }))
         // auth middlewares
         .layer(middleware::from_fn_with_state(
             state.clone(),
