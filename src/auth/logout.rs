@@ -1,3 +1,5 @@
+//! Implements a logout endpoint
+
 use axum::{routing, Router, extract::State, response::Redirect};
 
 use crate::AppState;
