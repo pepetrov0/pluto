@@ -14,7 +14,7 @@
   }
 
   .input {
-    @apply appearance-none outline-none  px-4 py-2 rounded shadow border-gray-200;
+    @apply appearance-none outline-none px-4 py-2 rounded shadow border-gray-200;
     @apply focus:outline-none focus:ring-0 focus:border-gray-900;
     @apply invalid:border-red-600;
   }
