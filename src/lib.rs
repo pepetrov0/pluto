@@ -55,7 +55,7 @@ pub fn router(state: AppState) -> Router {
             state.clone(),
             auth::session_providers::cookie::middleware,
         ))
-        // trace and state
+        .layer(compression::default())
         .layer(middleware::from_fn(content_security_policy::middleware))
         .layer(TraceLayer::new_for_http())
         .with_state(state)

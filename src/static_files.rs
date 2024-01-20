@@ -3,7 +3,7 @@
 use std::time::Duration;
 
 use axum::{
-    http::{Uri, StatusCode},
+    http::{StatusCode, Uri},
     response::{IntoResponse, Response},
     routing, Router,
 };
@@ -13,7 +13,7 @@ use axum_extra::{
 };
 use rust_embed::RustEmbed;
 
-use crate::{compression, AppState};
+use crate::AppState;
 
 #[derive(RustEmbed)]
 #[folder = "static"]
@@ -50,7 +50,5 @@ async fn handler(uri: Uri) -> impl IntoResponse {
 }
 
 pub fn router() -> Router<AppState> {
-    Router::new()
-        .route("/*file", routing::get(handler))
-        .layer(compression::default())
+    Router::new().route("/*file", routing::get(handler))
 }

@@ -1,0 +1,14 @@
+{% extends "page.html" %}
+
+{% block body %}
+<div class="w-[100dvw] h-[100dvh] max-w-[100dvw] max-h-[100dvh] flex relative">
+    <nav
+        class="group peer z-10 grid grid-cols-[3rem_auto] auto-rows-[3rem] grid-flow-col bg-accent text-accent-contrast shadow-xl overflow-x-clip h-full w-12 hover:w-full hover:absolute hover hover:md:relative md:w-64 hover:md:w-64 max-w-[75%] flex-none p-2">
+        <div class="w-full h-full"></div>
+        <a class="font-bold hidden group-hover:block md:block text-center" href="/">pluto</a>
+    </nav>
+    <main class="overflow-y-auto p-2 ml-2 peer-hover:ml-14 peer-hover:md:ml-2">
+        {% block content %}{% endblock %}
+    </main>
+</div>
+{% endblock %}
