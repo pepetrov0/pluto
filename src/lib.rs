@@ -47,7 +47,8 @@ pub fn router(state: AppState) -> Router {
         .merge(auth::router())
         // dashboard
         .merge(dashboard::router())
-        .nest_service("/", ServeDir::new("static"))
+        // static files
+        .fallback_service( ServeDir::new("static"))
         // auth middlewares
         .layer(middleware::from_fn_with_state(
             state.clone(),
