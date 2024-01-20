@@ -27,7 +27,7 @@ pub trait UserRepository: Send + Sync {
     /// Finds a user by id or by email
     async fn find_user(&self, id_or_email: &str) -> Option<User>;
 
-    /// Retrieve password
+    /// Retrieve a user bundled with their password
     async fn find_user_with_password(&self, id_or_email: &str) -> Option<UserWithPassword>;
 }
 
