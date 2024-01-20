@@ -1,9 +1,12 @@
 use std::sync::Arc;
 
 use argon2::Argon2;
+use axum::routing;
 use axum_extra::extract::cookie::Key;
 use pluto::{
-    config::{Configuration, SessionDriver}, database, imkvs::InMemoryKeyValueStore,
+    config::{Configuration, SessionDriver},
+    database,
+    imkvs::InMemoryKeyValueStore,
     shutdown,
 };
 
@@ -41,7 +44,12 @@ async fn main() {
     };
 
     // initialize router
-    let router = pluto::router(state);
+    let router = pluto::router(state).route(
+        "/report",
+        routing::any(|body: String| async move {
+            println!("{:?}", body);
+        }),
+    );
 
     // initialize listener
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();

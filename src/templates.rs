@@ -29,3 +29,9 @@ impl<T: Template> IntoResponse for HtmlTemplate<T> {
         (TypedHeader(ContentType::html()), html).into_response()
     }
 }
+
+/// A struct for configuration navigation
+#[derive(Debug, Clone, Default)]
+pub struct Navigation {
+    pub no_logout: bool
+}

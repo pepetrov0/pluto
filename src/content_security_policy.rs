@@ -13,7 +13,7 @@ pub async fn middleware(req: Request<Body>, next: Next) -> Response {
 
     let header = (
         "Content-Security-Policy",
-        "default-src 'self' 'strict-dynamic' https://fonts.googleapis.com https://fonts.gstatic.com",
+        "default-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com",
     );
     ([header], resp).into_response()
 }

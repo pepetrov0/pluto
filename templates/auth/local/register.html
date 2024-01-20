@@ -4,10 +4,10 @@
 <title>Sign up</title>
 {% endblock %}
 
-{% block body %}
-<main class="flex flex-col mt-8 w-80 mx-auto max-w-[90%] gap-3">
+{% block content %}
+<div class="flex flex-col mt-8 w-80 mx-auto max-w-[90%] gap-3">
     <h3 class="heading-3">Sign up</h3>
-    <form method="POST" action="/register" class="card flex flex-col gap-3 bg-default">
+    <form method="POST" action="/register" class="flex flex-col gap-3 card bg-default">
         <input name="email" type="email" placeholder="Email.." class="input" required />
         <input id="password" name="password" type="password" placeholder="Password.." minlength="12" class="input"
             required />
@@ -17,7 +17,7 @@
         <span class="text-center">Already have an account? <a class="link" href="/login">Sign in now.</a></span>
     </form>
     {% if let Some(error) = error %}
-    <section class="card bg-danger border-danger-darker border-2">
+    <section class="border-2 card bg-danger border-danger-darker">
         {% match error %}
         {% when RegistrationError::InvalidEmail %}
         Invalid email!
@@ -32,5 +32,5 @@
         {% endmatch %}
     </section>
     {% endif %}
-</main>
+</div>
 {% endblock %}

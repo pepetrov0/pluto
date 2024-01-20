@@ -1,14 +1,36 @@
 {% extends "page.html" %}
 
 {% block body %}
-<div class="w-[100dvw] h-[100dvh] max-w-[100dvw] max-h-[100dvh] flex relative">
-    <nav
-        class="group peer z-10 grid grid-cols-[3rem_auto] auto-rows-[3rem] grid-flow-col bg-accent text-accent-contrast shadow-xl overflow-x-clip h-full w-12 hover:w-full hover:absolute hover hover:md:relative md:w-64 hover:md:w-64 max-w-[75%] flex-none p-2">
-        <div class="w-full h-full"></div>
-        <a class="font-bold hidden group-hover:block md:block text-center" href="/">pluto</a>
-    </nav>
-    <main class="overflow-y-auto p-2 ml-2 peer-hover:ml-14 peer-hover:md:ml-2">
-        {% block content %}{% endblock %}
-    </main>
+<div>
+  <nav
+    class="fixed left-0 top-0 h-[100dvh] max-w-[min(16rem,90%)] z-50 flex flex-col bg-accent text-accent-contrast group/nav has-[#nav-toggle:checked]/nav:w-64">
+    <!-- home -->
+    <div class="flex items-center gap-2">
+      <div class="relative w-[3rem] h-[3rem] flex-none">
+        <div class="absolute top-0 left-0 w-full h-full p-3 block group-has-[#nav-toggle:checked]/nav:hidden">
+          {% include "icons/menu.svg" %}
+        </div>
+        <div class="absolute top-0 left-0 w-full h-full p-3 hidden group-has-[#nav-toggle:checked]/nav:block">
+          {% include "icons/close.svg" %}
+        </div>
+        <input id="nav-toggle" type="checkbox" class="w-full h-full opacity-0 cursor-pointer" />
+      </div>
+      <a class="font-bold text-center hidden group-has-[#nav-toggle:checked]/nav:block px-4 flex-grow"
+        href="/">pluto</a>
+    </div>
+
+    <!-- logout -->
+    {% if !navigation.no_logout %}
+    <a class="flex items-center gap-2 mt-auto" href="/logout">
+      <div class="relative w-[3rem] h-[3rem] flex-none p-3">
+        {% include "icons/logout.svg" %}
+      </div>
+      <span class="hidden group-has-[#nav-toggle:checked]/nav:block px-4 flex-grow">Log out</span>
+    </a>
+    {% endif %}
+  </nav>
+  <main class="pl-[3rem]">
+    {% block content %}{% endblock %}
+  </main>
 </div>
 {% endblock %}
