@@ -2,7 +2,10 @@ use std::sync::Arc;
 
 use argon2::Argon2;
 use axum_extra::extract::cookie::Key;
-use pluto::{config::Configuration, database, imkvs::InMemoryKeyValueStore, shutdown};
+use pluto::{
+    config::{Configuration, SessionDriver}, database, imkvs::InMemoryKeyValueStore,
+    shutdown,
+};
 
 #[tokio::main]
 async fn main() {
@@ -31,7 +34,10 @@ async fn main() {
         database: database.clone(),
         password_hasher,
         user_repository: database.clone(),
-        session_repository: Arc::new(InMemoryKeyValueStore::default()),
+        session_repository: match config.session_driver {
+            SessionDriver::InMemory => Arc::new(InMemoryKeyValueStore::default()),
+            SessionDriver::Database => database.clone(),
+        },
     };
 
     // initialize router

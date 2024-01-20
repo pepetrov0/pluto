@@ -43,7 +43,7 @@ impl FromRequestParts<AppState> for AuthPrincipal {
         let user = parts
             .extract_with_state::<Session, _>(state)
             .await
-            .map(|v| v.user)
+            .map(|v| v.usr)
             .map_err(|_| Redirect::to("/login"))?;
 
         state

@@ -1,8 +1,8 @@
 //! Implements a session component
 
-use axum::{async_trait, extract::FromRequestParts, Extension, http::request::Parts};
+use axum::{async_trait, extract::FromRequestParts, http::request::Parts, Extension};
 use nanoid::nanoid;
-use sqlx::prelude::FromRow;
+use sqlx::{prelude::FromRow, PgPool};
 
 use crate::{imkvs::InMemoryKeyValueStore, AppState};
 
@@ -12,7 +12,7 @@ pub struct Session {
     /// The session id
     pub id: String,
     /// A user id or email
-    pub user: String,
+    pub usr: String,
 }
 
 /// A session repository
@@ -34,7 +34,7 @@ impl SessionRepository for InMemoryKeyValueStore<String, Session> {
         let mut map = self.lock().await;
         let session = Session {
             id: nanoid!(),
-            user,
+            usr: user,
         };
 
         map.insert(session.id.clone(), session.clone());
@@ -53,10 +53,44 @@ impl SessionRepository for InMemoryKeyValueStore<String, Session> {
 }
 
 #[async_trait]
+impl SessionRepository for PgPool {
+    async fn create_session(&self, user: String) -> Option<Session> {
+        sqlx::query_as::<_, Session>(
+            "insert into sessions (id, usr) values ($1, $2) returning id, usr",
+        )
+        .bind(nanoid::nanoid!())
+        .bind(user)
+        .fetch_one(self)
+        .await
+        .ok()
+    }
+
+    async fn find_session(&self, id: &str) -> Option<Session> {
+        sqlx::query_as::<_, Session>("select id, usr from sessions where id=$1")
+            .bind(id)
+            .fetch_one(self)
+            .await
+            .ok()
+    }
+
+    async fn delete_session(&self, id: &str) {
+        let _ = sqlx::query("delete from sessions where id=$1")
+            .bind(id)
+            .execute(self)
+            .await;
+    }
+}
+
+#[async_trait]
 impl FromRequestParts<AppState> for Session {
     type Rejection = <Extension<Session> as FromRequestParts<AppState>>::Rejection;
 
-    async fn from_request_parts(parts: &mut Parts, state: &AppState) -> Result<Self, Self::Rejection>{
-        Extension::from_request_parts(parts, state).await.map(|v| v.0)
+    async fn from_request_parts(
+        parts: &mut Parts,
+        state: &AppState,
+    ) -> Result<Self, Self::Rejection> {
+        Extension::from_request_parts(parts, state)
+            .await
+            .map(|v| v.0)
     }
 }

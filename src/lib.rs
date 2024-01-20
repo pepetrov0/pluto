@@ -8,21 +8,21 @@ use tower_http::trace::TraceLayer;
 use user::UserRepository;
 
 // components
-mod compression;
+pub mod compression;
 pub mod config;
-mod content_security_policy;
+pub mod content_security_policy;
 pub mod database;
 pub mod imkvs;
-mod templates;
-mod user;
-mod validation;
+pub mod templates;
+pub mod user;
+pub mod validation;
 
 // features
-mod auth;
-mod dashboard;
-mod healthcheck;
+pub mod auth;
+pub mod dashboard;
+pub mod healthcheck;
 pub mod shutdown;
-mod static_files;
+pub mod static_files;
 
 #[derive(Clone)]
 pub struct AppState {

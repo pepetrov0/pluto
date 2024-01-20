@@ -6,7 +6,7 @@ use crate::AppState;
 
 pub mod password_hasher;
 pub mod principal;
-pub mod session;
+pub(crate) mod session;
 pub mod session_providers;
 mod source_providers;
 mod logout;

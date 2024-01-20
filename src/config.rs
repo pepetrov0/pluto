@@ -12,11 +12,21 @@ pub struct Configuration {
     #[serde(skip_serializing)]
     #[serde(default = "random_secret")]
     pub secret: String,
+    #[serde(default)]
+    pub session_driver: SessionDriver,
     /// Session cookie name
     pub session_cookie_name: Option<String>,
     /// Database URL to connect to
     #[serde(skip_serializing)]
     pub database_url: String,
+}
+
+/// Represents a session driver
+#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SessionDriver {
+    InMemory,
+    Database,
 }
 
 impl Configuration {
@@ -44,4 +54,10 @@ fn random_secret() -> String {
         .take(DEFAULT_SECRET_LENGTH)
         .collect();
     String::from_utf8(bytes).expect("msg")
+}
+
+impl Default for SessionDriver {
+    fn default() -> Self {
+        Self::InMemory
+    }
 }
