@@ -1,16 +1,14 @@
 use askama::Template;
 use axum::{routing, Router};
 
-use crate::{auth::principal::AuthPrincipal, templates::{HtmlTemplate, Navigation}, AppState};
+use crate::{auth::principal::AuthPrincipal, templates::HtmlTemplate, AppState};
 
 #[derive(Template, Debug, Default)]
 #[template(path = "dashboard.html")]
-pub struct DashboardPage {
-    pub navigation: Navigation
-}
+pub struct DashboardPage {}
 
 async fn handler(AuthPrincipal(_): AuthPrincipal) -> HtmlTemplate<DashboardPage> {
-    HtmlTemplate(DashboardPage { navigation: Navigation::default() })
+    HtmlTemplate(DashboardPage {})
 }
 
 pub fn router() -> Router<AppState> {

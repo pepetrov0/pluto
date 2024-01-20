@@ -2,35 +2,39 @@
 
 {% block body %}
 <div>
-  <nav
-    class="fixed left-0 top-0 h-[100dvh] max-w-[min(16rem,90%)] z-50 flex flex-col bg-accent text-accent-contrast group/nav has-[#nav-toggle:checked]/nav:w-64">
-    <!-- home -->
-    <div class="flex items-center gap-2">
-      <div class="relative w-[3rem] h-[3rem] flex-none">
-        <div class="absolute top-0 left-0 w-full h-full p-3 block group-has-[#nav-toggle:checked]/nav:hidden">
-          {% include "icons/menu.svg" %}
+    <nav
+        class="fixed left-0 top-0 h-[100dvh] max-w-[min(16rem,90%)] z-50 flex flex-col bg-accent text-accent-contrast group/nav has-[#nav-toggle:checked]/nav:w-64 md:w-64">
+        <!-- home -->
+        <div class="flex items-center gap-2">
+            <div class="relative w-12 h-12 flex-none">
+                <div
+                    class="absolute top-0 left-0 w-full h-full p-3 block group-has-[#nav-toggle:checked]/nav:hidden md:!hidden">
+                    {% include "icons/menu.svg" %}
+                </div>
+                <div
+                    class="absolute top-0 left-0 w-full h-full p-3 hidden group-has-[#nav-toggle:checked]/nav:block md:!hidden">
+                    {% include "icons/close.svg" %}
+                </div>
+                <input aria-label="navigation toggle" id="nav-toggle" type="checkbox"
+                    class="w-full h-full opacity-0 cursor-pointer md:hidden" />
+            </div>
+            <a class="font-bold text-center hidden group-has-[#nav-toggle:checked]/nav:block md:block px-4 flex-grow"
+                href="/">pluto</a>
         </div>
-        <div class="absolute top-0 left-0 w-full h-full p-3 hidden group-has-[#nav-toggle:checked]/nav:block">
-          {% include "icons/close.svg" %}
-        </div>
-        <input id="nav-toggle" type="checkbox" class="w-full h-full opacity-0 cursor-pointer" />
-      </div>
-      <a class="font-bold text-center hidden group-has-[#nav-toggle:checked]/nav:block px-4 flex-grow"
-        href="/">pluto</a>
-    </div>
 
-    <!-- logout -->
-    {% if !navigation.no_logout %}
-    <a class="flex items-center gap-2 mt-auto" href="/logout">
-      <div class="relative w-[3rem] h-[3rem] flex-none p-3">
-        {% include "icons/logout.svg" %}
-      </div>
-      <span class="hidden group-has-[#nav-toggle:checked]/nav:block px-4 flex-grow">Log out</span>
-    </a>
-    {% endif %}
-  </nav>
-  <main class="pl-[3rem]">
-    {% block content %}{% endblock %}
-  </main>
+        <!-- gap separator -->
+        <div class="mt-auto"></div>
+
+        <!-- logout -->
+        <a class="flex items-center gap-2" href="/logout" aria-label="log out button">
+            <div class="relative w-12 h-12 flex-none p-3">
+                {% include "icons/logout.svg" %}
+            </div>
+            <span class="hidden group-has-[#nav-toggle:checked]/nav:block md:!block px-4 flex-grow">Log out</span>
+        </a>
+    </nav>
+    <main class="pl-12 md:pl-64">
+        {% block content %}{% endblock %}
+    </main>
 </div>
 {% endblock %}
