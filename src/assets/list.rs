@@ -1,3 +1,5 @@
+//! Implements the list page where all assets are listed
+
 use askama::Template;
 use axum::extract::State;
 
