@@ -22,6 +22,14 @@
                 href="/">pluto</a>
         </div>
 
+        <!-- dashboard -->
+        <a class="flex items-center gap-2" href="/" aria-label="dashboard button">
+            <div class="relative w-12 h-12 flex-none p-3">
+                {% include "icons/dashboard.svg" %}
+            </div>
+            <span class="hidden group-has-[#nav-toggle:checked]/nav:block md:!block px-4 flex-grow">Dashboard</span>
+        </a>
+
         <!-- assets -->
         <a class="flex items-center gap-2" href="/assets" aria-label="currencies and assets button">
             <div class="relative w-12 h-12 flex-none p-3">
@@ -32,7 +40,7 @@
 
         <!-- gap separator -->
         <div class="mt-auto"></div>
-
+        
         <!-- logout -->
         <a class="flex items-center gap-2" href="/logout" aria-label="log out button">
             <div class="relative w-12 h-12 flex-none p-3">

@@ -24,6 +24,11 @@ module.exports = {
       danger: colors.red["200"],
       "danger-darker": colors.red["400"],
     },
+    extends: {
+      spacing: {
+        default: "32rem",
+      },
+    },
   },
   plugins: [require("@tailwindcss/forms")],
 };

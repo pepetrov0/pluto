@@ -40,6 +40,14 @@
     @apply text-3xl font-bold;
   }
 
+  .heading-2 {
+    @apply text-4xl font-bold;
+  }
+
+  .heading-1 {
+    @apply text-5xl font-bold;
+  }
+  
   .card {
     @apply p-3 rounded shadow;
   }

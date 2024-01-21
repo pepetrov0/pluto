@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use assets::AssetRepository;
+use assets::component::AssetRepository;
 use auth::{password_hasher::PasswordHasher, session::SessionRepository};
 use axum::{extract::FromRef, middleware, Router};
 use axum_extra::extract::cookie::Key;
@@ -51,6 +51,8 @@ pub fn router(state: AppState) -> Router {
         .merge(auth::router())
         // dashboard
         .merge(dashboard::router())
+        // assets
+        .merge(assets::router())
         // static files
         .merge(static_files::router())
         // auth middlewares

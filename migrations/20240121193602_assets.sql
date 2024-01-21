@@ -9,7 +9,7 @@ create table if not exists
         id varchar(21) primary key,
         symbol varchar(8) not null unique,
         label varchar(255) not null,
-        precision integer not null default 0 check (
+        precision smallint not null default 0 check (
             precision >= 0
             and precision <= 4
         ),

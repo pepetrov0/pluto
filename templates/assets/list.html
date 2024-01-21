@@ -1,0 +1,20 @@
+{% extends "page-with-nav.html" %}
+
+{% block head %}
+<title>Currencies and assets</title>
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-2 mx-auto w-full max-w-screen-md p-4">
+    <h3 class="heading-3 mb-2">Currencies</h3>
+    {% for currency in currencies %}
+    <section class="card bg-default text-default-contrast grid grid-flow-row grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto_1fr] gap-x-1">
+        <h6 class="heading-6 mb-2 col-span-2 sm:col-span-4">{{ currency.label }}</h6>
+        <strong>Symbol:</strong>
+        <span>{{ currency.symbol|upper }}</span>
+        <strong>Number of decimals:</strong>
+        <span>{{ currency.precision }}</span>
+    </section>
+    {% endfor %}
+</div>
+{% endblock %}
