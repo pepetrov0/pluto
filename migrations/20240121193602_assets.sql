@@ -23,7 +23,7 @@ insert into
         symbol,
         label,
         precision,
-        type
+        atype
     )
 values
     (
