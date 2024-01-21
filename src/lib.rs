@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use assets::AssetRepository;
 use auth::{password_hasher::PasswordHasher, session::SessionRepository};
 use axum::{extract::FromRef, middleware, Router};
 use axum_extra::extract::cookie::Key;
@@ -8,6 +9,7 @@ use tower_http::trace::TraceLayer;
 use user::UserRepository;
 
 // components
+pub mod assets;
 pub mod compression;
 pub mod config;
 pub mod content_security_policy;
@@ -32,6 +34,7 @@ pub struct AppState {
     pub password_hasher: Arc<dyn PasswordHasher>,
     pub user_repository: Arc<dyn UserRepository>,
     pub session_repository: Arc<dyn SessionRepository>,
+    pub assets_repository: Arc<dyn AssetRepository>,
 }
 
 impl FromRef<AppState> for Key {

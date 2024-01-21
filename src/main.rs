@@ -41,6 +41,7 @@ async fn main() {
             SessionDriver::InMemory => Arc::new(InMemoryKeyValueStore::default()),
             SessionDriver::Database => database.clone(),
         },
+        assets_repository: database.clone(),
     };
 
     // initialize router
