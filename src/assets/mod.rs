@@ -4,8 +4,8 @@ use crate::AppState;
 
 pub mod component;
 
-mod list_page;
+mod list;
 
 pub fn router() -> Router<AppState> {
-    Router::new().route("/assets", routing::get(list_page::handler))
+    Router::new().route("/assets", routing::get(list::handler))
 }
