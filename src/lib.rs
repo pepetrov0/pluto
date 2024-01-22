@@ -53,6 +53,8 @@ pub fn router(state: AppState) -> Router {
         .merge(dashboard::router())
         // assets
         .merge(assets::router())
+        // acounts
+        .merge(accounts::router())
         // static files
         .merge(static_files::router())
         // auth middlewares
