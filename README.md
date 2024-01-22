@@ -1,2 +1,3 @@
 # pluto
-Pluto is a personal finance management application
+
+pluto is a personal finance management application
