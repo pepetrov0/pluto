@@ -14,7 +14,7 @@ pub struct AssetsListPage {
 }
 
 pub async fn handler(_: AuthPrincipal, State(state): State<AppState>) -> HtmlTemplate<AssetsListPage> {
-    let assets = state.assets_repository.list_assets().await.unwrap(); // FIXME: implement error handling
+    let assets = state.asset_repository.list_assets().await.unwrap(); // FIXME: implement error handling
     HtmlTemplate(AssetsListPage {
         currencies: assets
             .iter()

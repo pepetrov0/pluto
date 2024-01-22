@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use accounts::component::AccountRepository;
 use assets::component::AssetRepository;
 use auth::{password_hasher::PasswordHasher, session::SessionRepository};
 use axum::{extract::FromRef, middleware, Router};
@@ -8,23 +9,21 @@ use database::Pool;
 use tower_http::trace::TraceLayer;
 use user::UserRepository;
 
-// components
+pub mod accounts;
 pub mod assets;
+pub mod auth;
 pub mod compression;
 pub mod config;
 pub mod content_security_policy;
+pub mod dashboard;
 pub mod database;
+pub mod healthcheck;
 pub mod imkvs;
+pub mod shutdown;
+pub mod static_files;
 pub mod templates;
 pub mod user;
 pub mod validation;
-
-// features
-pub mod auth;
-pub mod dashboard;
-pub mod healthcheck;
-pub mod shutdown;
-pub mod static_files;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -34,7 +33,8 @@ pub struct AppState {
     pub password_hasher: Arc<dyn PasswordHasher>,
     pub user_repository: Arc<dyn UserRepository>,
     pub session_repository: Arc<dyn SessionRepository>,
-    pub assets_repository: Arc<dyn AssetRepository>,
+    pub asset_repository: Arc<dyn AssetRepository>,
+    pub account_repository: Arc<dyn AccountRepository>,
 }
 
 impl FromRef<AppState> for Key {
