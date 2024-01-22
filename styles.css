@@ -25,27 +25,27 @@
   }
 
   .heading-6 {
-    @apply text-lg font-bold;
+    @apply text-lg font-bold pb-2;
   }
 
   .heading-5 {
-    @apply text-xl font-bold;
+    @apply text-xl font-bold pb-2;
   }
 
   .heading-4 {
-    @apply text-2xl font-bold;
+    @apply text-2xl font-bold pb-2;
   }
 
   .heading-3 {
-    @apply text-3xl font-bold;
+    @apply text-3xl font-bold pb-2;
   }
 
   .heading-2 {
-    @apply text-4xl font-bold;
+    @apply text-4xl font-bold pb-2;
   }
 
   .heading-1 {
-    @apply text-5xl font-bold;
+    @apply text-5xl font-bold pb-2;
   }
   
   .card {
