@@ -10,10 +10,18 @@
     {% for currency in currencies %}
     <section class="card bg-default text-default-contrast grid grid-flow-row grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto_1fr] gap-x-1">
         <h6 class="heading-6 col-span-2 sm:col-span-4">{{ currency.label }}</h6>
+        <!-- ticker -->
         <strong>Ticker:</strong>
         <span>{{ currency.ticker|upper }}</span>
+        <!-- symbol -->
         <strong>Symbol:</strong>
-        <span>{{ currency.symbol }}</span>
+        {% match currency.symbol %}
+        {% when Some with (currency) %}
+        <span>{{ currency }}</span>
+        {% when None %}
+        <span>N/A</span>
+        {% endmatch %}
+        <!-- number of decimals -->
         <strong>Number of decimals:</strong>
         <span>{{ currency.precision }}</span>
     </section>

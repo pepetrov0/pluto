@@ -8,7 +8,7 @@ create table if not exists
     assets (
         id varchar(21) primary key,
         ticker varchar(8) not null unique,
-        symbol varchar(8) not null,
+        symbol varchar(8),
         label varchar(255) not null,
         precision smallint not null default 0 check (
             precision >= 0

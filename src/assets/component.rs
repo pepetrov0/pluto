@@ -15,7 +15,7 @@ pub enum AssetType {
 pub struct Asset {
     pub id: String,
     pub ticker: String,
-    pub symbol: String,
+    pub symbol: Option<String>,
     pub label: String,
     pub precision: i16,
     pub atype: AssetType,
