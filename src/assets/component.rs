@@ -14,6 +14,7 @@ pub enum AssetType {
 #[derive(Debug, Clone, FromRow)]
 pub struct Asset {
     pub id: String,
+    pub ticker: String,
     pub symbol: String,
     pub label: String,
     pub precision: i16,
@@ -30,7 +31,7 @@ pub trait AssetRepository: Send + Sync {
 #[async_trait]
 impl AssetRepository for PgPool {
     async fn list_assets(&self) -> Option<Vec<Asset>> {
-        sqlx::query_as::<_, Asset>("select id, symbol, label, precision, atype from assets order by id")
+        sqlx::query_as::<_, Asset>("select id, ticker, symbol, label, precision, atype from assets order by id")
             .fetch_all(self)
             .await
             .ok()

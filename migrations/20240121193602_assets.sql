@@ -7,7 +7,8 @@ create type asset_type as enum('currency');
 create table if not exists
     assets (
         id varchar(21) primary key,
-        symbol varchar(8) not null unique,
+        ticker varchar(8) not null unique,
+        symbol varchar(8) not null,
         label varchar(255) not null,
         precision smallint not null default 0 check (
             precision >= 0
@@ -20,6 +21,7 @@ create table if not exists
 insert into
     assets (
         id,
+        ticker,
         symbol,
         label,
         precision,
@@ -29,6 +31,7 @@ values
     (
         'EWBwPFvyfRaTPChAoSAP7',
         'eur',
+        '€',
         'Euro',
         2,
         'currency'
@@ -36,6 +39,7 @@ values
     (
         'UtqSw6AWO3nSYCgjiqEjR',
         'usd',
+        '$',
         'United States Dollar',
         2,
         'currency'
@@ -43,6 +47,7 @@ values
     (
         'SM6v1TwJkIEm9qkDOvjJZ',
         'jpy',
+        '¥',
         'Japanese Yen',
         0,
         'currency'
