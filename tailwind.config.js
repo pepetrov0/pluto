@@ -25,6 +25,11 @@ module.exports = {
       danger: colors.red["200"],
       "danger-darker": colors.red["400"],
       "danger-contrast": colors.red["900"],
+
+      // success
+      success: colors.green["200"],
+      "success-darker": colors.green["400"],
+      "success-contrast": colors.green["900"],
     },
     extends: {
       spacing: {

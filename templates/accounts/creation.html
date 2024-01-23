@@ -8,27 +8,28 @@
 <div class="flex flex-col gap-2 mx-auto w-full max-w-screen-md px-2 py-4">
     <h1 class="heading-1">New account</h1>
     <hr />
-    {% if assets.is_none() %}
-    <section class="card bg-danger border-danger-darker text-danger-contrast">
+    {% if assets.is_none() || csrf_token.is_none() %}
+    <section class="card bg-danger text-danger-contrast">
         Something went wrong while loading this page. Please try again later.
     </section>
     {% endif %}
+    {% if let Some(csrf_token) = csrf_token %}
     <form class="flex flex-col gap-2" method="POST" action="/new-account">
         <!-- essential details -->
         <section class="card grid grid-cols-1 md:grid-cols-2 grid-flow-row gap-4">
             <!-- name -->
             <div class="flex flex-col w-full gap-1">
                 <label for="name" class="label">Name:</label>
-                <input id="name" class="input w-full" type="text" placeholder="Name.." minlength="1" maxlength="200" required />
+                <input id="name" name="name" class="input w-full" type="text" placeholder="Name.." minlength="1" maxlength="200" required />
             </div>
-            <!-- default currency -->
+            <!-- default asset -->
             <div class="flex flex-col w-full gap-1">
-                <label for="default-currency" class="label">Default currency:</label>
-                <select id="default-currency" class="input w-full">
-                    <option name="">-- Please select a default currency --</option>
+                <label for="default-asset" class="label">Default asset:</label>
+                <select id="default-asset" name="default_asset" class="input w-full">
+                    <option value="">-- Please select a default asset --</option>
                     {% if let Some(assets) = assets %}
                     {% for asset in assets %}
-                    <option name="{{asset.id}}">{{asset.label}}</option>
+                    <option value="{{asset.id}}">{{asset.label}}</option>
                     {% endfor %}
                     {% endif %}
                 </select>
@@ -39,6 +40,20 @@
             <a href="/accounts" class="button-outline">Cancel</a>
             <button class="button" type="submit">Create</button>
         </section>
+        <input class="hidden" name="csrf" value="{{ csrf_token.id }}" />
     </form>
+    {% endif %}
+    {% if let Some(error) = error %}
+    <section class="card bg-danger text-danger-contrast">
+        {% match error %}
+        {% when AccountCreationError::MissingName %}
+        Name is missing. Please enter at least 1 character.
+        {% when AccountCreationError::InvalidCsrf %}
+        Seems like your session expired. Please try again later.
+        {% when AccountCreationError::Unknown %}
+        Something went wrong. Please try again later.
+        {% endmatch %}
+    </section>
+    {% endif %}
 </div>
 {% endblock %}

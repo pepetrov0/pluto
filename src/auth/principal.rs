@@ -1,8 +1,8 @@
 //! Implements extraction of auth principal in axum handlers
 
 use axum::{
-    async_trait, extract::FromRequestParts, http::request::Parts,
-    RequestPartsExt, response::Redirect,
+    async_trait, extract::FromRequestParts, http::request::Parts, response::Redirect,
+    RequestPartsExt,
 };
 
 use crate::{user::User, AppState};

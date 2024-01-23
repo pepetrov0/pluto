@@ -11,6 +11,25 @@
         <a href="/new-account" class="button ml-auto">New account</a>
     </div>
     <hr />
-    <p>Not implemented</p>
+    <!-- created message -->
+    {% if created %}
+    <section class="card bg-success text-success-contrast">
+        Account created.
+    </section>
+    {% endif %}
+    <!-- accounts list -->
+    {% if let Some(accs) = accounts %}
+    {% for account in accs %}
+    <section class="card">
+        <h2 class="heading-3">{{ account.name }}</h2>
+    </section>
+    {% endfor %}
+    {% endif %}
+    <!-- error message -->
+    {% if accounts.is_none() %}
+    <section class="card bg-danger text-danger-contrast">
+        Something went wrong while loading this page. Please try again later.
+    </section>
+    {% endif %}
 </div>
 {% endblock %}

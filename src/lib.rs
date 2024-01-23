@@ -5,6 +5,7 @@ use assets::component::AssetRepository;
 use auth::{password_hasher::PasswordHasher, session::SessionRepository};
 use axum::{extract::FromRef, middleware, Router};
 use axum_extra::extract::cookie::Key;
+use csrf_tokens::CsrfTokenRepository;
 use database::Pool;
 use tower_http::trace::TraceLayer;
 use user::UserRepository;
@@ -15,6 +16,7 @@ pub mod auth;
 pub mod compression;
 pub mod config;
 pub mod content_security_policy;
+pub mod csrf_tokens;
 pub mod dashboard;
 pub mod database;
 pub mod healthcheck;
@@ -31,6 +33,7 @@ pub struct AppState {
     pub cookie_jar_key: Key,
     pub database: Arc<dyn Pool>,
     pub password_hasher: Arc<dyn PasswordHasher>,
+    pub csrf_token_repository: Arc<dyn CsrfTokenRepository>,
     pub user_repository: Arc<dyn UserRepository>,
     pub session_repository: Arc<dyn SessionRepository>,
     pub asset_repository: Arc<dyn AssetRepository>,

@@ -3,7 +3,7 @@
 use askama::Template;
 use axum::extract::Query;
 
-use crate::{templates::HtmlTemplate, auth::principal::NoAuthPrincipal};
+use crate::{auth::principal::NoAuthPrincipal, templates::HtmlTemplate};
 
 use super::error::LoginError;
 
@@ -18,6 +18,9 @@ pub struct LoginPage {
     pub error: Option<LoginError>,
 }
 
-pub async fn handler(_: NoAuthPrincipal, Query(query): Query<LoginQuery>) -> HtmlTemplate<LoginPage> {
+pub async fn handler(
+    _: NoAuthPrincipal,
+    Query(query): Query<LoginQuery>,
+) -> HtmlTemplate<LoginPage> {
     HtmlTemplate(LoginPage { error: query.error })
 }

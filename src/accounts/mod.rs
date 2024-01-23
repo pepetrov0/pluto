@@ -5,9 +5,11 @@ use axum::Router;
 use crate::AppState;
 
 pub mod component;
-mod list;
 mod creation;
+mod list;
 
 pub fn router() -> Router<AppState> {
-    Router::new().merge(list::router()).merge(creation::router())
+    Router::new()
+        .merge(list::router())
+        .merge(creation::router())
 }

@@ -31,9 +31,11 @@ pub trait AssetRepository: Send + Sync {
 #[async_trait]
 impl AssetRepository for PgPool {
     async fn list_assets(&self) -> Option<Vec<Asset>> {
-        sqlx::query_as::<_, Asset>("select id, ticker, symbol, label, precision, atype from assets order by id")
-            .fetch_all(self)
-            .await
-            .ok()
+        sqlx::query_as::<_, Asset>(
+            "select id, ticker, symbol, label, precision, atype from assets order by label",
+        )
+        .fetch_all(self)
+        .await
+        .ok()
     }
 }

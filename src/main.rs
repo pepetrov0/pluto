@@ -36,6 +36,7 @@ async fn main() {
         cookie_jar_key: Key::from(config.secret.as_bytes()),
         database: database.clone(),
         password_hasher,
+        csrf_token_repository: Arc::new(InMemoryKeyValueStore::default()),
         user_repository: database.clone(),
         session_repository: match config.session_driver {
             SessionDriver::InMemory => Arc::new(InMemoryKeyValueStore::default()),

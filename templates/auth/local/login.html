@@ -20,12 +20,12 @@
         <span class="text-center">Don't have an account? <a class="link" href="/register">Sign up now.</a></span>
     </form>
     {% if let Some(error) = error %}
-    <section class="border-2 card bg-danger border-danger-darker text-danger-contrast">
+    <section class="card bg-danger text-danger-contrast">
         {% match error %}
         {% when LoginError::InvalidCredentials %}
         Invalid user credentials.
         {% when LoginError::Unknown %}
-        Something went wrong, please try again later.
+        Something went wrong. Please try again later.
         {% endmatch %}
     </section>
     {% endif %}
