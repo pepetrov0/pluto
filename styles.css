@@ -23,7 +23,7 @@
   }
 
   .button-outline {
-    @apply bg-default text-accent px-4 py-2 rounded shadow cursor-pointer border-2 border-accent disabled:text-disabled-darker disabled:border-disabled-darker disabled:cursor-not-allowed;
+    @apply bg-default text-accent px-4 py-2 rounded shadow cursor-pointer border-2 border-accent disabled:bg-disabled disabled:text-disabled-darker disabled:border-disabled-darker disabled:cursor-not-allowed;
   }
 
   .input {

@@ -24,6 +24,7 @@ module.exports = {
       // danger
       danger: colors.red["200"],
       "danger-darker": colors.red["400"],
+      "danger-contrast": colors.red["900"],
     },
     extends: {
       spacing: {

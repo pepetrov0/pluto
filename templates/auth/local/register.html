@@ -26,7 +26,7 @@
         <span class="text-center">Already have an account? <a class="link" href="/login">Sign in now.</a></span>
     </form>
     {% if let Some(error) = error %}
-    <section class="border-2 card bg-danger border-danger-darker">
+    <section class="border-2 card bg-danger border-danger-darker text-danger-contrast">
         {% match error %}
         {% when RegistrationError::InvalidEmail %}
         Invalid email.
