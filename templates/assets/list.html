@@ -6,10 +6,10 @@
 
 {% block content %}
 <div class="flex flex-col gap-2 mx-auto w-full max-w-screen-md p-2">
-    <h3 class="heading-3">Currencies</h3>
+    <h2 class="heading-3">Currencies</h2>
     {% for currency in currencies %}
     <section class="card bg-default text-default-contrast grid grid-flow-row grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto_1fr] gap-x-1">
-        <h6 class="heading-6 col-span-2 sm:col-span-4">{{ currency.label }}</h6>
+        <h3 class="heading-5 col-span-2 sm:col-span-4">{{ currency.label }}</h3>
         <!-- ticker -->
         <strong>Ticker:</strong>
         <span>{{ currency.ticker|upper }}</span>
