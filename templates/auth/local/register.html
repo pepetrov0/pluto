@@ -20,17 +20,17 @@
     <section class="border-2 card bg-danger border-danger-darker">
         {% match error %}
         {% when RegistrationError::InvalidEmail %}
-        Invalid email!
+        Invalid email.
         {% when RegistrationError::PasswordTooShort %}
-        Password is too short! Please enter at least 12 characters.
+        Password is too short. Please enter at least 12 characters.
         {% when RegistrationError::PasswordsMismatch %}
-        Passwords do not match!
+        Passwords do not match.
         {% when RegistrationError::EmailTaken %}
-        The email address provided is already registered!
+        The email address provided is already registered.
         {% when RegistrationError::SessionCreationError %}
-        Something went wrong, please try again later!
+        Something went wrong, please try again later.
         {% when RegistrationError::Unknown %}
-        Something went wrong, please try again later!
+        Something went wrong, please try again later.
         {% endmatch %}
     </section>
     {% endif %}

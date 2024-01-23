@@ -18,9 +18,9 @@
     <section class="border-2 card bg-danger border-danger-darker">
         {% match error %}
         {% when LoginError::InvalidCredentials %}
-        Invalid user credentials!
+        Invalid user credentials.
         {% when LoginError::Unknown %}
-        Something went wrong, please try again later!
+        Something went wrong, please try again later.
         {% endmatch %}
     </section>
     {% endif %}

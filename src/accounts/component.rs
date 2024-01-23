@@ -1,3 +1,5 @@
+//! Implements account component
+
 use axum::async_trait;
 use sqlx::{prelude::FromRow, PgPool};
 

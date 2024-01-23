@@ -7,6 +7,11 @@
 {% block content %}
 <div class="flex flex-col gap-2 mx-auto w-full max-w-screen-md px-2 py-4">
     <h2 class="heading-2">Currencies</h2>
+    {% if currencies_error %}
+    <section class="card bg-danger border-danger-darker">
+        Something went wrong while loading this page. Please try again later.
+    </section>
+    {% endif %}
     {% for currency in currencies %}
     <section class="card grid grid-flow-row grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto_1fr] gap-x-1">
         <h3 class="heading-3 col-span-2 sm:col-span-4">{{ currency.label }}</h3>
