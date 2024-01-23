@@ -21,6 +21,11 @@ pub async fn handler(
     State(state): State<AppState>,
     Form(details): Form<RegisterForm>,
 ) -> Result<(SetCookieSession, Redirect), RegistrationError> {
+    let details = RegisterForm {
+        email: details.email.trim().to_owned(),
+        ..details
+    };
+
     if !validation::is_email(&details.email) {
         return Err(RegistrationError::InvalidEmail);
     }
