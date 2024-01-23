@@ -15,7 +15,7 @@
   }
 
   .button {
-    @apply bg-accent text-accent-contrast px-4 py-2 rounded shadow disabled:bg-disabled disabled:text-disabled-darker disabled:cursor-not-allowed;
+    @apply bg-accent text-accent-contrast px-4 py-2 rounded shadow cursor-pointer disabled:bg-disabled disabled:text-disabled-darker disabled:cursor-not-allowed;
   }
 
   .input {

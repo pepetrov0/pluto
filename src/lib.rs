@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use accounts::component::AccountRepository;
+use accounts::component::{AccountOwnershipRepository, AccountRepository};
 use assets::component::AssetRepository;
 use auth::{password_hasher::PasswordHasher, session::SessionRepository};
 use axum::{extract::FromRef, middleware, Router};
@@ -35,6 +35,7 @@ pub struct AppState {
     pub session_repository: Arc<dyn SessionRepository>,
     pub asset_repository: Arc<dyn AssetRepository>,
     pub account_repository: Arc<dyn AccountRepository>,
+    pub account_ownership_repository: Arc<dyn AccountOwnershipRepository>,
 }
 
 impl FromRef<AppState> for Key {
