@@ -25,6 +25,10 @@ pub async fn handler(
         return Err(RegistrationError::InvalidEmail);
     }
 
+    if !validation::is_password(&details.password) {
+        return Err(RegistrationError::PasswordTooShort);
+    }
+
     if details.password != details.confirm_password {
         return Err(RegistrationError::PasswordsMismatch);
     }

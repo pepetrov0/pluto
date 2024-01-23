@@ -6,6 +6,7 @@ use axum::response::{IntoResponse, Redirect};
 #[serde(rename_all = "kebab-case")]
 pub enum RegistrationError {
     InvalidEmail,
+    PasswordTooShort,
     PasswordsMismatch,
     EmailTaken,
     SessionCreationError,
@@ -17,6 +18,9 @@ impl IntoResponse for RegistrationError {
         match self {
             RegistrationError::InvalidEmail => {
                 Redirect::to("/register?error=invalid-email").into_response()
+            }
+            RegistrationError::PasswordTooShort => {
+                Redirect::to("/register?error=password-too-short").into_response()
             }
             RegistrationError::PasswordsMismatch => {
                 Redirect::to("/register?error=passwords-mismatch").into_response()

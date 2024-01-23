@@ -21,6 +21,8 @@
         {% match error %}
         {% when RegistrationError::InvalidEmail %}
         Invalid email!
+        {% when RegistrationError::PasswordTooShort %}
+        Password is too short! Please enter at least 12 characters.
         {% when RegistrationError::PasswordsMismatch %}
         Passwords do not match!
         {% when RegistrationError::EmailTaken %}
