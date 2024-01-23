@@ -14,6 +14,7 @@ module.exports = {
 
       // accent
       accent: colors.gray["900"],
+      "accent-lighter": colors.gray["700"],
       "accent-contrast": colors.white,
 
       // disabled
