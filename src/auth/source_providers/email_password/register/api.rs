@@ -21,23 +21,28 @@ pub async fn handler(
     State(state): State<AppState>,
     Form(details): Form<RegisterForm>,
 ) -> Result<(SetCookieSession, Redirect), RegistrationError> {
+    // trim details (email)
     let details = RegisterForm {
         email: details.email.trim().to_owned(),
         ..details
     };
 
+    // validate email
     if !validation::is_email(&details.email) {
         return Err(RegistrationError::InvalidEmail);
     }
 
+    // validate password
     if !validation::is_password(&details.password) {
         return Err(RegistrationError::PasswordTooShort);
     }
 
+    // validate matching passwords
     if details.password != details.confirm_password {
         return Err(RegistrationError::PasswordsMismatch);
     }
 
+    // check if email is already taken
     if state
         .user_repository
         .find_user(&details.email)
@@ -47,11 +52,13 @@ pub async fn handler(
         return Err(RegistrationError::EmailTaken);
     }
 
+    // attempt hashing the password
     let hash = match state.password_hasher.hash(details.password.as_bytes()) {
         Some(hash) => hash,
         None => return Err(RegistrationError::Unknown),
     };
 
+    // attempt creating a user and a session
     match state
         .user_repository
         .create_user(details.email, Some(hash))
