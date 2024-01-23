@@ -1,13 +1,12 @@
 //! Implements the assets feature
 
-use axum::{Router, routing};
 use crate::AppState;
-
+use axum::Router;
 
 pub mod component;
 
 mod list;
 
 pub fn router() -> Router<AppState> {
-    Router::new().route("/assets", routing::get(list::handler))
+    Router::new().merge(list::router())
 }

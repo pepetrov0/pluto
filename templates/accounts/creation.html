@@ -1,0 +1,44 @@
+{% extends "page-with-nav.html" %}
+
+{% block head %}
+<title>New account</title>
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-2 mx-auto w-full max-w-screen-md px-2 py-4">
+    <h1 class="heading-1">New account</h1>
+    <hr />
+    {% if assets.is_none() %}
+    <section class="card bg-danger border-danger-darker">
+        Something went wrong while loading this page. Please try again later.
+    </section>
+    {% endif %}
+    <form class="flex flex-col gap-2" method="POST" action="/new-account">
+        <!-- essential details -->
+        <section class="card grid grid-cols-1 md:grid-cols-2 grid-flow-row gap-4">
+            <!-- name -->
+            <div class="flex flex-col w-full gap-1">
+                <label for="name" class="label">Name:</label>
+                <input id="name" class="input w-full" type="text" placeholder="Name.." minlength="1" maxlength="200" required />
+            </div>
+            <!-- default currency -->
+            <div class="flex flex-col w-full gap-1">
+                <label for="default-currency" class="label">Default currency:</label>
+                <select id="default-currency" class="input w-full">
+                    <option name="">-- Please select a default currency --</option>
+                    {% if let Some(assets) = assets %}
+                    {% for asset in assets %}
+                    <option name="{{asset.id}}">{{asset.label}}</option>
+                    {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+        </section>
+        <!-- actions -->
+        <section class="card flex justify-end gap-2">
+            <a href="/accounts" class="button-outline">Cancel</a>
+            <button class="button" type="submit">Create</button>
+        </section>
+    </form>
+</div>
+{% endblock %}

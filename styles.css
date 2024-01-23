@@ -14,12 +14,20 @@
     @apply underline text-accent;
   }
 
+  .label {
+    @apply text-accent text-sm;
+  }
+
   .button {
     @apply bg-accent text-accent-contrast px-4 py-2 rounded shadow cursor-pointer disabled:bg-disabled disabled:text-disabled-darker disabled:cursor-not-allowed;
   }
 
+  .button-outline {
+    @apply bg-default text-accent px-4 py-2 rounded shadow cursor-pointer border-2 border-accent disabled:text-disabled-darker disabled:border-disabled-darker disabled:cursor-not-allowed;
+  }
+
   .input {
-    @apply appearance-none outline-none px-4 py-2 bg-default text-default-contrast rounded shadow border-default-darker invalid:border-danger-darker;
+    @apply appearance-none outline-none px-4 py-2 bg-default border-2 text-default-contrast rounded shadow border-default-darker invalid:border-danger-darker;
     @apply focus:outline-none focus:ring-0 focus:border-accent;
     @apply invalid:border-danger-darker;
   }

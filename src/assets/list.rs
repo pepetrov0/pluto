@@ -1,7 +1,7 @@
 //! Implements the list page where all assets are listed
 
 use askama::Template;
-use axum::{extract::State, http::StatusCode};
+use axum::{extract::State, http::StatusCode, routing, Router};
 
 use crate::{auth::principal::AuthPrincipal, templates::HtmlTemplate, AppState};
 
@@ -9,12 +9,12 @@ use super::component::{Asset, AssetType};
 
 #[derive(Template, Debug, Clone)]
 #[template(path = "assets/list.html")]
-pub struct AssetsListPage {
+struct AssetsListPage {
     pub currencies_error: bool,
     pub currencies: Vec<Asset>,
 }
 
-pub async fn handler(
+async fn handler(
     _: AuthPrincipal,
     State(state): State<AppState>,
 ) -> Result<HtmlTemplate<AssetsListPage>, StatusCode> {
@@ -29,4 +29,8 @@ pub async fn handler(
             .collect(),
     };
     Ok(HtmlTemplate(page))
+}
+
+pub fn router() -> Router<AppState> {
+    Router::new().route("/assets", routing::get(handler))
 }
