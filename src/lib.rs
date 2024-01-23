@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use accounts::component::{AccountOwnershipRepository, AccountRepository};
+use accounts::{component::AccountRepository, ownership::AccountOwnershipRepository};
 use assets::component::AssetRepository;
 use auth::{password_hasher::PasswordHasher, session::SessionRepository};
 use axum::{extract::FromRef, middleware, Router};
