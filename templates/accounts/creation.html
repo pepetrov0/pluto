@@ -8,7 +8,7 @@
 <div class="flex flex-col gap-2 mx-auto w-full max-w-screen-md px-2 py-4">
     <h1 class="heading-1">New account</h1>
     <hr />
-    {% if assets.is_none() || csrf_token.is_none() %}
+    {% if currencies.is_none() || csrf_token.is_none() %}
     <section class="card bg-danger text-danger-contrast">
         Something went wrong while loading this page. Please try again later.
     </section>
@@ -27,10 +27,12 @@
                 <label for="default-asset" class="label">Default asset:</label>
                 <select id="default-asset" name="default_asset" class="input w-full">
                     <option value="">-- Please select a default asset --</option>
-                    {% if let Some(assets) = assets %}
-                    {% for asset in assets %}
-                    <option value="{{asset.id}}">{{asset.label}}</option>
-                    {% endfor %}
+                    {% if let Some(currencies) = currencies %}
+                    <optgroup label="Currencies">
+                        {% for currency in currencies %}
+                        <option value="{{currency.id}}">{{currency.label}}</option>
+                        {% endfor %}
+                    </optgroup>
                     {% endif %}
                 </select>
             </div>
