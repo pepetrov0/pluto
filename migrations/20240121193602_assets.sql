@@ -8,7 +8,7 @@ create table if not exists
     assets (
         id varchar(21) primary key,
         ticker varchar(8) not null unique,
-        symbol varchar(8),
+        symbol varchar(8) not null,
         label varchar(255) not null,
         precision smallint not null default 0 check (
             precision >= 0
@@ -40,7 +40,7 @@ values
         'UtqSw6AWO3nSYCgjiqEjR',
         'usd',
         '$',
-        'United States Dollar',
+        'U.S. dollar',
         2,
         'currency'
     ),
@@ -48,7 +48,7 @@ values
         'SM6v1TwJkIEm9qkDOvjJZ',
         'jpy',
         '¥',
-        'Japanese Yen',
+        'Japanese yen',
         0,
         'currency'
     );

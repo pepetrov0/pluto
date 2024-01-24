@@ -8,7 +8,7 @@ mod api;
 pub(super) mod error;
 mod page;
 
-pub(super) const CSRF_TOKEN_USAGE: &str = "new-account-page";
+pub(super) const CSRF_TOKEN_USAGE: &str = "new-account";
 
 pub fn router() -> Router<AppState> {
     Router::new()

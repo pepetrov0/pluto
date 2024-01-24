@@ -6,14 +6,26 @@
 
 {% block content %}
 <div class="flex flex-col gap-2 mx-auto w-full max-w-screen-md px-2 py-4">
-    <h1 class="heading-1">Currencies & Assets</h1>
+    <h1 class="heading-1 flex items-center">
+        <span>Currencies & Assets</span>
+        <a href="/new-asset" class="button ml-auto">New asset</a>
+    </h1>
     <hr />
-    <h2 class="heading-2">Currencies</h2>
-    {% if currencies_error %}
+    <!-- created message -->
+    {% if created %}
+    <section class="card bg-success text-success-contrast">
+        Asset created.
+    </section>
+    {% endif %}
+    <!-- errors -->
+    {% if currencies.is_none() %}
     <section class="card bg-danger text-danger-contrast">
         Something went wrong while loading this page. Please try again later.
     </section>
     {% endif %}
+    <!-- currencies list -->
+    {% if let Some(currencies) = currencies %}
+    <h2 class="heading-2">Currencies</h2>
     {% for currency in currencies %}
     <section class="card grid grid-flow-row grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto_1fr] gap-x-1">
         <h3 class="heading-3 col-span-2 sm:col-span-4">{{ currency.label }}</h3>
@@ -22,16 +34,12 @@
         <span>{{ currency.ticker|upper }}</span>
         <!-- symbol -->
         <strong>Symbol:</strong>
-        {% match currency.symbol %}
-        {% when Some with (currency) %}
-        <span>{{ currency }}</span>
-        {% when None %}
-        <span>N/A</span>
-        {% endmatch %}
+        <span>{{ currency.symbol }}</span>
         <!-- number of decimals -->
         <strong>Number of decimals:</strong>
         <span>{{ currency.precision }}</span>
     </section>
     {% endfor %}
+    {% endif %}
 </div>
 {% endblock %}

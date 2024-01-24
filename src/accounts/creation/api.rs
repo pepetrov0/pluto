@@ -46,8 +46,8 @@ pub async fn handler(
     }
 
     // check for a missing name
-    if details.name.is_empty() {
-        return Err(AccountCreationError::MissingName);
+    if details.name.is_empty() || details.name.len() > 200 {
+        return Err(AccountCreationError::InvalidName);
     }
 
     // create account and ownership

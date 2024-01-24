@@ -74,7 +74,7 @@ impl UserRepository for sqlx::PgPool {
             return Some(vec![]);
         }
 
-        sqlx::query_as::<_, User>("select id, email from users where id=ANY($1)")
+        sqlx::query_as::<_, User>("select id, email from users where id=ANY($1) order by email")
             .bind(&ids[..])
             .fetch_all(self)
             .await
