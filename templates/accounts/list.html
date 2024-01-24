@@ -41,7 +41,7 @@
         <!-- owners -->
         <span class="col-span-2 md:col-span-4 text-ellipsis overflow-hidden text-nowrap text-sm pt-2">
             {% for owner in owners %}
-                {{ owner.email }}{% if loop.last == false %},{% endif %}
+                {{ owner.email }}{% if !loop.last %},{% endif %}
             {% endfor %}
         </span>
     </section>
