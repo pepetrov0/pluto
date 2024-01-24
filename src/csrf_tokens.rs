@@ -28,6 +28,7 @@ pub trait CsrfTokenRepository: Send + Sync {
 
 #[async_trait]
 impl CsrfTokenRepository for InMemoryKeyValueStore<String, CsrfToken> {
+    #[tracing::instrument]
     async fn consume_csrf_token(&self, id: &str) -> Option<CsrfToken> {
         let mut map = self.lock().await;
         let now = Utc::now().naive_utc();
@@ -38,6 +39,7 @@ impl CsrfTokenRepository for InMemoryKeyValueStore<String, CsrfToken> {
         map.remove(id)
     }
 
+    #[tracing::instrument]
     async fn create_csrf_token(&self, user: String, usage: &str) -> Option<CsrfToken> {
         let mut map = self.lock().await;
         let now = Utc::now().naive_utc();

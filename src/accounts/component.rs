@@ -18,11 +18,12 @@ pub trait AccountRepository: Sync + Send {
     async fn create_account(&self, name: String, default_asset: Option<String>) -> Option<Account>;
 
     /// Find all accounts by IDs
-    async fn find_all_accounts_by_ids(&self, ids: Vec<String>) -> Option<Vec<Account>>;
+    async fn list_accounts_by_ids(&self, ids: Vec<String>) -> Option<Vec<Account>>;
 }
 
 #[async_trait]
 impl AccountRepository for PgPool {
+    #[tracing::instrument]
     async fn create_account(&self, name: String, default_asset: Option<String>) -> Option<Account> {
         sqlx::query_as::<_, Account>("insert into accounts (id, name, default_asset) values ($1, $2, $3) returning id, name, default_asset")
             .bind(nanoid::nanoid!())
@@ -33,7 +34,12 @@ impl AccountRepository for PgPool {
             .ok()
     }
 
-    async fn find_all_accounts_by_ids(&self, ids: Vec<String>) -> Option<Vec<Account>> {
+    #[tracing::instrument]
+    async fn list_accounts_by_ids(&self, ids: Vec<String>) -> Option<Vec<Account>> {
+        if ids.is_empty() {
+            return Some(vec![]);
+        }
+
         sqlx::query_as::<_, Account>(
             "select id, name, default_asset from accounts where id = ANY($1) order by name",
         )
@@ -43,4 +49,3 @@ impl AccountRepository for PgPool {
         .ok()
     }
 }
-

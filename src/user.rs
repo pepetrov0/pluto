@@ -4,7 +4,7 @@ use axum::async_trait;
 use sqlx::FromRow;
 
 /// Represents a user
-#[derive(Debug, FromRow)]
+#[derive(Debug, Clone, FromRow)]
 pub struct User {
     pub id: String,
     pub email: String,
@@ -29,6 +29,9 @@ pub trait UserRepository: Send + Sync {
 
     /// Retrieve a user bundled with their password
     async fn find_user_with_password(&self, id_or_email: &str) -> Option<UserWithPassword>;
+
+    /// Lists all users by IDs
+    async fn list_users_by_ids(&self, ids: Vec<String>) -> Option<Vec<User>>;
 }
 
 #[async_trait]
@@ -64,5 +67,17 @@ impl UserRepository for sqlx::PgPool {
         .fetch_one(self)
         .await
         .ok()
+    }
+
+    async fn list_users_by_ids(&self, ids: Vec<String>) -> Option<Vec<User>> {
+        if ids.is_empty() {
+            return Some(vec![]);
+        }
+
+        sqlx::query_as::<_, User>("select id, email from users where id=ANY($1)")
+            .bind(&ids[..])
+            .fetch_all(self)
+            .await
+            .ok()
     }
 }

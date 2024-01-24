@@ -30,6 +30,7 @@ pub trait SessionRepository: Send + Sync {
 
 #[async_trait]
 impl SessionRepository for InMemoryKeyValueStore<String, Session> {
+    #[tracing::instrument]
     async fn create_session(&self, user: String) -> Option<Session> {
         let mut map = self.lock().await;
         let session = Session {
@@ -41,11 +42,13 @@ impl SessionRepository for InMemoryKeyValueStore<String, Session> {
         Some(session)
     }
 
+    #[tracing::instrument]
     async fn find_session(&self, id: &str) -> Option<Session> {
         let map = self.lock().await;
         map.get(id).cloned()
     }
 
+    #[tracing::instrument]
     async fn delete_session(&self, id: &str) {
         let mut map = self.lock().await;
         map.remove(id);
@@ -54,6 +57,7 @@ impl SessionRepository for InMemoryKeyValueStore<String, Session> {
 
 #[async_trait]
 impl SessionRepository for PgPool {
+    #[tracing::instrument]
     async fn create_session(&self, user: String) -> Option<Session> {
         sqlx::query_as::<_, Session>(
             "insert into sessions (id, usr) values ($1, $2) returning id, usr",
@@ -65,6 +69,7 @@ impl SessionRepository for PgPool {
         .ok()
     }
 
+    #[tracing::instrument]
     async fn find_session(&self, id: &str) -> Option<Session> {
         sqlx::query_as::<_, Session>("select id, usr from sessions where id=$1")
             .bind(id)
@@ -73,6 +78,7 @@ impl SessionRepository for PgPool {
             .ok()
     }
 
+    #[tracing::instrument]
     async fn delete_session(&self, id: &str) {
         let _ = sqlx::query("delete from sessions where id=$1")
             .bind(id)

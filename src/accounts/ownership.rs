@@ -21,11 +21,19 @@ pub trait AccountOwnershipRepository: Sync + Send {
         account: String,
     ) -> Option<AccountOwnership>;
 
-    async fn find_account_ownerships_by_user(&self, user: &str) -> Option<Vec<AccountOwnership>>;
+    /// List all account ownerships for a user
+    async fn list_account_ownerships_by_user(&self, user: &str) -> Option<Vec<AccountOwnership>>;
+
+    /// List all account ownerships for accounts
+    async fn list_account_ownerships_by_accounts(
+        &self,
+        ids: Vec<String>,
+    ) -> Option<Vec<AccountOwnership>>;
 }
 
 #[async_trait]
 impl AccountOwnershipRepository for PgPool {
+    #[tracing::instrument]
     async fn create_account_ownership(
         &self,
         user: String,
@@ -39,11 +47,30 @@ impl AccountOwnershipRepository for PgPool {
             .ok()
     }
 
-    async fn find_account_ownerships_by_user(&self, user: &str) -> Option<Vec<AccountOwnership>> {
+    #[tracing::instrument]
+    async fn list_account_ownerships_by_user(&self, user: &str) -> Option<Vec<AccountOwnership>> {
         sqlx::query_as::<_, AccountOwnership>(
             "select id, usr, account from accounts_ownerships where usr=$1",
         )
         .bind(user)
+        .fetch_all(self)
+        .await
+        .ok()
+    }
+
+    #[tracing::instrument]
+    async fn list_account_ownerships_by_accounts(
+        &self,
+        ids: Vec<String>,
+    ) -> Option<Vec<AccountOwnership>> {
+        if ids.is_empty() {
+            return Some(vec![]);
+        }
+
+        sqlx::query_as::<_, AccountOwnership>(
+            "select id, usr, account from accounts_ownerships where account=ANY($1)",
+        )
+        .bind(&ids[..])
         .fetch_all(self)
         .await
         .ok()

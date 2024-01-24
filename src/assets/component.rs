@@ -26,14 +26,33 @@ pub struct Asset {
 pub trait AssetRepository: Send + Sync {
     // lists all assets
     async fn list_assets(&self) -> Option<Vec<Asset>>;
+
+    // lists all assets filtered by id
+    async fn list_assets_by_ids(&self, ids: Vec<String>) -> Option<Vec<Asset>>;
 }
 
 #[async_trait]
 impl AssetRepository for PgPool {
+    #[tracing::instrument]
     async fn list_assets(&self) -> Option<Vec<Asset>> {
         sqlx::query_as::<_, Asset>(
             "select id, ticker, symbol, label, precision, atype from assets order by label",
         )
+        .fetch_all(self)
+        .await
+        .ok()
+    }
+
+    #[tracing::instrument]
+    async fn list_assets_by_ids(&self, ids: Vec<String>) -> Option<Vec<Asset>> {
+        if ids.is_empty() {
+            return Some(vec![]);
+        }
+
+        sqlx::query_as::<_, Asset>(
+            "select id, ticker, symbol, label, precision, atype from assets where id=ANY($1) order by label",
+        )
+        .bind(&ids[..])
         .fetch_all(self)
         .await
         .ok()

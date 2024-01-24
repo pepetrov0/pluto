@@ -6,10 +6,10 @@
 
 {% block content %}
 <div class="flex flex-col gap-2 mx-auto w-full max-w-screen-md px-2 py-4">
-    <div class="flex items-center">
-        <h1 class="heading-1">Accounts</h1>
+    <h1 class="heading-1 flex items-center">
+        <span>Accounts</span>
         <a href="/new-account" class="button ml-auto">New account</a>
-    </div>
+    </h1>
     <hr />
     <!-- created message -->
     {% if created %}
@@ -17,19 +17,35 @@
         Account created.
     </section>
     {% endif %}
-    <!-- accounts list -->
-    {% if let Some(accs) = accounts %}
-    {% for account in accs %}
-    <section class="card">
-        <h2 class="heading-3">{{ account.name }}</h2>
-    </section>
-    {% endfor %}
-    {% endif %}
     <!-- error message -->
     {% if accounts.is_none() %}
     <section class="card bg-danger text-danger-contrast">
         Something went wrong while loading this page. Please try again later.
     </section>
+    {% endif %}
+    <!-- accounts list -->
+    {% if let Some(accs) = accounts %}
+    {% for (account, asset, owners) in accs %}
+    <section class="card grid grid-cols-[auto_1fr] md:grid-cols-[auto_1fr_auto_1fr] gap-1">
+        <h2 class="heading-3 col-span-2 sm:col-span-4">{{ account.name }}</h2>
+        <!-- default asset -->
+        <strong>Default asset:</strong>
+        <span>
+            {% match asset %}
+            {% when Some with (val) %}
+            {{ val.label }}
+            {% when None %}
+            None
+            {% endmatch %}
+        </span>
+        <!-- owners -->
+        <span class="col-span-2 md:col-span-4 text-ellipsis overflow-hidden text-nowrap text-sm pt-2">
+            {% for owner in owners %}
+                {{ owner.email }}{% if loop.last == false %},{% endif %}
+            {% endfor %}
+        </span>
+    </section>
+    {% endfor %}
     {% endif %}
 </div>
 {% endblock %}

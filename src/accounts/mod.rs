@@ -5,9 +5,9 @@ use axum::Router;
 use crate::AppState;
 
 pub mod component;
-pub mod ownership;
 mod creation;
 mod list;
+pub mod ownership;
 
 pub fn router() -> Router<AppState> {
     Router::new()
