@@ -50,7 +50,7 @@ features = ["fs", "trace", "compression-gzip", "compression-deflate", "compressi
 
 [dependencies.sqlx]
 version = "0"
-features = ["postgres", "runtime-tokio"]
+features = ["postgres", "runtime-tokio", "chrono"]
 
 [dependencies.chrono-tz]
 version = "0"

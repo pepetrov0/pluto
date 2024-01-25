@@ -45,6 +45,8 @@ async fn main() {
         asset_repository: database.clone(),
         account_repository: database.clone(),
         account_ownership_repository: database.clone(),
+        transaction_repository: database.clone(),
+        entry_repository: database.clone(),
     };
 
     // initialize router

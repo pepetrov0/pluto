@@ -4,6 +4,7 @@ begin;
 create table if not exists
     transactions (
         id varchar(21) primary key,
+        note varchar(255) not null,
         credit_account varchar(21) not null references accounts (id) on update cascade on delete restrict,
         debit_account varchar(21) not null references accounts (id) on update cascade on delete restrict,
         credit_asset varchar(21) not null references assets (id) on update cascade on delete restrict,
@@ -19,9 +20,10 @@ create table if not exists
 
 -- create the entries view
 create or replace view
-    entries (id, account, asset, stamp, amount, settled) as
+    entries (id, note, account, asset, stamp, amount, settled) as
 select
     id,
+    note,
     credit_account as account,
     credit_asset as asset,
     credit_stamp as stamp,
@@ -32,6 +34,7 @@ from
 union all
 select
     id,
+    note,
     debit_account as account,
     debit_asset as asset,
     debit_stamp as stamp,

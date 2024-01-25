@@ -8,6 +8,7 @@ use axum_extra::extract::cookie::Key;
 use csrf_tokens::CsrfTokenRepository;
 use database::Pool;
 use tower_http::trace::TraceLayer;
+use transactions::{component::TransactionRepository, entries::EntryRepository};
 use user::UserRepository;
 
 pub mod accounts;
@@ -24,6 +25,7 @@ pub mod imkvs;
 pub mod shutdown;
 pub mod static_files;
 pub mod templates;
+pub mod transactions;
 pub mod user;
 pub mod validation;
 
@@ -39,6 +41,8 @@ pub struct AppState {
     pub asset_repository: Arc<dyn AssetRepository>,
     pub account_repository: Arc<dyn AccountRepository>,
     pub account_ownership_repository: Arc<dyn AccountOwnershipRepository>,
+    pub transaction_repository: Arc<dyn TransactionRepository>,
+    pub entry_repository: Arc<dyn EntryRepository>,
 }
 
 impl FromRef<AppState> for Key {
