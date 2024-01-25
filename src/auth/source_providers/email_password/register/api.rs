@@ -1,6 +1,7 @@
 //! Implements the API relevant for user registration
 
 use axum::{extract::State, response::Redirect, Form};
+use chrono_tz::Tz;
 
 use crate::{
     auth::{principal::NoAuthPrincipal, session_providers::cookie::SetCookieSession},
@@ -14,6 +15,7 @@ pub struct RegisterForm {
     pub email: String,
     pub password: String,
     pub confirm_password: String,
+    pub timezone: String,
 }
 
 pub async fn handler(
@@ -58,10 +60,12 @@ pub async fn handler(
         None => return Err(RegistrationError::Unknown),
     };
 
+    let timezone = Tz::from_str_insensitive(&details.timezone).unwrap_or_default();
+
     // attempt creating a user and a session
     match state
         .user_repository
-        .create_user(details.email, Some(hash))
+        .create_user(details.email, Some(hash), timezone)
         .await
     {
         // create a session and redirect to /

@@ -22,6 +22,14 @@
             <input id="confirm-password" name="confirm_password" type="password" placeholder="Confirm password.."
                 minlength="12" class="input" required />
         </div>
+        <div class="flex flex-col gap-1">
+            <label for="timezone" class="label">Timezone:</label>
+            <select id="timezone" name="timezone" class="input" required>
+            {% for timezone in timezones %}
+                <option value="{{ timezone }}">{{ timezone|under_to_space|slash_to_pipe }}</option>
+            {% endfor %}
+            </select>
+        </div>
         <button type="submit" class="button">Sign up</button>
         <span class="text-center">Already have an account? <a class="link" href="/login">Sign in now.</a></span>
     </form>

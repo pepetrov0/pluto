@@ -52,3 +52,6 @@ features = ["fs", "trace", "compression-gzip", "compression-deflate", "compressi
 version = "0"
 features = ["postgres", "runtime-tokio"]
 
+[dependencies.chrono-tz]
+version = "0"
+features = ["case-insensitive", "serde"]
