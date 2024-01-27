@@ -2,11 +2,8 @@ use askama::Template;
 use axum::extract::{Query, State};
 
 use crate::{
-    assets::component::{Asset, AssetType},
-    auth::principal::AuthPrincipal,
-    csrf_tokens::CsrfToken,
-    templates::HtmlTemplate,
-    AppState,
+    assets::component::Asset, auth::principal::AuthPrincipal, csrf_tokens::CsrfToken,
+    templates::HtmlTemplate, AppState,
 };
 
 use super::error::AccountCreationError;
@@ -21,7 +18,7 @@ pub struct NewAccountQuery {
 pub struct NewAccountPage {
     pub csrf_token: Option<CsrfToken>,
     pub error: Option<AccountCreationError>,
-    pub currencies: Option<Vec<Asset>>,
+    pub assets: Option<Vec<Asset>>,
 }
 
 pub async fn handler(
@@ -36,15 +33,11 @@ pub async fn handler(
         .await;
 
     // fetch currencies
-    let currencies = state.asset_repository.list_assets().await.map(|v| {
-        v.into_iter()
-            .filter(|v| v.atype == AssetType::Currency)
-            .collect()
-    });
+    let currencies = state.asset_repository.list_assets().await;
 
     HtmlTemplate(NewAccountPage {
         csrf_token,
         error: query.error,
-        currencies,
+        assets: currencies,
     })
 }

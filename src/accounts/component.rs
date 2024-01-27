@@ -17,7 +17,10 @@ pub trait AccountRepository: Sync + Send {
     /// Creates an account
     async fn create_account(&self, name: String, default_asset: Option<String>) -> Option<Account>;
 
-    /// Find all accounts by IDs
+    /// List all accounts
+    async fn list_accounts(&self) -> Option<Vec<Account>>;
+
+    /// List all accounts by IDs
     async fn list_accounts_by_ids(&self, ids: Vec<String>) -> Option<Vec<Account>>;
 }
 
@@ -32,6 +35,16 @@ impl AccountRepository for PgPool {
             .fetch_one(self)
             .await
             .ok()
+    }
+
+    #[tracing::instrument]
+    async fn list_accounts(&self) -> Option<Vec<Account>> {
+        sqlx::query_as::<_, Account>(
+            "select id, name, default_asset from accounts order by name",
+        )
+        .fetch_all(self)
+        .await
+        .ok()
     }
 
     #[tracing::instrument]

@@ -38,6 +38,9 @@ pub trait UserRepository: Send + Sync {
     /// Retrieve a user bundled with their password
     async fn find_user_with_password(&self, id_or_email: &str) -> Option<UserWithPassword>;
 
+    /// Lists all users
+    async fn list_users(&self) -> Option<Vec<User>>;
+
     /// Lists all users by IDs
     async fn list_users_by_ids(&self, ids: Vec<String>) -> Option<Vec<User>>;
 }
@@ -83,6 +86,15 @@ impl UserRepository for sqlx::PgPool {
         .ok()
     }
 
+    #[tracing::instrument]
+    async fn list_users(&self) -> Option<Vec<User>> {
+        sqlx::query_as::<_, User>("select id, email, timezone from users order by email")
+            .fetch_all(self)
+            .await
+            .ok()
+    }
+
+    #[tracing::instrument]
     async fn list_users_by_ids(&self, ids: Vec<String>) -> Option<Vec<User>> {
         if ids.is_empty() {
             return Some(vec![]);

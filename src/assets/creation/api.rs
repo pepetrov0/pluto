@@ -12,7 +12,7 @@ use super::error::AssetCreationError;
 pub struct NewAssetForm {
     pub label: String,
     pub ticker: String,
-    pub symbol: String,
+    pub symbol: Option<String>,
     pub precision: i16,
     pub atype: AssetType,
     pub csrf: String,
@@ -26,7 +26,10 @@ pub async fn handler(
     let details = NewAssetForm {
         label: details.label.trim().to_owned(),
         ticker: details.ticker.trim().to_lowercase().to_owned(),
-        symbol: details.symbol.trim().to_owned(),
+        symbol: details
+            .symbol
+            .map(|v| v.trim().to_owned())
+            .filter(|v| !v.is_empty()),
         precision: details.precision,
         atype: details.atype,
         csrf: details.csrf.trim().to_owned(),
@@ -59,8 +62,10 @@ pub async fn handler(
     }
 
     // validate symbol
-    if details.symbol.is_empty() || details.symbol.len() > 8 {
-        return Err(AssetCreationError::InvalidSymbol);
+    if let Some(symbol) = &details.symbol {
+        if symbol.len() > 8 {
+            return Err(AssetCreationError::InvalidSymbol);
+        }
     }
 
     // validate precision

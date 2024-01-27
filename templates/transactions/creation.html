@@ -1,0 +1,184 @@
+{% extends "page-with-nav.html" %}
+
+{% include "macros/asset-list.html" %}
+
+{% block head %}
+<title>New transaction</title>
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-2 mx-auto w-full max-w-screen-md px-2 py-4">
+    <h1 class="heading-1">New transaction</h1>
+    <hr />
+    {% if
+    csrf_token.is_none() ||
+    own_accounts.is_none() ||
+    other_accounts.is_none() ||
+    other_users.is_none() ||
+    assets.is_none()
+    %}
+    <section class="card bg-danger text-danger-contrast">
+        Something went wrong while loading this page. Please try again later.
+    </section>
+    {% endif %}
+    {% if let Some(csrf_token) = csrf_token %}
+    {% if let Some(own_accounts) = own_accounts %}
+    {% if let Some(other_accounts) = other_accounts %}
+    {% if let Some(other_users) = other_users %}
+    {% if let Some(assets) = assets %}
+    <form class="flex flex-col gap-2" method="POST" action="/new-transaction">
+        <!-- essential details -->
+        <section class="card grid grid-cols-1 md:grid-cols-2 grid-flow-row gap-4">
+            <!-- Note -->
+            <div class="flex flex-col w-full gap-1 col-span-1 md:col-span-2">
+                <label for="note" class="label">Note:</label>
+                <input id="note" name="note" class="input w-full" type="text" placeholder="Note.." minlength="1"
+                    maxlength="200" required />
+            </div>
+            <!-- Credit Account -->
+            <div class="flex flex-col w-full gap-1">
+                <label for="credit-account" class="label">Credit account:</label>
+                <input name="create_credit_account" class="hidden" type="text" value="{{new_credit}}" />
+                {% if !new_credit %}
+                <select id="credit-account" name="credit_account" class="input w-full" required>
+                    {% call account_options %}
+                </select>
+                <span>
+                    <a class="link text-sm"
+                        href="/new-transaction?new-credit=true&new-debit=false&multi-asset={{multi_asset}}">
+                        Need a new account?
+                    </a>
+                </span>
+                {% else %}
+                <input id="credit-account" name="credit_account" class="input w-full"
+                    placeholder="New credit account name.." minlength="1" maxlength="200" required />
+                <span>
+                    <a class="link text-sm"
+                        href="/new-transaction?new-credit=false&new-debit={{new_debit}}&multi-asset={{multi_asset}}">
+                        Prefer selecting from existing accounts?
+                    </a>
+                </span>
+                {% endif %}
+            </div>
+            <!-- Debit Account -->
+            <div class="flex flex-col w-full gap-1">
+                <label for="debit-account" class="label">Debit account:</label>
+                <input name="create_debit_account" class="hidden" type="text" value="{{new_debit}}" />
+                {% if !new_debit %}
+                <select id="debit-account" name="debit_account" class="input w-full" required>
+                    {% call account_options %}
+                </select>
+                <span>
+                    <a class="link text-sm"
+                        href="/new-transaction?new-credit=false&new-debit=true&multi-asset={{multi_asset}}">
+                        Need a new account?
+                    </a>
+                </span>
+                {% else %}
+                <input id="debit-account" name="debit_account" class="input w-full"
+                    placeholder="New debit account name.." minlength="1" maxlength="200" required />
+                <span>
+                    <a class="link text-sm"
+                        href="/new-transaction?new-credit={{new_credit}}&new-debit=false&multi-asset={{multi_asset}}">
+                        Prefer selecting from existing accounts?
+                    </a>
+                </span>
+                {% endif %}
+            </div>
+            {% if multi_asset %}
+            <!-- Credit Asset -->
+            <div class="flex flex-col w-full gap-1">
+                <label for="credit-asset" class="label">Credit asset:</label>
+                <select id="credit-asset" name="credit_asset" class="input w-full">
+                    {% include "macros/asset-list.html" %}
+                </select>
+            </div>
+            <!-- Credit Amount -->
+            <div class="flex flex-col w-full gap-1">
+                <label for="credit-amount" class="label">Credit amount:</label>
+                <input id="credit-amount" name="credit_amount" class="input w-full" type="number"
+                    placeholder="Credit amount.." step="0.0001" required />
+            </div>
+            <!-- Debit Asset -->
+            <div class="flex flex-col w-full gap-1">
+                <label for="debit-asset" class="label">Debit asset:</label>
+                <select id="debit-asset" name="debit_asset" class="input w-full">
+                    {% include "macros/asset-list.html" %}
+                </select>
+            </div>
+            <!-- Debit Amount -->
+            <div class="flex flex-col w-full gap-1">
+                <label for="debit-amount" class="label">Debit amount:</label>
+                <input id="debit-amount" name="debit_amount" class="input w-full" type="number"
+                    placeholder="Debit amount.." step="0.0001" required />
+            </div>
+            {% else %}
+            <!-- Asset -->
+            <div class="flex flex-col w-full gap-1">
+                <label for="asset" class="label">Asset:</label>
+                <select id="asset" name="asset" class="input w-full">
+                    {% include "macros/asset-list.html" %}
+                </select>
+            </div>
+            <!-- Amount -->
+            <div class="flex flex-col w-full gap-1">
+                <label for="amount" class="label">Amount:</label>
+                <input id="amount" name="amount" class="input w-full" type="number" placeholder="Amount.." step="0.0001"
+                    min="0" required />
+            </div>
+            {% endif %}
+            <!-- Multi-asset switch -->
+            {% if multi_asset %}
+            <span class="text-center col-span-1 md:col-span-2">
+                <a class="link text-sm"
+                    href="/new-transaction?new-credit={{new_credit}}&new-debit={{new_debit}}&multi-asset=false">
+                    Creating a single-asset transaction?
+                </a>
+            </span>
+            {% else %}
+            <span class="text-center col-span-1 md:col-span-2">
+                <a class="link text-sm"
+                    href="/new-transaction?new-credit={{new_credit}}&new-debit={{new_debit}}&multi-asset=true">
+                    Creating a multi-asset transaction?
+                </a>
+            </span>
+            {% endif %}
+            <!-- Date -->
+            <div class="flex flex-col w-full gap-1 col-span-1 md:col-span-2">
+                <label for="date" class="label">Date:</label>
+                <input id="date" name="date" class="input w-full" type="datetime-local" required />
+            </div>
+        </section>
+        <!-- actions -->
+        <section class="card flex justify-end gap-2">
+            <a href="/transactions" class="button-outline">Cancel</a>
+            <button class="button" type="submit">Create</button>
+        </section>
+        <input class="hidden" name="csrf" value="{{ csrf_token.id }}" />
+    </form>
+    {% endif %}
+    {% endif %}
+    {% endif %}
+    {% endif %}
+    {% endif %}
+</div>
+{% endblock %}
+
+<!-- macro to construct account options -->
+{% macro account_options %}
+<optgroup label="My accounts">
+    {% for account in own_accounts %}
+    <option value="{{account.id}}">{{account.name}}</option>
+    {% endfor %}
+</optgroup>
+<optgroup label="Other users">
+    {% for user in other_users %}
+    <option value="{{user.id}}">{{user.email}}</option>
+    {% endfor %}
+</optgroup>
+<optgroup label="Other accounts">
+    {% for account in other_accounts %}
+    <option value="{{account.id}}">{{account.name}}</option>
+    {% endfor %}
+</optgroup>
+{% endmacro %}

@@ -21,6 +21,9 @@ pub trait AccountOwnershipRepository: Sync + Send {
         account: String,
     ) -> Option<AccountOwnership>;
 
+    /// List all account ownerships
+    async fn list_account_ownerships(&self) -> Option<Vec<AccountOwnership>>;
+
     /// List all account ownerships for a user
     async fn list_account_ownerships_by_user(&self, user: &str) -> Option<Vec<AccountOwnership>>;
 
@@ -45,6 +48,16 @@ impl AccountOwnershipRepository for PgPool {
             .fetch_one(self)
             .await
             .ok()
+    }
+
+    #[tracing::instrument]
+    async fn list_account_ownerships(&self) -> Option<Vec<AccountOwnership>> {
+        sqlx::query_as::<_, AccountOwnership>(
+            "select id, usr, account from accounts_ownerships",
+        )
+        .fetch_all(self)
+        .await
+        .ok()
     }
 
     #[tracing::instrument]

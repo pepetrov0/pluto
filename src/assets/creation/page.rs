@@ -14,7 +14,7 @@ pub struct NewAssetQuery {
     pub error: Option<AssetCreationError>,
 }
 
-#[derive(Template, Debug)]
+#[derive(Template)]
 #[template(path = "assets/creation.html")]
 pub struct NewAssetPage {
     pub csrf_token: Option<CsrfToken>,

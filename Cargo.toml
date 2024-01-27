@@ -22,7 +22,6 @@ rust-embed = "8"
 serde_json = "1"
 tracing = "0"
 tracing-subscriber = "0"
-chrono = "0"
 
 [dependencies.tokio]
 version = "1"
@@ -51,6 +50,10 @@ features = ["fs", "trace", "compression-gzip", "compression-deflate", "compressi
 [dependencies.sqlx]
 version = "0"
 features = ["postgres", "runtime-tokio", "chrono"]
+
+[dependencies.chrono]
+version = "0"
+features = ["serde"]
 
 [dependencies.chrono-tz]
 version = "0"

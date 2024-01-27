@@ -34,7 +34,13 @@
         <span>{{ currency.ticker|upper }}</span>
         <!-- symbol -->
         <strong>Symbol:</strong>
-        <span>{{ currency.symbol }}</span>
+        <span>
+            {% if let Some(symbol) = currency.symbol %}
+            {{ symbol }}
+            {% else %}
+            N/A
+            {% endif %}
+        </span>
         <!-- number of decimals -->
         <strong>Number of decimals:</strong>
         <span>{{ currency.precision }}</span>

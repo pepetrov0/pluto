@@ -18,7 +18,7 @@ pub enum AssetType {
 pub struct Asset {
     pub id: String,
     pub ticker: String,
-    pub symbol: String,
+    pub symbol: Option<String>,
     pub label: String,
     pub precision: i16,
     pub atype: AssetType,
@@ -40,7 +40,7 @@ pub trait AssetRepository: Send + Sync {
     async fn create_asset(
         &self,
         ticker: String,
-        symbol: String,
+        symbol: Option<String>,
         label: String,
         precision: i16,
         atype: AssetType,
@@ -89,7 +89,7 @@ impl AssetRepository for PgPool {
     async fn create_asset(
         &self,
         ticker: String,
-        symbol: String,
+        symbol: Option<String>,
         label: String,
         precision: i16,
         atype: AssetType,
