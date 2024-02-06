@@ -39,12 +39,10 @@ impl AccountRepository for PgPool {
 
     #[tracing::instrument]
     async fn list_accounts(&self) -> Option<Vec<Account>> {
-        sqlx::query_as::<_, Account>(
-            "select id, name, default_asset from accounts order by name",
-        )
-        .fetch_all(self)
-        .await
-        .ok()
+        sqlx::query_as::<_, Account>("select id, name, default_asset from accounts order by name")
+            .fetch_all(self)
+            .await
+            .ok()
     }
 
     #[tracing::instrument]

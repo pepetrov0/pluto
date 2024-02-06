@@ -11,6 +11,8 @@ use crate::{
     csrf_tokens::CsrfToken, templates::HtmlTemplate, user::User, AppState,
 };
 
+use super::error::TransactionCreationError;
+
 #[derive(Deserialize, Default)]
 #[serde(rename_all = "kebab-case")]
 #[serde(default)]
@@ -18,6 +20,8 @@ pub struct NewTransactionQuery {
     pub new_credit: bool,
     pub new_debit: bool,
     pub multi_asset: bool,
+    #[serde(default)]
+    pub error: Option<TransactionCreationError>,
 }
 
 #[derive(Template, Default)]
@@ -31,6 +35,7 @@ pub struct NewTransactionPage {
     pub new_credit: bool,
     pub new_debit: bool,
     pub multi_asset: bool,
+    pub error: Option<TransactionCreationError>,
 }
 
 pub async fn handler(
@@ -104,6 +109,7 @@ pub async fn handler(
         new_credit: query.new_credit,
         new_debit: query.new_debit,
         multi_asset: query.multi_asset,
+        error: query.error,
     };
     Ok(HtmlTemplate(page))
 }

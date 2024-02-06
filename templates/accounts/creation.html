@@ -6,53 +6,53 @@
 
 {% block content %}
 <div class="flex flex-col gap-2 mx-auto w-full max-w-screen-md px-2 py-4">
-    <h1 class="heading-1">New account</h1>
-    <hr />
-    {% if assets.is_none() || csrf_token.is_none() %}
-    <section class="card bg-danger text-danger-contrast">
-        Something went wrong while loading this page. Please try again later.
+  <h1 class="heading-1">New account</h1>
+  <hr />
+  {% if assets.is_none() || csrf_token.is_none() %}
+  <section class="card bg-danger text-danger-contrast">
+    Something went wrong while loading this page. Please try again later.
+  </section>
+  {% endif %}
+  {% if let Some(csrf_token) = csrf_token %}
+  <form class="flex flex-col gap-2" method="POST" action="/new-account">
+    <!-- essential details -->
+    <section class="card grid grid-cols-1 md:grid-cols-2 grid-flow-row gap-4">
+      <!-- name -->
+      <div class="flex flex-col w-full gap-1">
+        <label for="name" class="label">Name:</label>
+        <input id="name" name="name" class="input w-full" type="text" placeholder="Name.." minlength="1" maxlength="200"
+          required />
+      </div>
+      <!-- default asset -->
+      <div class="flex flex-col w-full gap-1">
+        <label for="default-asset" class="label">Default asset:</label>
+        <select id="default-asset" name="default_asset" class="input w-full">
+          <option value="">-- None --</option>
+          {% if let Some(assets) = assets %}
+          {% include "macros/asset-list.html" %}
+          {% endif %}
+        </select>
+      </div>
     </section>
-    {% endif %}
-    {% if let Some(csrf_token) = csrf_token %}
-    <form class="flex flex-col gap-2" method="POST" action="/new-account">
-        <!-- essential details -->
-        <section class="card grid grid-cols-1 md:grid-cols-2 grid-flow-row gap-4">
-            <!-- name -->
-            <div class="flex flex-col w-full gap-1">
-                <label for="name" class="label">Name:</label>
-                <input id="name" name="name" class="input w-full" type="text" placeholder="Name.." minlength="1"
-                    maxlength="200" required />
-            </div>
-            <!-- default asset -->
-            <div class="flex flex-col w-full gap-1">
-                <label for="default-asset" class="label">Default asset:</label>
-                <select id="default-asset" name="default_asset" class="input w-full">
-                    <option value="">-- Please select a default asset --</option>
-                    {% if let Some(assets) = assets %}
-                    {% include "macros/asset-list.html" %}
-                    {% endif %}
-                </select>
-            </div>
-        </section>
-        <!-- actions -->
-        <section class="card flex justify-end gap-2">
-            <a href="/accounts" class="button-outline">Cancel</a>
-            <button class="button" type="submit">Create</button>
-        </section>
-        <input class="hidden" name="csrf" value="{{ csrf_token.id }}" />
-    </form>
-    {% endif %}
-    {% if let Some(error) = error %}
-    <section class="card bg-danger text-danger-contrast">
-        {% match error %}
-        {% when AccountCreationError::InvalidName %}
-        Name is invalid. Please enter 1-200 characters.
-        {% when AccountCreationError::InvalidCsrf %}
-        Seems like your session expired. Please try again later.
-        {% when AccountCreationError::Unknown %}
-        Something went wrong. Please try again later.
-        {% endmatch %}
+    <!-- actions -->
+    <section class="card flex justify-end gap-2">
+      <a href="/accounts" class="button-outline">Cancel</a>
+      <button class="button" type="submit">Create</button>
     </section>
-    {% endif %}
+    <input class="hidden" name="csrf" value="{{ csrf_token.id }}" />
+  </form>
+  {% endif %}
+  {% if let Some(error) = error %}
+  <section class="card bg-danger text-danger-contrast">
+    {% match error %}
+    {% when AccountCreationError::InvalidName %}
+    Name is invalid. Please enter 1-200 characters.
+    {% when AccountCreationError::InvalidCsrf %}
+    Seems like your session expired. Please try again later.
+    {% when AccountCreationError::Unknown %}
+    Something went wrong. Please try again later.
+    {% endmatch %}
+  </section>
+  {% endif %}
 </div>
 {% endblock %}

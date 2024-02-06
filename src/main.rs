@@ -58,7 +58,7 @@ async fn main() {
     );
 
     // initialize listener
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:8000").await.unwrap();
 
     // serve on listener
     axum::serve(listener, router)

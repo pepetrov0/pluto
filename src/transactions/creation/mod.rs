@@ -5,6 +5,7 @@ use axum::{routing, Router};
 use crate::AppState;
 
 mod api;
+mod error;
 mod page;
 
 pub(super) const CSRF_TOKEN_USAGE: &str = "new-transaction";

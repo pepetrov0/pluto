@@ -18,9 +18,7 @@ pub struct Entry {
 
 /// Represents an entry repository
 #[async_trait]
-pub trait EntryRepository: Send + Sync {
-}
+pub trait EntryRepository: Send + Sync {}
 
 #[async_trait]
-impl EntryRepository for PgPool {
-}
+impl EntryRepository for PgPool {}

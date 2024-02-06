@@ -52,12 +52,10 @@ impl AccountOwnershipRepository for PgPool {
 
     #[tracing::instrument]
     async fn list_account_ownerships(&self) -> Option<Vec<AccountOwnership>> {
-        sqlx::query_as::<_, AccountOwnership>(
-            "select id, usr, account from accounts_ownerships",
-        )
-        .fetch_all(self)
-        .await
-        .ok()
+        sqlx::query_as::<_, AccountOwnership>("select id, usr, account from accounts_ownerships")
+            .fetch_all(self)
+            .await
+            .ok()
     }
 
     #[tracing::instrument]
