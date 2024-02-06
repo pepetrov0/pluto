@@ -58,8 +58,8 @@ pub async fn handler(
 
     // check for a missing note
     if details.note.is_empty() || details.note.len() > 200 {
-      return Err(TransactionCreationError::InvalidNote);
-  }
+        return Err(TransactionCreationError::InvalidNote);
+    }
 
     // timezone and date
     let tz =
@@ -148,7 +148,6 @@ pub async fn handler(
     let credit_asset = details
         .credit_asset
         .or(details.asset.clone())
-        .or(credit_account.clone().and_then(|v| v.default_asset))
         .ok_or(TransactionCreationError::MissingCreditAsset)?;
     let debit_asset = details
         .debit_asset
@@ -188,7 +187,7 @@ pub async fn handler(
         Some(account) => account,
         None if details.create_credit_account => state
             .account_repository
-            .create_account(details.credit_account, None)
+            .create_account(details.credit_account)
             .await
             .ok_or(TransactionCreationError::Unknown)?,
         None => return Err(TransactionCreationError::Unknown),
@@ -197,7 +196,7 @@ pub async fn handler(
         Some(account) => account,
         None if details.create_debit_account => state
             .account_repository
-            .create_account(details.debit_account, None)
+            .create_account(details.debit_account)
             .await
             .ok_or(TransactionCreationError::Unknown)?,
         None => return Err(TransactionCreationError::Unknown),

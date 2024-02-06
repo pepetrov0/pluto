@@ -11,7 +11,6 @@ use super::error::AccountCreationError;
 #[derive(Debug, Clone, Deserialize)]
 pub struct NewAccountForm {
     pub name: String,
-    pub default_asset: Option<String>,
     pub csrf: String,
 }
 
@@ -22,10 +21,6 @@ pub async fn handler(
 ) -> Result<Redirect, AccountCreationError> {
     let details = NewAccountForm {
         name: details.name.trim().to_owned(),
-        default_asset: details
-            .default_asset
-            .map(|v| v.trim().to_owned())
-            .filter(|v| !v.is_empty()),
         csrf: details.csrf.trim().to_owned(),
     };
 
@@ -53,7 +48,7 @@ pub async fn handler(
     // create account and ownership
     let account = state
         .account_repository
-        .create_account(details.name, details.default_asset)
+        .create_account(details.name)
         .await
         .ok_or(AccountCreationError::Unknown)?;
     let _ = state

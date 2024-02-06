@@ -7,11 +7,11 @@ use axum::{
 };
 
 use crate::{
-    accounts::component::Account, assets::component::Asset, auth::principal::AuthPrincipal,
-    templates::HtmlTemplate, user::User, AppState,
+    accounts::component::Account, auth::principal::AuthPrincipal, templates::HtmlTemplate,
+    user::User, AppState,
 };
 
-type AccountBundle = (Account, Option<Asset>, Vec<User>);
+type AccountBundle = (Account, Vec<User>);
 
 #[derive(serde::Deserialize)]
 pub struct AccountsListQuery {
@@ -53,18 +53,6 @@ async fn handler(
         .await
         .ok_or_else(construct_error)?;
 
-    // fetch all assets
-    let assets = accounts_owned
-        .iter()
-        .cloned()
-        .filter_map(|v| v.default_asset)
-        .collect();
-    let assets = state
-        .asset_repository
-        .list_assets_by_ids(assets)
-        .await
-        .ok_or_else(construct_error)?;
-
     // fetch all ownerships
     let ownerships = accounts_owned.iter().cloned().map(|v| v.id).collect();
     let ownerships = state
@@ -85,18 +73,13 @@ async fn handler(
     let accounts_owned = accounts_owned
         .into_iter()
         .map(|v| {
-            let asset = match &v.default_asset {
-                Some(id) => assets.iter().find(|v| v.id == *id).cloned(),
-                None => None,
-            };
-
             let owners = ownerships
                 .iter()
                 .filter(|&o| o.account == v.id)
                 .flat_map(|v| users.iter().find(|&u| v.usr == u.id).cloned())
                 .collect();
 
-            (v, asset, owners)
+            (v, owners)
         })
         .collect();
 

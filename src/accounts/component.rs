@@ -8,14 +8,13 @@ use sqlx::{prelude::FromRow, PgPool};
 pub struct Account {
     pub id: String,
     pub name: String,
-    pub default_asset: Option<String>,
 }
 
 /// Represents an account repository
 #[async_trait]
 pub trait AccountRepository: Sync + Send {
     /// Creates an account
-    async fn create_account(&self, name: String, default_asset: Option<String>) -> Option<Account>;
+    async fn create_account(&self, name: String) -> Option<Account>;
 
     /// List all accounts
     async fn list_accounts(&self) -> Option<Vec<Account>>;
@@ -27,11 +26,10 @@ pub trait AccountRepository: Sync + Send {
 #[async_trait]
 impl AccountRepository for PgPool {
     #[tracing::instrument]
-    async fn create_account(&self, name: String, default_asset: Option<String>) -> Option<Account> {
-        sqlx::query_as::<_, Account>("insert into accounts (id, name, default_asset) values ($1, $2, $3) returning id, name, default_asset")
+    async fn create_account(&self, name: String) -> Option<Account> {
+        sqlx::query_as::<_, Account>("insert into accounts (id, name) values ($1, $2) returning id, name")
             .bind(nanoid::nanoid!())
             .bind(name)
-            .bind(default_asset)
             .fetch_one(self)
             .await
             .ok()
@@ -39,7 +37,7 @@ impl AccountRepository for PgPool {
 
     #[tracing::instrument]
     async fn list_accounts(&self) -> Option<Vec<Account>> {
-        sqlx::query_as::<_, Account>("select id, name, default_asset from accounts order by name")
+        sqlx::query_as::<_, Account>("select id, name from accounts order by name")
             .fetch_all(self)
             .await
             .ok()
@@ -52,7 +50,7 @@ impl AccountRepository for PgPool {
         }
 
         sqlx::query_as::<_, Account>(
-            "select id, name, default_asset from accounts where id = ANY($1) order by name",
+            "select id, name from accounts where id = ANY($1) order by name",
         )
         .bind(&ids[..])
         .fetch_all(self)

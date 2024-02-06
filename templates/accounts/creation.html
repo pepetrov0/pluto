@@ -18,20 +18,10 @@
     <!-- essential details -->
     <section class="card grid grid-cols-1 md:grid-cols-2 grid-flow-row gap-4">
       <!-- name -->
-      <div class="flex flex-col w-full gap-1">
+      <div class="flex flex-col w-full gap-1 md:col-span-2">
         <label for="name" class="label">Name:</label>
         <input id="name" name="name" class="input w-full" type="text" placeholder="Name.." minlength="1" maxlength="200"
           required />
-      </div>
-      <!-- default asset -->
-      <div class="flex flex-col w-full gap-1">
-        <label for="default-asset" class="label">Default asset:</label>
-        <select id="default-asset" name="default_asset" class="input w-full">
-          <option value="">-- None --</option>
-          {% if let Some(assets) = assets %}
-          {% include "macros/asset-list.html" %}
-          {% endif %}
-        </select>
       </div>
     </section>
     <!-- actions -->
