@@ -44,6 +44,6 @@ $$ language plpgsql;
 create
 or replace trigger cleanup_csrf_tokens
 after insert on csrf_tokens
-execute function cleanup_csrf_tokens_fn();
+execute function cleanup_csrf_tokens_fn ();
 
 commit;
