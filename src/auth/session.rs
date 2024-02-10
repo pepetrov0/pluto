@@ -1,10 +1,9 @@
 //! Implements a session component
 
 use axum::{async_trait, extract::FromRequestParts, http::request::Parts, Extension};
-use nanoid::nanoid;
-use sqlx::{prelude::FromRow, PgPool};
+use sqlx::{prelude::FromRow, Postgres};
 
-use crate::{imkvs::InMemoryKeyValueStore, AppState};
+use crate::{database::{AsReadonlyExecutor, AsWriteExecutor}, AppState};
 
 /// Represents a session
 #[derive(Debug, Clone, FromRow)]
@@ -15,76 +14,62 @@ pub struct Session {
     pub usr: String,
 }
 
-/// A session repository
+/// A session readonly repository
 #[async_trait]
-pub trait SessionRepository: Send + Sync {
-    /// Creates a session
-    async fn create_session(&self, user: String) -> Option<Session>;
-
+pub trait SessionReadonlyRepository {
     /// Finds a session
-    async fn find_session(&self, id: &str) -> Option<Session>;
+    async fn find_session(&mut self, id: &str) -> Option<Session>;
+}
+
+/// A session write repository
+#[async_trait]
+pub trait SessionWriteRepository {
+    /// Creates a session
+    async fn create_session(&mut self, user: String) -> Option<Session>;
 
     /// Deletes a session
-    async fn delete_session(&self, id: &str);
+    async fn delete_session(&mut self, id: &str);
 }
 
 #[async_trait]
-impl SessionRepository for InMemoryKeyValueStore<String, Session> {
+impl<T> SessionReadonlyRepository for T
+where
+    T: AsReadonlyExecutor<Postgres> + Send + std::fmt::Debug,
+{
     #[tracing::instrument]
-    async fn create_session(&self, user: String) -> Option<Session> {
-        let mut map = self.lock().await;
-        let session = Session {
-            id: nanoid!(),
-            usr: user,
-        };
-
-        map.insert(session.id.clone(), session.clone());
-        Some(session)
-    }
-
-    #[tracing::instrument]
-    async fn find_session(&self, id: &str) -> Option<Session> {
-        let map = self.lock().await;
-        map.get(id).cloned()
-    }
-
-    #[tracing::instrument]
-    async fn delete_session(&self, id: &str) {
-        let mut map = self.lock().await;
-        map.remove(id);
+    async fn find_session(&mut self, id: &str) -> Option<Session> {
+        sqlx::query_as::<_, Session>("select id, usr from sessions where id=$1")
+            .bind(id)
+            .fetch_one(self.as_executor())
+            .await
+            .map_err(|v| tracing::error!("{:#?}", v))
+            .ok()
     }
 }
 
 #[async_trait]
-impl SessionRepository for PgPool {
+impl<T> SessionWriteRepository for T
+where
+    T: AsWriteExecutor<Postgres> + Send + std::fmt::Debug,
+{
     #[tracing::instrument]
-    async fn create_session(&self, user: String) -> Option<Session> {
+    async fn create_session(&mut self, user: String) -> Option<Session> {
         sqlx::query_as::<_, Session>(
             "insert into sessions (id, usr) values ($1, $2) returning id, usr",
         )
         .bind(nanoid::nanoid!())
         .bind(user)
-        .fetch_one(self)
+        .fetch_one(self.as_executor())
         .await
         .map_err(|v| tracing::error!("{:#?}", v))
         .ok()
     }
 
     #[tracing::instrument]
-    async fn find_session(&self, id: &str) -> Option<Session> {
-        sqlx::query_as::<_, Session>("select id, usr from sessions where id=$1")
-            .bind(id)
-            .fetch_one(self)
-            .await
-            .map_err(|v| tracing::error!("{:#?}", v))
-            .ok()
-    }
-
-    #[tracing::instrument]
-    async fn delete_session(&self, id: &str) {
+    async fn delete_session(&mut self, id: &str) {
         let _ = sqlx::query("delete from sessions where id=$1")
             .bind(id)
-            .execute(self)
+            .execute(self.as_executor())
             .await
             .map_err(|v| tracing::error!("{:#?}", v));
     }

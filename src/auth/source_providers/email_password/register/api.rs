@@ -4,7 +4,11 @@ use axum::{extract::State, response::Redirect, Form};
 use chrono_tz::Tz;
 
 use crate::{
-    auth::{principal::NoAuthPrincipal, session_providers::cookie::SetCookieSession},
+    auth::{
+        principal::NoAuthPrincipal, session::SessionWriteRepository,
+        session_providers::cookie::SetCookieSession,
+    },
+    user::{UserReadonlyRepository, UserWriteRepository},
     validation, AppState,
 };
 
@@ -23,6 +27,12 @@ pub async fn handler(
     State(state): State<AppState>,
     Form(details): Form<RegisterForm>,
 ) -> Result<(SetCookieSession, Redirect), RegistrationError> {
+    let mut tx = state
+        .database
+        .begin()
+        .await
+        .map_err(|_| RegistrationError::Unknown)?;
+
     // trim details (email)
     let details = RegisterForm {
         email: details.email.trim().to_owned(),
@@ -45,12 +55,7 @@ pub async fn handler(
     }
 
     // check if email is already taken
-    if state
-        .user_repository
-        .find_user(&details.email)
-        .await
-        .is_some()
-    {
+    if tx.find_user(&details.email).await.is_some() {
         return Err(RegistrationError::EmailTaken);
     }
 
@@ -63,16 +68,17 @@ pub async fn handler(
     let timezone = Tz::from_str_insensitive(&details.timezone).unwrap_or_default();
 
     // attempt creating a user and a session
-    match state
-        .user_repository
+    let user = tx
         .create_user(details.email, Some(hash), timezone)
         .await
-    {
-        // create a session and redirect to /
-        Some(user) => match state.session_repository.create_session(user.id).await {
-            Some(session) => Ok((SetCookieSession(session), Redirect::to("/"))),
-            None => Err(RegistrationError::SessionCreationError),
-        },
-        None => Err(RegistrationError::Unknown),
-    }
+        .ok_or(RegistrationError::Unknown)?;
+
+    // create a session
+    let session = tx
+        .create_session(user.id)
+        .await
+        .ok_or(RegistrationError::Unknown)?;
+
+    tx.commit().await.map_err(|_| RegistrationError::Unknown)?;
+    Ok((SetCookieSession(session), Redirect::to("/")))
 }

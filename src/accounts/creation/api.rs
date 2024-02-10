@@ -1,10 +1,14 @@
 //! Implements the account creation API
 
 use axum::{extract::State, response::Redirect, Form};
-use chrono::Utc;
 use serde::Deserialize;
 
-use crate::{auth::principal::AuthPrincipal, csrf_tokens, AppState};
+use crate::{
+    accounts::{component::AccountWriteRepository, ownership::AccountOwnershipWriteRepository},
+    auth::principal::AuthPrincipal,
+    csrf_tokens::CsrfTokenRepository,
+    AppState,
+};
 
 use super::error::AccountCreationError;
 
@@ -24,17 +28,17 @@ pub async fn handler(
         csrf: details.csrf.trim().to_owned(),
     };
 
+    let mut tx = state
+        .database
+        .begin()
+        .await
+        .map_err(|_| AccountCreationError::Unknown)?;
+
     // check csrf
-    let csrf = state
-        .csrf_token_repository
-        .consume_csrf_token(details.csrf.as_str())
-        .await;
+    let csrf = tx.consume_csrf_token(details.csrf.as_str()).await;
     if csrf
-        .filter(|v| v.user == user.id)
+        .filter(|v| v.usr == user.id)
         .filter(|v| v.usage == super::CSRF_TOKEN_USAGE)
-        .filter(|v| {
-            (Utc::now().naive_utc() - v.created_at).num_seconds() < csrf_tokens::CSRF_TOKEN_LIFETIME
-        })
         .is_none()
     {
         return Err(AccountCreationError::InvalidCsrf);
@@ -46,16 +50,17 @@ pub async fn handler(
     }
 
     // create account and ownership
-    let account = state
-        .account_repository
+    let account = tx
         .create_account(details.name)
         .await
         .ok_or(AccountCreationError::Unknown)?;
-    let _ = state
-        .account_ownership_repository
+    let _ = tx
         .create_account_ownership(user.id, account.id)
         .await
         .ok_or(AccountCreationError::Unknown)?;
 
+    tx.commit()
+        .await
+        .map_err(|_| AccountCreationError::Unknown)?;
     Ok(Redirect::to("/accounts?created=true"))
 }

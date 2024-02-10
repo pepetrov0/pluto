@@ -1,15 +1,10 @@
 use std::sync::Arc;
 
-use accounts::{component::AccountRepository, ownership::AccountOwnershipRepository};
-use assets::component::AssetRepository;
-use auth::{password_hasher::PasswordHasher, session::SessionRepository};
+use auth::password_hasher::PasswordHasher;
 use axum::{extract::FromRef, middleware, Router};
 use axum_extra::extract::cookie::Key;
-use csrf_tokens::CsrfTokenRepository;
-use database::Pool;
+use sqlx::PgPool;
 use tower_http::trace::TraceLayer;
-use transactions::{component::TransactionRepository, entries::EntryRepository};
-use user::UserRepository;
 
 pub mod accounts;
 pub mod assets;
@@ -21,7 +16,6 @@ pub mod csrf_tokens;
 pub mod dashboard;
 pub mod database;
 pub mod healthcheck;
-pub mod imkvs;
 pub mod shutdown;
 pub mod static_files;
 pub mod templates;
@@ -38,16 +32,8 @@ pub const PAGE_SIZE_LIMITS: (i64, i64) = (10, 100);
 pub struct AppState {
     pub configuration: config::Configuration,
     pub cookie_jar_key: Key,
-    pub database: Arc<dyn Pool>,
+    pub database: PgPool,
     pub password_hasher: Arc<dyn PasswordHasher>,
-    pub csrf_token_repository: Arc<dyn CsrfTokenRepository>,
-    pub user_repository: Arc<dyn UserRepository>,
-    pub session_repository: Arc<dyn SessionRepository>,
-    pub asset_repository: Arc<dyn AssetRepository>,
-    pub account_repository: Arc<dyn AccountRepository>,
-    pub account_ownership_repository: Arc<dyn AccountOwnershipRepository>,
-    pub transaction_repository: Arc<dyn TransactionRepository>,
-    pub entry_repository: Arc<dyn EntryRepository>,
 }
 
 impl FromRef<AppState> for Key {

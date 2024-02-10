@@ -2,7 +2,9 @@
 
 use axum::async_trait;
 use chrono::NaiveDateTime;
-use sqlx::{prelude::FromRow, PgPool};
+use sqlx::{prelude::FromRow, Postgres};
+
+use crate::database::{AsReadonlyExecutor, AsWriteExecutor};
 
 /// Represents a transaction
 #[derive(Debug, Clone, FromRow)]
@@ -21,13 +23,28 @@ pub struct Transaction {
     pub debit_settled: bool,
 }
 
-// Represents a transaction repository
+// Represents a transaction readonly repository
 #[async_trait]
-pub trait TransactionRepository: Send + Sync {
+pub trait TransactionReadonlyRepository {
+    /// Count of transactions
+    async fn count_settled_transactions(&mut self, accounts: Vec<String>) -> Option<i64>;
+
+    /// List transactions by page
+    async fn list_settled_transactions(
+        &mut self,
+        page_offset: i64,
+        page_size: i64,
+        accounts: Vec<String>,
+    ) -> Option<Vec<Transaction>>;
+}
+
+// Represents a transaction write repository
+#[async_trait]
+pub trait TransactionWriteRepository {
     /// Creates a transaction
     #[allow(clippy::too_many_arguments)]
     async fn create_transaction(
-        &self,
+        &mut self,
         note: String,
         credit_account: String,
         debit_account: String,
@@ -40,24 +57,58 @@ pub trait TransactionRepository: Send + Sync {
         credit_settled: bool,
         debit_settled: bool,
     ) -> Option<Transaction>;
-
-    /// Count of transactions
-    async fn count_settled_transactions(&self, accounts: Vec<String>) -> Option<i64>;
-
-    /// List transactions by page
-    async fn list_settled_transactions(
-        &self,
-        page_offset: i64,
-        page_size: i64,
-        accounts: Vec<String>,
-    ) -> Option<Vec<Transaction>>;
 }
 
 #[async_trait]
-impl TransactionRepository for PgPool {
+impl<T> TransactionReadonlyRepository for T
+where
+    T: AsReadonlyExecutor<Postgres> + Send + std::fmt::Debug,
+{
+    #[tracing::instrument]
+    async fn count_settled_transactions(&mut self, accounts: Vec<String>) -> Option<i64> {
+        if accounts.is_empty() {
+            return Some(0);
+        }
+
+        sqlx::query_as::<_, (i64,)>(include_str!("sql/count-settled.pg.sql"))
+            .bind(&accounts[..])
+            .fetch_one(self.as_executor())
+            .await
+            .map_err(|v| tracing::error!("{:#?}", v))
+            .ok()
+            .map(|(v,)| v)
+    }
+
+    #[tracing::instrument]
+    async fn list_settled_transactions(
+        &mut self,
+        page_offset: i64,
+        page_size: i64,
+        accounts: Vec<String>,
+    ) -> Option<Vec<Transaction>> {
+        if accounts.is_empty() {
+            return Some(vec![]);
+        }
+
+        sqlx::query_as::<_, Transaction>(include_str!("sql/list-settled.pg.sql"))
+            .bind(page_offset)
+            .bind(page_size)
+            .bind(&accounts[..])
+            .fetch_all(self.as_executor())
+            .await
+            .map_err(|v| tracing::error!("{:#?}", v))
+            .ok()
+    }
+}
+
+#[async_trait]
+impl<T> TransactionWriteRepository for T
+where
+    T: AsWriteExecutor<Postgres> + Send + std::fmt::Debug,
+{
     #[tracing::instrument]
     async fn create_transaction(
-        &self,
+        &mut self,
         note: String,
         credit_account: String,
         debit_account: String,
@@ -83,43 +134,7 @@ impl TransactionRepository for PgPool {
             .bind(debit_amount)
             .bind(credit_settled)
             .bind(debit_settled)
-            .fetch_one(self)
-            .await
-            .map_err(|v| tracing::error!("{:#?}", v))
-            .ok()
-    }
-
-    #[tracing::instrument]
-    async fn count_settled_transactions(&self, accounts: Vec<String>) -> Option<i64> {
-        if accounts.is_empty() {
-            return Some(0);
-        }
-
-        sqlx::query_as::<_, (i64,)>(include_str!("sql/count-settled.pg.sql"))
-            .bind(&accounts[..])
-            .fetch_one(self)
-            .await
-            .map_err(|v| tracing::error!("{:#?}", v))
-            .ok()
-            .map(|(v,)| v)
-    }
-
-    #[tracing::instrument]
-    async fn list_settled_transactions(
-        &self,
-        page_offset: i64,
-        page_size: i64,
-        accounts: Vec<String>,
-    ) -> Option<Vec<Transaction>> {
-        if accounts.is_empty() {
-            return Some(vec![]);
-        }
-
-        sqlx::query_as::<_, Transaction>(include_str!("sql/list-settled.pg.sql"))
-            .bind(page_offset)
-            .bind(page_size)
-            .bind(&accounts[..])
-            .fetch_all(self)
+            .fetch_one(self.as_executor())
             .await
             .map_err(|v| tracing::error!("{:#?}", v))
             .ok()

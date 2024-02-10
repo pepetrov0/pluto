@@ -9,8 +9,16 @@ use chrono_tz::Tz;
 use serde::Deserialize;
 
 use crate::{
-    accounts::component::Account, assets::component::Asset, auth::principal::AuthPrincipal,
-    csrf_tokens::CsrfToken, templates::HtmlTemplate, user::User, AppState, DATE_TIME_FORMAT,
+    accounts::{
+        component::{Account, AccountReadonlyRepository},
+        ownership::AccountOwnershipReadonlyRepository,
+    },
+    assets::component::{Asset, AssetReadonlyRepository},
+    auth::principal::AuthPrincipal,
+    csrf_tokens::{CsrfToken, CsrfTokenRepository},
+    templates::HtmlTemplate,
+    user::{User, UserReadonlyRepository},
+    AppState, DATE_TIME_FORMAT,
 };
 
 use super::error::TransactionCreationError;
@@ -48,10 +56,15 @@ pub async fn handler(
 ) -> Result<HtmlTemplate<NewTransactionPage>, HtmlTemplate<NewTransactionPage>> {
     let construct_error = || HtmlTemplate(NewTransactionPage::default());
 
+    let mut tx = state
+        .database
+        .begin()
+        .await
+        .map_err(|_| construct_error())?;
+
     // create csrf token
-    let csrf_token = state
-        .csrf_token_repository
-        .create_csrf_token(user.id.clone(), super::CSRF_TOKEN_USAGE)
+    let csrf_token = tx
+        .create_csrf_token(&user.id, super::CSRF_TOKEN_USAGE)
         .await;
 
     // current timestamp
@@ -62,15 +75,10 @@ pub async fn handler(
         .unwrap_or_default();
 
     // accounts
-    let accounts = state
-        .account_repository
-        .list_accounts()
-        .await
-        .ok_or_else(construct_error)?;
+    let accounts = tx.list_accounts().await.ok_or_else(construct_error)?;
 
     // accounts ownerships
-    let ownerships = state
-        .account_ownership_repository
+    let ownerships = tx
         .list_account_ownerships()
         .await
         .ok_or_else(construct_error)?;
@@ -96,8 +104,7 @@ pub async fn handler(
         .collect();
 
     // other users
-    let other_users = state
-        .user_repository
+    let other_users = tx
         .list_users()
         .await
         .ok_or_else(construct_error)?
@@ -106,12 +113,9 @@ pub async fn handler(
         .collect();
 
     // assets
-    let assets = state
-        .asset_repository
-        .list_assets()
-        .await
-        .ok_or_else(construct_error)?;
+    let assets = tx.list_assets().await.ok_or_else(construct_error)?;
 
+    tx.commit().await.map_err(|_| construct_error())?;
     let page = NewTransactionPage {
         csrf_token,
         own_accounts: Some(own_accounts),

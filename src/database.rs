@@ -2,15 +2,31 @@
 
 use std::time::Duration;
 
-use sqlx::{postgres::PgPoolOptions, PgPool};
+use sqlx::{postgres::PgPoolOptions, Executor, PgPool, Postgres, Transaction};
 
 use crate::config::Configuration;
 
-/// A database connection pool
-pub trait Pool: Send + Sync {
-    fn is_open(&self) -> bool;
-    fn size(&self) -> u32;
-    fn num_idle(&self) -> u32;
+pub trait AsExecutor<DB: sqlx::Database> {
+    fn as_executor(&mut self) -> impl Executor<'_, Database = DB>;
+}
+
+pub trait AsReadonlyExecutor<DB: sqlx::Database>: AsExecutor<DB> {}
+
+pub trait AsWriteExecutor<DB: sqlx::Database>: AsReadonlyExecutor<DB> {}
+
+impl AsReadonlyExecutor<Postgres> for Transaction<'static, Postgres> {}
+impl AsWriteExecutor<Postgres> for Transaction<'static, Postgres> {}
+impl AsExecutor<Postgres> for Transaction<'static, Postgres> {
+    fn as_executor(&mut self) -> impl Executor<'_, Database = Postgres> {
+        &mut **self
+    }
+}
+
+impl AsReadonlyExecutor<Postgres> for PgPool {}
+impl AsExecutor<Postgres> for PgPool {
+    fn as_executor(&mut self) -> impl Executor<'_, Database = Postgres> {
+        &*self
+    }
 }
 
 /// Connects to a postgres database
@@ -27,18 +43,4 @@ pub async fn connect_to_postgres(cfg: &Configuration) -> Result<PgPool, sqlx::Er
     sqlx::migrate!().run(&pool).await?;
 
     Ok(pool)
-}
-
-impl Pool for PgPool {
-    fn is_open(&self) -> bool {
-        !self.is_closed()
-    }
-
-    fn size(&self) -> u32 {
-        self.size()
-    }
-
-    fn num_idle(&self) -> u32 {
-        self.num_idle() as u32
-    }
 }

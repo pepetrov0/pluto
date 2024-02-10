@@ -1,10 +1,14 @@
 //! Implements asset creation API
 
 use axum::{extract::State, response::Redirect, Form};
-use chrono::Utc;
 use serde::Deserialize;
 
-use crate::{assets::component::AssetType, auth::principal::AuthPrincipal, csrf_tokens, AppState};
+use crate::{
+    assets::component::{AssetReadonlyRepository, AssetType, AssetWriteRepository},
+    auth::principal::AuthPrincipal,
+    csrf_tokens::CsrfTokenRepository,
+    AppState,
+};
 
 use super::error::AssetCreationError;
 
@@ -23,6 +27,12 @@ pub async fn handler(
     State(state): State<AppState>,
     Form(details): Form<NewAssetForm>,
 ) -> Result<Redirect, AssetCreationError> {
+    let mut tx = state
+        .database
+        .begin()
+        .await
+        .map_err(|_| AssetCreationError::Unknown)?;
+
     let details = NewAssetForm {
         label: details.label.trim().to_owned(),
         ticker: details.ticker.trim().to_lowercase().to_owned(),
@@ -36,16 +46,10 @@ pub async fn handler(
     };
 
     // check csrf
-    let csrf = state
-        .csrf_token_repository
-        .consume_csrf_token(details.csrf.as_str())
-        .await;
+    let csrf = tx.consume_csrf_token(details.csrf.as_str()).await;
     if csrf
-        .filter(|v| v.user == user.id)
+        .filter(|v| v.usr == user.id)
         .filter(|v| v.usage == super::CSRF_TOKEN_USAGE)
-        .filter(|v| {
-            (Utc::now().naive_utc() - v.created_at).num_seconds() < csrf_tokens::CSRF_TOKEN_LIFETIME
-        })
         .is_none()
     {
         return Err(AssetCreationError::InvalidCsrf);
@@ -73,26 +77,20 @@ pub async fn handler(
         return Err(AssetCreationError::InvalidPrecision);
     }
 
-    if state
-        .asset_repository
-        .find_asset_by_ticker(&details.ticker)
-        .await
-        .is_some()
-    {
+    if tx.find_asset_by_ticker(&details.ticker).await.is_some() {
         return Err(AssetCreationError::AlreadyExists);
     }
 
-    state
-        .asset_repository
-        .create_asset(
-            details.ticker,
-            details.symbol,
-            details.label,
-            details.precision,
-            details.atype,
-        )
-        .await
-        .ok_or(AssetCreationError::Unknown)?;
+    tx.create_asset(
+        details.ticker,
+        details.symbol,
+        details.label,
+        details.precision,
+        details.atype,
+    )
+    .await
+    .ok_or(AssetCreationError::Unknown)?;
 
+    tx.commit().await.map_err(|_| AssetCreationError::Unknown)?;
     Ok(Redirect::to("/assets?created=true"))
 }

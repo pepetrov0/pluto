@@ -5,7 +5,17 @@ use chrono::{NaiveDateTime, TimeZone};
 use chrono_tz::Tz;
 use serde::Deserialize;
 
-use crate::{auth::principal::AuthPrincipal, AppState, DATE_TIME_FORMAT};
+use crate::{
+    accounts::{
+        component::{AccountReadonlyRepository, AccountWriteRepository},
+        ownership::AccountOwnershipReadonlyRepository,
+    },
+    assets::component::AssetReadonlyRepository,
+    auth::principal::AuthPrincipal,
+    csrf_tokens::CsrfTokenRepository,
+    transactions::component::TransactionWriteRepository,
+    AppState, DATE_TIME_FORMAT,
+};
 
 use super::error::TransactionCreationError;
 
@@ -25,6 +35,7 @@ pub struct NewTransactionForm {
     pub credit_amount: Option<f64>,
     pub debit_amount: Option<f64>,
     pub timestamp: String,
+    pub csrf: String,
 }
 
 pub async fn handler(
@@ -54,7 +65,24 @@ pub async fn handler(
         credit_amount: details.credit_amount,
         debit_amount: details.debit_amount,
         timestamp: details.timestamp,
+        csrf: details.csrf.trim().to_owned(),
     };
+
+    let mut tx = state
+        .database
+        .begin()
+        .await
+        .map_err(|_| TransactionCreationError::Unknown)?;
+
+    // check csrf
+    let csrf = tx.consume_csrf_token(details.csrf.as_str()).await;
+    if csrf
+        .filter(|v| v.usr == user.id)
+        .filter(|v| v.usage == super::CSRF_TOKEN_USAGE)
+        .is_none()
+    {
+        return Err(TransactionCreationError::InvalidCsrf);
+    }
 
     // check for a missing note
     if details.note.is_empty() || details.note.len() > 200 {
@@ -73,8 +101,7 @@ pub async fn handler(
         .naive_utc();
 
     // account ownerships
-    let ownerships = state
-        .account_ownership_repository
+    let ownerships = tx
         .list_account_ownerships_by_accounts(vec![
             details.debit_account.clone(),
             details.credit_account.clone(),
@@ -114,8 +141,7 @@ pub async fn handler(
     }
 
     // accounts
-    let accounts = state
-        .account_repository
+    let accounts = tx
         .list_accounts_by_ids(vec![
             details.debit_account.clone(),
             details.credit_account.clone(),
@@ -154,8 +180,7 @@ pub async fn handler(
         .or(details.asset)
         .or(Some(credit_asset.clone()))
         .ok_or(TransactionCreationError::MissingDebitAsset)?;
-    let assets = state
-        .asset_repository
+    let assets = tx
         .list_assets_by_ids(vec![credit_asset.clone(), debit_asset.clone()])
         .await
         .ok_or(TransactionCreationError::Unknown)?;
@@ -193,8 +218,7 @@ pub async fn handler(
     // account creation
     let credit_account = match credit_account {
         Some(account) => account,
-        None if details.create_credit_account => state
-            .account_repository
+        None if details.create_credit_account => tx
             .create_account(details.credit_account)
             .await
             .ok_or(TransactionCreationError::Unknown)?,
@@ -202,16 +226,14 @@ pub async fn handler(
     };
     let debit_account = match debit_account {
         Some(account) => account,
-        None if details.create_debit_account => state
-            .account_repository
+        None if details.create_debit_account => tx
             .create_account(details.debit_account)
             .await
             .ok_or(TransactionCreationError::Unknown)?,
         None => return Err(TransactionCreationError::MissingDebitAccount),
     };
 
-    state
-        .transaction_repository
+    let response = tx
         .create_transaction(
             details.note,
             credit_account.id,
@@ -227,5 +249,10 @@ pub async fn handler(
         )
         .await
         .map(|_| Redirect::to("/transactions?created=true"))
-        .ok_or(TransactionCreationError::Unknown)
+        .ok_or(TransactionCreationError::Unknown)?;
+
+    tx.commit()
+        .await
+        .map_err(|_| TransactionCreationError::Unknown)?;
+    Ok(response)
 }
