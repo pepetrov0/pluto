@@ -1,10 +1,14 @@
 //! Implements asset creation API
 
 use axum::{extract::State, response::Redirect, Form};
-use chrono::Utc;
 use serde::Deserialize;
 
-use crate::{assets::component::AssetType, auth::principal::AuthPrincipal, csrf_tokens, AppState};
+use crate::{
+    assets::component::{AssetRepository, AssetType},
+    auth::principal::AuthPrincipal,
+    csrf_tokens::CsrfTokenRepository,
+    AppState,
+};
 
 use super::error::AssetCreationError;
 
@@ -20,7 +24,7 @@ pub struct NewAssetForm {
 
 pub async fn handler(
     AuthPrincipal(user): AuthPrincipal,
-    State(state): State<AppState>,
+    State(mut state): State<AppState>,
     Form(details): Form<NewAssetForm>,
 ) -> Result<Redirect, AssetCreationError> {
     let details = NewAssetForm {
@@ -37,15 +41,12 @@ pub async fn handler(
 
     // check csrf
     let csrf = state
-        .csrf_token_repository
+        .database
         .consume_csrf_token(details.csrf.as_str())
         .await;
     if csrf
-        .filter(|v| v.user == user.id)
+        .filter(|v| v.usr == user.id)
         .filter(|v| v.usage == super::CSRF_TOKEN_USAGE)
-        .filter(|v| {
-            (Utc::now().naive_utc() - v.created_at).num_seconds() < csrf_tokens::CSRF_TOKEN_LIFETIME
-        })
         .is_none()
     {
         return Err(AssetCreationError::InvalidCsrf);
@@ -74,7 +75,7 @@ pub async fn handler(
     }
 
     if state
-        .asset_repository
+        .database
         .find_asset_by_ticker(&details.ticker)
         .await
         .is_some()
@@ -83,7 +84,7 @@ pub async fn handler(
     }
 
     state
-        .asset_repository
+        .database
         .create_asset(
             details.ticker,
             details.symbol,

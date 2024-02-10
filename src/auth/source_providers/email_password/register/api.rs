@@ -4,8 +4,7 @@ use axum::{extract::State, response::Redirect, Form};
 use chrono_tz::Tz;
 
 use crate::{
-    auth::{principal::NoAuthPrincipal, session_providers::cookie::SetCookieSession},
-    validation, AppState,
+    auth::{principal::NoAuthPrincipal, session::SessionRepository, session_providers::cookie::SetCookieSession}, user::UserRepository, validation, AppState
 };
 
 use super::error::RegistrationError;
@@ -20,7 +19,7 @@ pub struct RegisterForm {
 
 pub async fn handler(
     _: NoAuthPrincipal,
-    State(state): State<AppState>,
+    State(mut state): State<AppState>,
     Form(details): Form<RegisterForm>,
 ) -> Result<(SetCookieSession, Redirect), RegistrationError> {
     // trim details (email)
@@ -46,7 +45,7 @@ pub async fn handler(
 
     // check if email is already taken
     if state
-        .user_repository
+        .database
         .find_user(&details.email)
         .await
         .is_some()
@@ -64,12 +63,12 @@ pub async fn handler(
 
     // attempt creating a user and a session
     match state
-        .user_repository
+        .database
         .create_user(details.email, Some(hash), timezone)
         .await
     {
         // create a session and redirect to /
-        Some(user) => match state.session_repository.create_session(user.id).await {
+        Some(user) => match state.database.create_session(user.id).await {
             Some(session) => Ok((SetCookieSession(session), Redirect::to("/"))),
             None => Err(RegistrationError::SessionCreationError),
         },

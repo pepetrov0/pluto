@@ -1,63 +1,54 @@
 //! Implements CSRF tokens
 
 use axum::async_trait;
-use chrono::{NaiveDateTime, Utc};
+use sqlx::{prelude::FromRow, Postgres};
 
-use crate::imkvs::InMemoryKeyValueStore;
-
-pub const CSRF_TOKEN_LIFETIME: i64 = 1800; // in seconds
+use crate::database::AsExecutor;
 
 /// Represents a CSRF token
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, FromRow)]
 pub struct CsrfToken {
     pub id: String,
-    pub user: String,
+    pub usr: String,
     pub usage: String,
-    pub created_at: NaiveDateTime,
 }
 
 /// Represents a CSRF token repository
 #[async_trait]
-pub trait CsrfTokenRepository: Send + Sync {
+pub trait CsrfTokenRepository {
     /// Find and remove a CSRF token
-    async fn consume_csrf_token(&self, id: &str) -> Option<CsrfToken>;
+    async fn consume_csrf_token(&mut self, id: &str) -> Option<CsrfToken>;
 
     /// Create a CSRF token
-    async fn create_csrf_token(&self, user: String, usage: &str) -> Option<CsrfToken>;
+    async fn create_csrf_token(&mut self, user: &str, usage: &str) -> Option<CsrfToken>;
 }
 
 #[async_trait]
-impl CsrfTokenRepository for InMemoryKeyValueStore<String, CsrfToken> {
-    #[tracing::instrument]
-    async fn consume_csrf_token(&self, id: &str) -> Option<CsrfToken> {
-        let mut map = self.lock().await;
-        let now = Utc::now().naive_utc();
-
-        // cleanup expired tokens
-        map.retain(|_, v| (now - v.created_at).num_seconds() < CSRF_TOKEN_LIFETIME);
-
-        map.remove(id)
+impl<T> CsrfTokenRepository for T
+where
+    T: AsExecutor<Postgres> + Send + std::fmt::Debug,
+{
+    /// Find and remove a CSRF token
+    async fn consume_csrf_token(&mut self, id: &str) -> Option<CsrfToken> {
+        sqlx::query_as::<_, CsrfToken>(
+            "delete from valid_csrf_tokens where id=$1 returning id, usr, usage",
+        )
+        .bind(id)
+        .fetch_one(self.as_executor())
+        .await
+        .ok()
     }
 
-    #[tracing::instrument]
-    async fn create_csrf_token(&self, user: String, usage: &str) -> Option<CsrfToken> {
-        let mut map = self.lock().await;
-        let now = Utc::now().naive_utc();
-
-        // cleanup expired tokens
-        map.retain(|_, v| (now - v.created_at).num_seconds() < CSRF_TOKEN_LIFETIME);
-
-        // construct a new csrf token
-        let token = CsrfToken {
-            id: nanoid::nanoid!(),
-            user,
-            usage: usage.to_owned(),
-            created_at: now,
-        };
-
-        // save the new token
-        map.insert(token.id.clone(), token.clone());
-
-        Some(token)
+    /// Create a CSRF token
+    async fn create_csrf_token(&mut self, user: &str, usage: &str) -> Option<CsrfToken> {
+        sqlx::query_as::<_, CsrfToken>(
+            "insert into csrf_tokens (id, usr, usage) values ($1, $2, $3) returning id, usr, usage",
+        )
+        .bind(nanoid::nanoid!())
+        .bind(user)
+        .bind(usage)
+        .fetch_one(self.as_executor())
+        .await
+        .ok()
     }
 }

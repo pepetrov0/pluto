@@ -1,8 +1,5 @@
 begin;
 
--- enable pgcrypt
-create extension if not exists pgcrypto;
-
 -- create users table
 create table if not exists
     users (

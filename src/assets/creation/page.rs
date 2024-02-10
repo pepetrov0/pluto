@@ -4,7 +4,7 @@ use askama::Template;
 use axum::extract::{Query, State};
 
 use crate::{
-    auth::principal::AuthPrincipal, csrf_tokens::CsrfToken, templates::HtmlTemplate, AppState,
+    auth::principal::AuthPrincipal, csrf_tokens::{CsrfToken, CsrfTokenRepository}, templates::HtmlTemplate, AppState,
 };
 
 use super::error::AssetCreationError;
@@ -24,12 +24,12 @@ pub struct NewAssetPage {
 pub async fn handler(
     AuthPrincipal(user): AuthPrincipal,
     Query(query): Query<NewAssetQuery>,
-    State(state): State<AppState>,
+    State(mut state): State<AppState>,
 ) -> HtmlTemplate<NewAssetPage> {
     // create csrf token
     let csrf_token = state
-        .csrf_token_repository
-        .create_csrf_token(user.id.clone(), super::CSRF_TOKEN_USAGE)
+        .database
+        .create_csrf_token(&user.id, super::CSRF_TOKEN_USAGE)
         .await;
 
     HtmlTemplate(NewAssetPage {

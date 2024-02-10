@@ -9,8 +9,16 @@ use chrono_tz::Tz;
 use serde::Deserialize;
 
 use crate::{
-    accounts::component::Account, assets::component::Asset, auth::principal::AuthPrincipal,
-    csrf_tokens::CsrfToken, templates::HtmlTemplate, user::User, AppState, DATE_TIME_FORMAT,
+    accounts::{
+        component::{Account, AccountRepository},
+        ownership::AccountOwnershipRepository,
+    },
+    assets::component::{Asset, AssetRepository},
+    auth::principal::AuthPrincipal,
+    csrf_tokens::{CsrfToken, CsrfTokenRepository},
+    templates::HtmlTemplate,
+    user::{User, UserRepository},
+    AppState, DATE_TIME_FORMAT,
 };
 
 use super::error::TransactionCreationError;
@@ -44,14 +52,14 @@ pub struct NewTransactionPage {
 pub async fn handler(
     AuthPrincipal(user): AuthPrincipal,
     Query(query): Query<NewTransactionQuery>,
-    State(state): State<AppState>,
+    State(mut state): State<AppState>,
 ) -> Result<HtmlTemplate<NewTransactionPage>, HtmlTemplate<NewTransactionPage>> {
     let construct_error = || HtmlTemplate(NewTransactionPage::default());
 
     // create csrf token
     let csrf_token = state
-        .csrf_token_repository
-        .create_csrf_token(user.id.clone(), super::CSRF_TOKEN_USAGE)
+        .database
+        .create_csrf_token(&user.id, super::CSRF_TOKEN_USAGE)
         .await;
 
     // current timestamp
@@ -63,14 +71,14 @@ pub async fn handler(
 
     // accounts
     let accounts = state
-        .account_repository
+        .database
         .list_accounts()
         .await
         .ok_or_else(construct_error)?;
 
     // accounts ownerships
     let ownerships = state
-        .account_ownership_repository
+        .database
         .list_account_ownerships()
         .await
         .ok_or_else(construct_error)?;
@@ -97,7 +105,7 @@ pub async fn handler(
 
     // other users
     let other_users = state
-        .user_repository
+        .database
         .list_users()
         .await
         .ok_or_else(construct_error)?
@@ -107,7 +115,7 @@ pub async fn handler(
 
     // assets
     let assets = state
-        .asset_repository
+        .database
         .list_assets()
         .await
         .ok_or_else(construct_error)?;

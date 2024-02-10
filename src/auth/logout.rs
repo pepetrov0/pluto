@@ -4,14 +4,17 @@ use axum::{extract::State, response::Redirect, routing, Router};
 
 use crate::AppState;
 
-use super::{session::Session, session_providers::cookie::RemoveCookieSession};
+use super::{
+    session::{Session, SessionRepository},
+    session_providers::cookie::RemoveCookieSession,
+};
 
 async fn handler(
-    State(state): State<AppState>,
+    State(mut state): State<AppState>,
     session: Option<Session>,
 ) -> (RemoveCookieSession, Redirect) {
     if let Some(session) = session {
-        state.session_repository.delete_session(&session.id).await;
+        state.database.delete_session(&session.id).await;
     }
 
     (RemoveCookieSession, Redirect::to("/"))

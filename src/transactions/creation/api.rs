@@ -5,7 +5,7 @@ use chrono::{NaiveDateTime, TimeZone};
 use chrono_tz::Tz;
 use serde::Deserialize;
 
-use crate::{auth::principal::AuthPrincipal, AppState, DATE_TIME_FORMAT};
+use crate::{accounts::{component::AccountRepository, ownership::AccountOwnershipRepository}, assets::component::AssetRepository, auth::principal::AuthPrincipal, transactions::component::TransactionRepository, AppState, DATE_TIME_FORMAT};
 
 use super::error::TransactionCreationError;
 
@@ -29,7 +29,7 @@ pub struct NewTransactionForm {
 
 pub async fn handler(
     AuthPrincipal(user): AuthPrincipal,
-    State(state): State<AppState>,
+    State(mut state): State<AppState>,
     Form(details): Form<NewTransactionForm>,
 ) -> Result<Redirect, TransactionCreationError> {
     let details = NewTransactionForm {
@@ -74,7 +74,7 @@ pub async fn handler(
 
     // account ownerships
     let ownerships = state
-        .account_ownership_repository
+        .database
         .list_account_ownerships_by_accounts(vec![
             details.debit_account.clone(),
             details.credit_account.clone(),
@@ -115,7 +115,7 @@ pub async fn handler(
 
     // accounts
     let accounts = state
-        .account_repository
+        .database
         .list_accounts_by_ids(vec![
             details.debit_account.clone(),
             details.credit_account.clone(),
@@ -155,7 +155,7 @@ pub async fn handler(
         .or(Some(credit_asset.clone()))
         .ok_or(TransactionCreationError::MissingDebitAsset)?;
     let assets = state
-        .asset_repository
+        .database
         .list_assets_by_ids(vec![credit_asset.clone(), debit_asset.clone()])
         .await
         .ok_or(TransactionCreationError::Unknown)?;
@@ -194,7 +194,7 @@ pub async fn handler(
     let credit_account = match credit_account {
         Some(account) => account,
         None if details.create_credit_account => state
-            .account_repository
+            .database
             .create_account(details.credit_account)
             .await
             .ok_or(TransactionCreationError::Unknown)?,
@@ -203,7 +203,7 @@ pub async fn handler(
     let debit_account = match debit_account {
         Some(account) => account,
         None if details.create_debit_account => state
-            .account_repository
+            .database
             .create_account(details.debit_account)
             .await
             .ok_or(TransactionCreationError::Unknown)?,
@@ -211,7 +211,7 @@ pub async fn handler(
     };
 
     state
-        .transaction_repository
+        .database
         .create_transaction(
             details.note,
             credit_account.id,

@@ -1,10 +1,9 @@
 //! Implements a session component
 
 use axum::{async_trait, extract::FromRequestParts, http::request::Parts, Extension};
-use nanoid::nanoid;
-use sqlx::{prelude::FromRow, PgPool};
+use sqlx::{prelude::FromRow, Postgres};
 
-use crate::{imkvs::InMemoryKeyValueStore, AppState};
+use crate::{database::AsExecutor, AppState};
 
 /// Represents a session
 #[derive(Debug, Clone, FromRow)]
@@ -17,74 +16,50 @@ pub struct Session {
 
 /// A session repository
 #[async_trait]
-pub trait SessionRepository: Send + Sync {
+pub trait SessionRepository {
     /// Creates a session
-    async fn create_session(&self, user: String) -> Option<Session>;
+    async fn create_session(&mut self, user: String) -> Option<Session>;
 
     /// Finds a session
-    async fn find_session(&self, id: &str) -> Option<Session>;
+    async fn find_session(&mut self, id: &str) -> Option<Session>;
 
     /// Deletes a session
-    async fn delete_session(&self, id: &str);
+    async fn delete_session(&mut self, id: &str);
 }
 
 #[async_trait]
-impl SessionRepository for InMemoryKeyValueStore<String, Session> {
+impl<T> SessionRepository for T
+where
+    T: AsExecutor<Postgres> + Send + std::fmt::Debug,
+{
     #[tracing::instrument]
-    async fn create_session(&self, user: String) -> Option<Session> {
-        let mut map = self.lock().await;
-        let session = Session {
-            id: nanoid!(),
-            usr: user,
-        };
-
-        map.insert(session.id.clone(), session.clone());
-        Some(session)
-    }
-
-    #[tracing::instrument]
-    async fn find_session(&self, id: &str) -> Option<Session> {
-        let map = self.lock().await;
-        map.get(id).cloned()
-    }
-
-    #[tracing::instrument]
-    async fn delete_session(&self, id: &str) {
-        let mut map = self.lock().await;
-        map.remove(id);
-    }
-}
-
-#[async_trait]
-impl SessionRepository for PgPool {
-    #[tracing::instrument]
-    async fn create_session(&self, user: String) -> Option<Session> {
+    async fn create_session(&mut self, user: String) -> Option<Session> {
         sqlx::query_as::<_, Session>(
             "insert into sessions (id, usr) values ($1, $2) returning id, usr",
         )
         .bind(nanoid::nanoid!())
         .bind(user)
-        .fetch_one(self)
+        .fetch_one(self.as_executor())
         .await
         .map_err(|v| tracing::error!("{:#?}", v))
         .ok()
     }
 
     #[tracing::instrument]
-    async fn find_session(&self, id: &str) -> Option<Session> {
+    async fn find_session(&mut self, id: &str) -> Option<Session> {
         sqlx::query_as::<_, Session>("select id, usr from sessions where id=$1")
             .bind(id)
-            .fetch_one(self)
+            .fetch_one(self.as_executor())
             .await
             .map_err(|v| tracing::error!("{:#?}", v))
             .ok()
     }
 
     #[tracing::instrument]
-    async fn delete_session(&self, id: &str) {
+    async fn delete_session(&mut self, id: &str) {
         let _ = sqlx::query("delete from sessions where id=$1")
             .bind(id)
-            .execute(self)
+            .execute(self.as_executor())
             .await
             .map_err(|v| tracing::error!("{:#?}", v));
     }

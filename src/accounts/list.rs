@@ -8,8 +8,10 @@ use axum::{
 
 use crate::{
     accounts::component::Account, auth::principal::AuthPrincipal, templates::HtmlTemplate,
-    user::User, AppState,
+    user::{User, UserRepository}, AppState,
 };
+
+use super::{component::AccountRepository, ownership::AccountOwnershipRepository};
 
 type AccountBundle = (Account, Vec<User>);
 
@@ -29,7 +31,7 @@ struct AccountsListPage {
 async fn handler(
     AuthPrincipal(user): AuthPrincipal,
     Query(query): Query<AccountsListQuery>,
-    State(state): State<AppState>,
+    State(mut state): State<AppState>,
 ) -> Result<HtmlTemplate<AccountsListPage>, HtmlTemplate<AccountsListPage>> {
     let construct_error = || {
         HtmlTemplate(AccountsListPage {
@@ -40,7 +42,7 @@ async fn handler(
 
     // fetch all account ownerships
     let ownerships = state
-        .account_ownership_repository
+        .database
         .list_account_ownerships_by_user(&user.id)
         .await
         .ok_or_else(construct_error)?;
@@ -48,7 +50,7 @@ async fn handler(
     // fetch all accounts that are owned
     let accounts_owned = ownerships.into_iter().map(|v| v.account).collect();
     let accounts_owned = state
-        .account_repository
+        .database
         .list_accounts_by_ids(accounts_owned)
         .await
         .ok_or_else(construct_error)?;
@@ -56,7 +58,7 @@ async fn handler(
     // fetch all ownerships
     let ownerships = accounts_owned.iter().cloned().map(|v| v.id).collect();
     let ownerships = state
-        .account_ownership_repository
+        .database
         .list_account_ownerships_by_accounts(ownerships)
         .await
         .ok_or_else(construct_error)?;
@@ -64,7 +66,7 @@ async fn handler(
     // fetch all users
     let users = ownerships.iter().cloned().map(|v| v.usr).collect();
     let users = state
-        .user_repository
+        .database
         .list_users_by_ids(users)
         .await
         .ok_or_else(construct_error)?;

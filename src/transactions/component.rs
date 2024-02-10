@@ -2,7 +2,9 @@
 
 use axum::async_trait;
 use chrono::NaiveDateTime;
-use sqlx::{prelude::FromRow, PgPool};
+use sqlx::{prelude::FromRow, Postgres};
+
+use crate::database::AsExecutor;
 
 /// Represents a transaction
 #[derive(Debug, Clone, FromRow)]
@@ -23,11 +25,11 @@ pub struct Transaction {
 
 // Represents a transaction repository
 #[async_trait]
-pub trait TransactionRepository: Send + Sync {
+pub trait TransactionRepository {
     /// Creates a transaction
     #[allow(clippy::too_many_arguments)]
     async fn create_transaction(
-        &self,
+        &mut self,
         note: String,
         credit_account: String,
         debit_account: String,
@@ -42,11 +44,11 @@ pub trait TransactionRepository: Send + Sync {
     ) -> Option<Transaction>;
 
     /// Count of transactions
-    async fn count_settled_transactions(&self, accounts: Vec<String>) -> Option<i64>;
+    async fn count_settled_transactions(&mut self, accounts: Vec<String>) -> Option<i64>;
 
     /// List transactions by page
     async fn list_settled_transactions(
-        &self,
+        &mut self,
         page_offset: i64,
         page_size: i64,
         accounts: Vec<String>,
@@ -54,10 +56,13 @@ pub trait TransactionRepository: Send + Sync {
 }
 
 #[async_trait]
-impl TransactionRepository for PgPool {
-    #[tracing::instrument]
+impl<T> TransactionRepository for T
+where
+    T: AsExecutor<Postgres> + Send + std::fmt::Debug,
+{
+    // #[tracing::instrument(skip(self))]
     async fn create_transaction(
-        &self,
+        &mut self,
         note: String,
         credit_account: String,
         debit_account: String,
@@ -83,21 +88,21 @@ impl TransactionRepository for PgPool {
             .bind(debit_amount)
             .bind(credit_settled)
             .bind(debit_settled)
-            .fetch_one(self)
+            .fetch_one(self.as_executor())
             .await
             .map_err(|v| tracing::error!("{:#?}", v))
             .ok()
     }
 
     #[tracing::instrument]
-    async fn count_settled_transactions(&self, accounts: Vec<String>) -> Option<i64> {
+    async fn count_settled_transactions(&mut self, accounts: Vec<String>) -> Option<i64> {
         if accounts.is_empty() {
             return Some(0);
         }
 
         sqlx::query_as::<_, (i64,)>(include_str!("sql/count-settled.pg.sql"))
             .bind(&accounts[..])
-            .fetch_one(self)
+            .fetch_one(self.as_executor())
             .await
             .map_err(|v| tracing::error!("{:#?}", v))
             .ok()
@@ -106,7 +111,7 @@ impl TransactionRepository for PgPool {
 
     #[tracing::instrument]
     async fn list_settled_transactions(
-        &self,
+        &mut self,
         page_offset: i64,
         page_size: i64,
         accounts: Vec<String>,
@@ -119,7 +124,7 @@ impl TransactionRepository for PgPool {
             .bind(page_offset)
             .bind(page_size)
             .bind(&accounts[..])
-            .fetch_all(self)
+            .fetch_all(self.as_executor())
             .await
             .map_err(|v| tracing::error!("{:#?}", v))
             .ok()

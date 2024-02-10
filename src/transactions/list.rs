@@ -9,10 +9,12 @@ use chrono_tz::Tz;
 use either::Either;
 
 use crate::{
-    accounts::component::Account, assets::component::Asset, auth::principal::AuthPrincipal,
-    templates::HtmlTemplate, user::User, AppState, DATE_TIME_FORMAT, DATE_TIME_FORMAT_NICE,
+    accounts::{component::{Account, AccountRepository}, ownership::AccountOwnershipRepository}, assets::component::{Asset, AssetRepository}, auth::principal::AuthPrincipal,
+    templates::HtmlTemplate, user::{User, UserRepository}, AppState, DATE_TIME_FORMAT, DATE_TIME_FORMAT_NICE,
     DEFAULT_PAGE_SIZE, PAGE_SIZE_LIMITS,
 };
+
+use super::component::TransactionRepository;
 
 #[derive(serde::Deserialize)]
 pub struct AccountsListQuery {
@@ -49,7 +51,7 @@ struct TransactionBundle {
 async fn handler(
     AuthPrincipal(user): AuthPrincipal,
     Query(query): Query<AccountsListQuery>,
-    State(state): State<AppState>,
+    State(mut state): State<AppState>,
 ) -> Result<HtmlTemplate<TransactionsList>, HtmlTemplate<TransactionsList>> {
     let construct_error = || HtmlTemplate(TransactionsList::default());
 
@@ -57,7 +59,7 @@ async fn handler(
 
     // all owned accounts for the user
     let owned_accounts: Vec<_> = state
-        .account_ownership_repository
+        .database
         .list_account_ownerships_by_user(&user.id)
         .await
         .ok_or_else(construct_error)?
@@ -67,7 +69,7 @@ async fn handler(
 
     // number of transactions
     let number_of_transactions = state
-        .transaction_repository
+        .database
         .count_settled_transactions(owned_accounts.clone())
         .await
         .ok_or_else(construct_error)?;
@@ -82,7 +84,7 @@ async fn handler(
 
     // transactions
     let transactions = state
-        .transaction_repository
+        .database
         .list_settled_transactions(page_offset, page_size, owned_accounts)
         .await
         .ok_or_else(construct_error)?;
@@ -93,7 +95,7 @@ async fn handler(
         .flat_map(|v| [v.credit_asset.clone(), v.debit_asset.clone()])
         .collect();
     let assets = state
-        .asset_repository
+        .database
         .list_assets_by_ids(assets)
         .await
         .ok_or_else(construct_error)?;
@@ -104,7 +106,7 @@ async fn handler(
         .flat_map(|v| [v.credit_account.clone(), v.debit_account.clone()])
         .collect();
     let accounts = state
-        .account_repository
+        .database
         .list_accounts_by_ids(accounts)
         .await
         .ok_or_else(construct_error)?;
@@ -112,7 +114,7 @@ async fn handler(
     // account ownerships
     let ownerships = accounts.iter().map(|v| v.id.clone()).collect();
     let ownerships = state
-        .account_ownership_repository
+        .database
         .list_account_ownerships_by_accounts(ownerships)
         .await
         .ok_or_else(construct_error)?;
@@ -120,7 +122,7 @@ async fn handler(
     // users
     let users = ownerships.iter().map(|v| v.usr.clone()).collect();
     let users = state
-        .user_repository
+        .database
         .list_users_by_ids(users)
         .await
         .ok_or_else(construct_error)?;

@@ -3,7 +3,11 @@
 use axum::{extract::State, response::Redirect, Form};
 
 use crate::{
-    auth::{principal::NoAuthPrincipal, session_providers::cookie::SetCookieSession},
+    auth::{
+        principal::NoAuthPrincipal, session::SessionRepository,
+        session_providers::cookie::SetCookieSession,
+    },
+    user::UserRepository,
     validation, AppState,
 };
 
@@ -17,7 +21,7 @@ pub struct RegisterForm {
 
 pub async fn handler(
     _: NoAuthPrincipal,
-    State(state): State<AppState>,
+    State(mut state): State<AppState>,
     Form(details): Form<RegisterForm>,
 ) -> Result<(SetCookieSession, Redirect), LoginError> {
     if !validation::is_email(&details.email) {
@@ -25,7 +29,7 @@ pub async fn handler(
     }
 
     let user = state
-        .user_repository
+        .database
         .find_user_with_password(&details.email)
         .await
         .ok_or(LoginError::InvalidCredentials)?;
@@ -42,7 +46,7 @@ pub async fn handler(
         return Err(LoginError::InvalidCredentials);
     }
 
-    match state.session_repository.create_session(user.id).await {
+    match state.database.create_session(user.id).await {
         Some(session) => Ok((SetCookieSession(session), Redirect::to("/"))),
         None => Err(LoginError::Unknown),
     }

@@ -3,7 +3,9 @@
 use axum::async_trait;
 use nanoid::nanoid;
 use serde::{Deserialize, Serialize};
-use sqlx::{prelude::FromRow, PgPool, Type};
+use sqlx::{prelude::FromRow, Postgres, Type};
+
+use crate::database::AsExecutor;
 
 /// Represents an asset type
 #[derive(Debug, Clone, PartialEq, Eq, Type, Serialize, Deserialize)]
@@ -26,19 +28,19 @@ pub struct Asset {
 
 /// An asset repository
 #[async_trait]
-pub trait AssetRepository: Send + Sync {
+pub trait AssetRepository {
     /// lists all assets
-    async fn list_assets(&self) -> Option<Vec<Asset>>;
+    async fn list_assets(&mut self) -> Option<Vec<Asset>>;
 
     /// lists all assets filtered by id
-    async fn list_assets_by_ids(&self, ids: Vec<String>) -> Option<Vec<Asset>>;
+    async fn list_assets_by_ids(&mut self, ids: Vec<String>) -> Option<Vec<Asset>>;
 
     /// find an asset by ticker
-    async fn find_asset_by_ticker(&self, ticker: &str) -> Option<Asset>;
+    async fn find_asset_by_ticker(&mut self, ticker: &str) -> Option<Asset>;
 
     /// create an asset
     async fn create_asset(
-        &self,
+        &mut self,
         ticker: String,
         symbol: Option<String>,
         label: String,
@@ -48,20 +50,23 @@ pub trait AssetRepository: Send + Sync {
 }
 
 #[async_trait]
-impl AssetRepository for PgPool {
+impl<T> AssetRepository for T
+where
+    T: AsExecutor<Postgres> + std::fmt::Debug + Send,
+{
     #[tracing::instrument]
-    async fn list_assets(&self) -> Option<Vec<Asset>> {
+    async fn list_assets(&mut self) -> Option<Vec<Asset>> {
         sqlx::query_as::<_, Asset>(
             "select id, ticker, symbol, label, precision, atype from assets order by label",
         )
-        .fetch_all(self)
+        .fetch_all(self.as_executor())
         .await
         .map_err(|v| tracing::error!("{:#?}", v))
         .ok()
     }
 
     #[tracing::instrument]
-    async fn list_assets_by_ids(&self, ids: Vec<String>) -> Option<Vec<Asset>> {
+    async fn list_assets_by_ids(&mut self, ids: Vec<String>) -> Option<Vec<Asset>> {
         if ids.is_empty() {
             return Some(vec![]);
         }
@@ -70,19 +75,19 @@ impl AssetRepository for PgPool {
             "select id, ticker, symbol, label, precision, atype from assets where id=ANY($1) order by label",
         )
         .bind(&ids[..])
-        .fetch_all(self)
+        .fetch_all(self.as_executor())
         .await
         .map_err(|v| tracing::error!("{:#?}", v))
         .ok()
     }
 
     #[tracing::instrument]
-    async fn find_asset_by_ticker(&self, ticker: &str) -> Option<Asset> {
+    async fn find_asset_by_ticker(&mut self, ticker: &str) -> Option<Asset> {
         sqlx::query_as::<_, Asset>(
             "select id, ticker, symbol, label, precision, atype from assets where ticker=$1",
         )
         .bind(ticker)
-        .fetch_one(self)
+        .fetch_one(self.as_executor())
         .await
         .map_err(|v| tracing::error!("{:#?}", v))
         .ok()
@@ -90,7 +95,7 @@ impl AssetRepository for PgPool {
 
     #[tracing::instrument]
     async fn create_asset(
-        &self,
+        &mut self,
         ticker: String,
         symbol: Option<String>,
         label: String,
@@ -106,7 +111,7 @@ impl AssetRepository for PgPool {
         .bind(label)
         .bind(precision)
         .bind(atype)
-        .fetch_one(self)
+        .fetch_one(self.as_executor())
         .await
         .map_err(|v| tracing::error!("{:#?}", v))
         .ok()

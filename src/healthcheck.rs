@@ -15,7 +15,7 @@ struct Ping {
 struct DatabaseStatus {
     pub open: bool,
     pub size: u32,
-    pub idle: u32,
+    pub idle: usize,
 }
 
 
@@ -24,7 +24,7 @@ async fn handler(State(state): State<AppState>) -> Json<Ping> {
         message: "pong".to_string(),
         configuration: state.configuration,
         database_status: DatabaseStatus {
-            open: state.database.is_open(),
+            open: !state.database.is_closed(),
             size: state.database.size(),
             idle: state.database.num_idle(),
         },

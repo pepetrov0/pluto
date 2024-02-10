@@ -9,7 +9,7 @@ use axum::{
 
 use crate::{auth::principal::AuthPrincipal, templates::HtmlTemplate, AppState};
 
-use super::component::{Asset, AssetType};
+use super::component::{Asset, AssetRepository, AssetType};
 
 #[derive(serde::Deserialize)]
 pub struct AssetsListQuery {
@@ -27,9 +27,9 @@ struct AssetsListPage {
 async fn handler(
     _: AuthPrincipal,
     Query(query): Query<AssetsListQuery>,
-    State(state): State<AppState>,
+    State(mut state): State<AppState>,
 ) -> Result<HtmlTemplate<AssetsListPage>, StatusCode> {
-    let assets = state.asset_repository.list_assets().await;
+    let assets = state.database.list_assets().await;
 
     let page = AssetsListPage {
         created: query.created,

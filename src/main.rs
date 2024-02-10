@@ -1,14 +1,8 @@
 use std::sync::Arc;
 
 use argon2::Argon2;
-use axum::routing;
 use axum_extra::extract::cookie::Key;
-use pluto::{
-    config::{Configuration, SessionDriver},
-    database,
-    imkvs::InMemoryKeyValueStore,
-    shutdown,
-};
+use pluto::{config::Configuration, database, shutdown};
 
 #[tokio::main]
 async fn main() {
@@ -29,11 +23,9 @@ async fn main() {
     let config = Configuration::read().expect("could not load in configuration");
 
     // connect to database
-    let database = Arc::new(
-        database::connect_to_postgres(&config)
-            .await
-            .expect("could not connect to database"),
-    );
+    let database = database::connect_to_postgres(&config)
+        .await
+        .expect("could not connect to database");
 
     // create password hasher
     let password_hasher = Arc::new(Argon2::default());
@@ -43,26 +35,10 @@ async fn main() {
         cookie_jar_key: Key::from(config.secret.as_bytes()),
         database: database.clone(),
         password_hasher,
-        csrf_token_repository: Arc::new(InMemoryKeyValueStore::default()),
-        user_repository: database.clone(),
-        session_repository: match config.session_driver {
-            SessionDriver::InMemory => Arc::new(InMemoryKeyValueStore::default()),
-            SessionDriver::Database => database.clone(),
-        },
-        asset_repository: database.clone(),
-        account_repository: database.clone(),
-        account_ownership_repository: database.clone(),
-        transaction_repository: database.clone(),
-        entry_repository: database.clone(),
     };
 
     // initialize router
-    let router = pluto::router(state).route(
-        "/report",
-        routing::any(|body: String| async move {
-            println!("{:?}", body);
-        }),
-    );
+    let router = pluto::router(state);
 
     // initialize listener
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8000").await.unwrap();
