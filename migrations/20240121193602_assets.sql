@@ -1,5 +1,3 @@
-begin;
-
 -- create asset type enum
 create type asset_type as enum('currency');
 
@@ -45,5 +43,3 @@ values
     0,
     'currency'
   );
-
-commit;

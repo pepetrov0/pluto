@@ -1,5 +1,3 @@
-begin;
-
 -- create accounts table
 create table if not exists
   accounts (
@@ -15,5 +13,3 @@ create table if not exists
     account varchar(21) not null references accounts (id) on update cascade on delete restrict,
     unique (usr, account)
   );
-
-commit;

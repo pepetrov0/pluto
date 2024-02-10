@@ -1,5 +1,3 @@
-begin;
-
 -- create the transactions table
 create table if not exists
   transactions (
@@ -42,5 +40,3 @@ select
   debit_settled as settled
 from
   transactions;
-
-commit;

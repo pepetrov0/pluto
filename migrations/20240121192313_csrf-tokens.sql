@@ -1,5 +1,3 @@
-begin;
-
 -- create csrf_tokens table
 create table if not exists
   csrf_tokens (
@@ -45,5 +43,3 @@ create
 or replace trigger cleanup_csrf_tokens
 after insert on csrf_tokens
 execute function cleanup_csrf_tokens_fn ();
-
-commit;

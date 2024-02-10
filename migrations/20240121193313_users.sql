@@ -1,5 +1,3 @@
-begin;
-
 -- create users table
 create table if not exists
   users (
@@ -8,5 +6,3 @@ create table if not exists
     password varchar(128),
     timezone varchar(64) not null default 'UTC'
   );
-
-commit;
