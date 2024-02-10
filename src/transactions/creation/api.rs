@@ -141,57 +141,6 @@ pub async fn handler(
         return Err(TransactionCreationError::AccountsNotOwned);
     }
 
-    // users
-    let users = tx
-        .list_users_by_ids(vec![
-            details.credit_account.clone(),
-            details.debit_account.clone(),
-        ])
-        .await
-        .ok_or(TransactionCreationError::Unknown)?;
-
-    // accounts
-    let accounts = vec![
-        details.credit_account.clone(),
-        details.debit_account.clone(),
-    ]
-    .into_iter();
-    let user_accounts = users.iter().map(|v| v.favorite_account.clone());
-    let accounts = accounts.chain(user_accounts).collect();
-    let accounts = tx
-        .list_accounts_by_ids(accounts)
-        .await
-        .ok_or(TransactionCreationError::Unknown)?;
-
-    // credit and debit accounts
-    let credit_account = match details.create_credit_account {
-        true => None,
-        false => {
-            let account = users
-                .iter()
-                .find(|&u| u.id == details.credit_account)
-                .map(|v| v.favorite_account.clone())
-                .unwrap_or_else(|| details.credit_account.clone());
-            accounts.iter().find(|&v| v.id == account).cloned()
-        }
-    };
-    let debit_account = match details.create_debit_account {
-        true => None,
-        false => {
-            let account = users
-                .iter()
-                .find(|&u| u.id == details.debit_account)
-                .map(|v| v.favorite_account.clone())
-                .unwrap_or_else(|| details.debit_account.clone());
-            accounts.iter().find(|&v| v.id == account).cloned()
-        }
-    };
-
-    // assert that accounts are different
-    if credit_account.as_ref().map(|v| &v.id) == debit_account.as_ref().map(|v| &v.id) {
-        return Err(TransactionCreationError::MatchingAccounts);
-    }
-
     // assets
     let credit_asset = details
         .credit_asset
@@ -237,44 +186,92 @@ pub async fn handler(
         return Err(TransactionCreationError::InvalidDebitAmount);
     }
 
-    // account creation
-    let credit_account = match credit_account {
-        Some(account) => account,
-        None if details.create_credit_account => tx
+    // users
+    let users = tx
+        .list_users_by_ids(vec![
+            details.credit_account.clone(),
+            details.debit_account.clone(),
+        ])
+        .await
+        .ok_or(TransactionCreationError::Unknown)?;
+
+    // accounts
+    let accounts = users
+        .iter()
+        .map(|v| v.favorite_account.clone())
+        .chain(
+            [
+                details.credit_account.clone(),
+                details.debit_account.clone(),
+            ]
+            .into_iter(),
+        )
+        .collect();
+    let accounts = tx
+        .list_accounts_by_ids(accounts)
+        .await
+        .ok_or(TransactionCreationError::Unknown)?;
+    let credit_account = match details.create_credit_account {
+        true => tx
             .create_account(&details.credit_account)
             .await
             .ok_or(TransactionCreationError::Unknown)?,
-        None => return Err(TransactionCreationError::MissingCreditAccount),
+        false => {
+            let account = users
+                .iter()
+                .find(|&u| u.id == details.credit_account)
+                .map(|v| v.favorite_account.clone())
+                .unwrap_or_else(|| details.credit_account.clone());
+            accounts
+                .iter()
+                .find(|&v| v.id == account)
+                .cloned()
+                .ok_or(TransactionCreationError::MissingDebitAccount)?
+        }
     };
-    let debit_account = match debit_account {
-        Some(account) => account,
-        None if details.create_debit_account => tx
+    let debit_account = match details.create_debit_account {
+        true => tx
             .create_account(&details.debit_account)
             .await
             .ok_or(TransactionCreationError::Unknown)?,
-        None => return Err(TransactionCreationError::MissingDebitAccount),
+        false => {
+            let account = users
+                .iter()
+                .find(|&u| u.id == details.debit_account)
+                .map(|v| v.favorite_account.clone())
+                .unwrap_or_else(|| details.debit_account.clone());
+            accounts
+                .iter()
+                .find(|&v| v.id == account)
+                .cloned()
+                .ok_or(TransactionCreationError::MissingDebitAccount)?
+        }
     };
 
-    let response = tx
-        .create_transaction(
-            details.note,
-            credit_account.id,
-            debit_account.id,
-            credit_asset.id,
-            debit_asset.id,
-            timestamp,
-            timestamp,
-            credit_amount,
-            debit_amount,
-            credit_account_owned_by_self || !credit_account_owned,
-            debit_account_owned_by_self || !debit_account_owned,
-        )
-        .await
-        .map(|_| Redirect::to("/transactions?created=true"))
-        .ok_or(TransactionCreationError::Unknown)?;
+    // assert that accounts are different
+    if credit_account.id == debit_account.id {
+        return Err(TransactionCreationError::MatchingAccounts);
+    }
+
+    tx.create_transaction(
+        details.note,
+        credit_account.id,
+        debit_account.id,
+        credit_asset.id,
+        debit_asset.id,
+        timestamp,
+        timestamp,
+        credit_amount,
+        debit_amount,
+        credit_account_owned_by_self || !credit_account_owned,
+        debit_account_owned_by_self || !debit_account_owned,
+    )
+    .await
+    .ok_or(TransactionCreationError::Unknown)?;
 
     tx.commit()
         .await
         .map_err(|_| TransactionCreationError::Unknown)?;
-    Ok(response)
+
+    Ok(Redirect::to("/transactions?created=true"))
 }
