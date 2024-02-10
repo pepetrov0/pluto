@@ -63,6 +63,7 @@ impl UserRepository for sqlx::PgPool {
         .bind(timezone.name())
         .fetch_one(self)
         .await
+        .map_err(|v| tracing::error!("{:#?}", v))
         .ok()
     }
 
@@ -72,6 +73,7 @@ impl UserRepository for sqlx::PgPool {
             .bind(id_or_email)
             .fetch_one(self)
             .await
+            .map_err(|v| tracing::error!("{:#?}", v))
             .ok()
     }
 
@@ -83,6 +85,7 @@ impl UserRepository for sqlx::PgPool {
         .bind(id_or_email)
         .fetch_one(self)
         .await
+        .map_err(|v| tracing::error!("{:#?}", v))
         .ok()
     }
 
@@ -91,6 +94,7 @@ impl UserRepository for sqlx::PgPool {
         sqlx::query_as::<_, User>("select id, email, timezone from users order by email")
             .fetch_all(self)
             .await
+            .map_err(|v| tracing::error!("{:#?}", v))
             .ok()
     }
 
@@ -106,6 +110,7 @@ impl UserRepository for sqlx::PgPool {
         .bind(&ids[..])
         .fetch_all(self)
         .await
+        .map_err(|v| tracing::error!("{:#?}", v))
         .ok()
     }
 }

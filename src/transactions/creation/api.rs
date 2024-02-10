@@ -5,7 +5,7 @@ use chrono::{NaiveDateTime, TimeZone};
 use chrono_tz::Tz;
 use serde::Deserialize;
 
-use crate::{auth::principal::AuthPrincipal, AppState};
+use crate::{auth::principal::AuthPrincipal, AppState, DATE_TIME_FORMAT};
 
 use super::error::TransactionCreationError;
 
@@ -64,7 +64,7 @@ pub async fn handler(
     // timezone and date
     let tz =
         Tz::from_str_insensitive(&user.timezone).map_err(|_| TransactionCreationError::Unknown)?;
-    let timestamp = NaiveDateTime::parse_from_str(&details.timestamp, "%Y-%m-%dT%H:%M")
+    let timestamp = NaiveDateTime::parse_from_str(&details.timestamp, DATE_TIME_FORMAT)
         .map_err(|_| TransactionCreationError::Unknown)?;
     let timestamp = tz
         .from_local_datetime(&timestamp)
@@ -182,6 +182,14 @@ pub async fn handler(
     let credit_amount = (10f64.powi(credit_asset.precision.into()) * credit_amount).round() as i64;
     let debit_amount = (10f64.powi(debit_asset.precision.into()) * debit_amount).round() as i64;
 
+    // check if amounts are within bounds
+    if credit_amount <= 0 {
+        return Err(TransactionCreationError::InvalidCreditAmount);
+    }
+    if debit_amount <= 0 {
+        return Err(TransactionCreationError::InvalidDebitAmount);
+    }
+
     // account creation
     let credit_account = match credit_account {
         Some(account) => account,
@@ -190,7 +198,7 @@ pub async fn handler(
             .create_account(details.credit_account)
             .await
             .ok_or(TransactionCreationError::Unknown)?,
-        None => return Err(TransactionCreationError::Unknown),
+        None => return Err(TransactionCreationError::MissingCreditAccount),
     };
     let debit_account = match debit_account {
         Some(account) => account,
@@ -199,7 +207,7 @@ pub async fn handler(
             .create_account(details.debit_account)
             .await
             .ok_or(TransactionCreationError::Unknown)?,
-        None => return Err(TransactionCreationError::Unknown),
+        None => return Err(TransactionCreationError::MissingDebitAccount),
     };
 
     state

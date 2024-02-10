@@ -2,83 +2,169 @@
 
 {% block body %}
 <div>
-    <nav
-        class="fixed left-0 top-0 h-[100dvh] max-w-[min(16rem,90%)] z-50 flex flex-col bg-accent text-accent-contrast group/nav has-[#nav-toggle:checked]/nav:w-64 md:w-64">
-        <!-- home -->
-        <div class="flex items-center gap-2">
-            <div class="relative w-12 h-12 flex-none">
-                <div
-                    class="absolute top-0 left-0 w-full h-full p-3 block group-has-[#nav-toggle:checked]/nav:hidden md:!hidden">
-                    {% include "icons/menu.svg" %}
-                </div>
-                <div
-                    class="absolute top-0 left-0 w-full h-full p-3 hidden group-has-[#nav-toggle:checked]/nav:block md:!hidden">
-                    {% include "icons/close.svg" %}
-                </div>
-                <input aria-label="navigation toggle" id="nav-toggle" type="checkbox"
-                    class="w-full h-full opacity-0 cursor-pointer md:hidden" />
-            </div>
-            <a class="font-bold text-center hidden group-has-[#nav-toggle:checked]/nav:block md:block px-4 flex-grow"
-                href="/">pluto</a>
+  <nav
+    class="fixed left-0 top-0 h-[100dvh] max-w-[min(16rem,90%)] z-50 flex flex-col bg-accent text-accent-contrast group/nav has-[#nav-toggle:checked]/nav:w-64 md:w-64 overflow-y-auto">
+    <!-- home -->
+    <div class="flex items-center gap-2">
+      <div class="relative w-12 h-12 flex-none">
+        <div
+          class="absolute top-0 left-0 w-full h-full p-3 block group-has-[#nav-toggle:checked]/nav:hidden md:!hidden">
+          {% include "icons/bars-3.svg" %}
         </div>
+        <div
+          class="absolute top-0 left-0 w-full h-full p-3 hidden group-has-[#nav-toggle:checked]/nav:block md:!hidden">
+          {% include "icons/x-mark.svg" %}
+        </div>
+        <input aria-label="navigation toggle" id="nav-toggle" type="checkbox"
+          class="w-full h-full opacity-0 cursor-pointer md:hidden" />
+      </div>
+      <a class="font-bold text-center hidden group-has-[#nav-toggle:checked]/nav:block md:block px-4 flex-grow"
+        href="/">pluto</a>
+    </div>
 
-        <!-- dashboard -->
-        <a class="flex items-center gap-2" href="/" aria-label="dashboard button">
-            <div class="relative w-12 h-12 flex-none p-3">
-                {% include "icons/dashboard.svg" %}
-            </div>
-            <span class="hidden group-has-[#nav-toggle:checked]/nav:block md:!block px-4 flex-grow">Dashboard</span>
-        </a>
+    <!-- dashboard -->
+    <a class="flex items-center gap-2" href="/" aria-label="dashboard button">
+      <div class="relative w-12 h-12 flex-none p-3">
+        {% include "icons/newspaper.svg" %}
+      </div>
+      <span class="hidden group-has-[#nav-toggle:checked]/nav:block md:!block px-4 flex-grow">Dashboard</span>
+    </a>
 
-        <hr class="my-2 text-accent-lighter w-5/6 self-center" />
+    <!-- new transaction -->
+    <a class="flex items-center gap-2" href="/new-transaction" aria-label="dashboard button">
+      <div class="relative w-12 h-12 flex-none p-3">
+        {% include "icons/document-plus.svg" %}
+      </div>
+      <span class="hidden group-has-[#nav-toggle:checked]/nav:block md:!block px-4 flex-grow">New transaction</span>
+    </a>
 
-        <!-- accounts -->
-        <a class="flex items-center gap-2" href="/accounts" aria-label="accounts button">
-            <div class="relative w-12 h-12 flex-none p-3">
-                {% include "icons/accounts.svg" %}
-            </div>
-            <span class="hidden group-has-[#nav-toggle:checked]/nav:block md:!block px-4 flex-grow">Accounts</span>
-        </a>
+    <!-- templates -->
+    <a class="flex items-center gap-2 text-disabled-darker cursor-not-allowed" href="#"
+      aria-label="currencies and assets button">
+      <div class="relative w-12 h-12 flex-none p-3">
+        {% include "icons/paint-brush.svg" %}
+      </div>
+      <span class="hidden group-has-[#nav-toggle:checked]/nav:block md:!block px-4 flex-grow">Templates</span>
+    </a>
 
-        <!-- transactions -->
-        <a class="flex items-center gap-2" href="/transactions" aria-label="transactions button">
-            <div class="relative w-12 h-12 flex-none p-3">
-                {% include "icons/transactions.svg" %}
-            </div>
-            <span class="hidden group-has-[#nav-toggle:checked]/nav:block md:!block px-4 flex-grow">Transactions</span>
-        </a>
+    <hr class="my-2 border-t-2 border-dotted text-accent-lighter w-5/6 self-center" />
 
-        <hr class="my-2 text-accent-lighter w-5/6 self-center" />
+    <!-- accounts -->
+    <a class="flex items-center gap-2" href="/accounts" aria-label="accounts button">
+      <div class="relative w-12 h-12 flex-none p-3">
+        {% include "icons/wallet.svg" %}
+      </div>
+      <span class="hidden group-has-[#nav-toggle:checked]/nav:block md:!block px-4 flex-grow">Accounts</span>
+    </a>
 
-        <!-- assets -->
-        <a class="flex items-center gap-2" href="/assets" aria-label="currencies and assets button">
-            <div class="relative w-12 h-12 flex-none p-3">
-                {% include "icons/assets.svg" %}
-            </div>
-            <span class="hidden group-has-[#nav-toggle:checked]/nav:block md:!block px-4 flex-grow">Currencies & Assets</span>
-        </a>
+    <!-- transactions -->
+    <a class="flex items-center gap-2" href="/transactions" aria-label="transactions button">
+      <div class="relative w-12 h-12 flex-none p-3">
+        {% include "icons/arrows-right-left.svg" %}
+      </div>
+      <span class="hidden group-has-[#nav-toggle:checked]/nav:block md:!block px-4 flex-grow">Transactions</span>
+    </a>
 
-        <!-- gap separator -->
-        <div class="mt-auto"></div>
+    <hr class="my-2 border-t-2 border-dotted text-accent-lighter w-5/6 self-center" />
 
-        <!-- Profile -->
-        <a class="flex items-center gap-2" href="/profile" aria-label="profile button">
-            <div class="relative w-12 h-12 flex-none p-3">
-                {% include "icons/profile.svg" %}
-            </div>
-            <span class="hidden group-has-[#nav-toggle:checked]/nav:block md:!block px-4 flex-grow">Profile</span>
-        </a>
-        
-        <!-- logout -->
-        <a class="flex items-center gap-2" href="/logout" aria-label="log out button">
-            <div class="relative w-12 h-12 flex-none p-3">
-                {% include "icons/logout.svg" %}
-            </div>
-            <span class="hidden group-has-[#nav-toggle:checked]/nav:block md:!block px-4 flex-grow">Log out</span>
-        </a>
-    </nav>
-    <main class="pl-12 md:pl-64">
-        {% block content %}{% endblock %}
-    </main>
+    <!-- budgets -->
+    <a class="flex items-center gap-2 text-disabled-darker cursor-not-allowed" href="#"
+      aria-label="currencies and assets button">
+      <div class="relative w-12 h-12 flex-none p-3">
+        {% include "icons/chart-pie.svg" %}
+      </div>
+      <span class="hidden group-has-[#nav-toggle:checked]/nav:block md:!block px-4 flex-grow">Budgets</span>
+    </a>
+
+    <!-- bills -->
+    <a class="flex items-center gap-2 text-disabled-darker cursor-not-allowed" href="#"
+      aria-label="currencies and assets button">
+      <div class="relative w-12 h-12 flex-none p-3">
+        {% include "icons/receipt-percent.svg" %}
+      </div>
+      <span class="hidden group-has-[#nav-toggle:checked]/nav:block md:!block px-4 flex-grow">Bills</span>
+    </a>
+
+    <hr class="my-2 border-t-2 border-dotted text-accent-lighter w-5/6 self-center" />
+
+    <!-- rules -->
+    <a class="flex items-center gap-2 text-disabled-darker cursor-not-allowed" href="#"
+      aria-label="currencies and assets button">
+      <div class="relative w-12 h-12 flex-none p-3">
+        {% include "icons/scale.svg" %}
+      </div>
+      <span class="hidden group-has-[#nav-toggle:checked]/nav:block md:!block px-4 flex-grow">Rules</span>
+    </a>
+
+    <!-- recurring transactions -->
+    <a class="flex items-center gap-2 text-disabled-darker cursor-not-allowed" href="#"
+      aria-label="currencies and assets button">
+      <div class="relative w-12 h-12 flex-none p-3">
+        {% include "icons/arrow-path-rounded-square.svg" %}
+      </div>
+      <span class="hidden group-has-[#nav-toggle:checked]/nav:block md:!block px-4 flex-grow">Recurring
+        transactions</span>
+    </a>
+
+    <hr class="my-2 border-t-2 border-dotted text-accent-lighter w-5/6 self-center" />
+
+    <!-- reports -->
+    <a class="flex items-center gap-2 text-disabled-darker cursor-not-allowed" href="#"
+      aria-label="currencies and assets button">
+      <div class="relative w-12 h-12 flex-none p-3">
+        {% include "icons/document-magnifying-glass.svg" %}
+      </div>
+      <span class="hidden group-has-[#nav-toggle:checked]/nav:block md:!block px-4 flex-grow">Reports</span>
+    </a>
+
+    <hr class="my-2 border-t-2 border-dotted text-accent-lighter w-5/6 self-center" />
+
+    <!-- tags -->
+    <a class="flex items-center gap-2 text-disabled-darker cursor-not-allowed" href="#"
+      aria-label="currencies and assets button">
+      <div class="relative w-12 h-12 flex-none p-3">
+        {% include "icons/tag.svg" %}
+      </div>
+      <span class="hidden group-has-[#nav-toggle:checked]/nav:block md:!block px-4 flex-grow">Tags</span>
+    </a>
+
+    <!-- assets -->
+    <a class="flex items-center gap-2" href="/assets" aria-label="currencies and assets button">
+      <div class="relative w-12 h-12 flex-none p-3">
+        {% include "icons/swatch.svg" %}
+      </div>
+      <span class="hidden group-has-[#nav-toggle:checked]/nav:block md:!block px-4 flex-grow">Currencies & Assets</span>
+    </a>
+
+    <!-- gap separator -->
+    <hr class="my-2 border-t-2 border-dotted mt-[max(auto,0.5rem)] text-accent-lighter w-5/6 self-center" />
+
+    <!-- notifications -->
+    <a class="flex items-center gap-2 text-disabled-darker cursor-not-allowed" href="#" aria-label="profile button">
+      <div class="relative w-12 h-12 flex-none p-3">
+        {% include "icons/bell.svg" %}
+      </div>
+      <span class="hidden group-has-[#nav-toggle:checked]/nav:block md:!block px-4 flex-grow">Notifications</span>
+    </a>
+
+    <!-- profile -->
+    <a class="flex items-center gap-2 text-disabled-darker cursor-not-allowed" href="#" aria-label="profile button">
+      <div class="relative w-12 h-12 flex-none p-3">
+        {% include "icons/identification.svg" %}
+      </div>
+      <span class="hidden group-has-[#nav-toggle:checked]/nav:block md:!block px-4 flex-grow">Profile</span>
+    </a>
+
+    <!-- logout -->
+    <a class="flex items-center gap-2" href="/logout" aria-label="log out button">
+      <div class="relative w-12 h-12 flex-none p-3">
+        {% include "icons/arrow-right-start-on-rectangle.svg" %}
+      </div>
+      <span class="hidden group-has-[#nav-toggle:checked]/nav:block md:!block px-4 flex-grow">Log out</span>
+    </a>
+  </nav>
+  <main class="pl-12 md:pl-64">
+    {% block content %}{% endblock %}
+  </main>
 </div>
 {% endblock %}

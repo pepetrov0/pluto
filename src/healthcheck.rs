@@ -18,6 +18,7 @@ struct DatabaseStatus {
     pub idle: u32,
 }
 
+
 async fn handler(State(state): State<AppState>) -> Json<Ping> {
     Json(Ping {
         message: "pong".to_string(),

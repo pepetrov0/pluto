@@ -6,10 +6,127 @@
 
 {% block content %}
 <div class="flex flex-col gap-2 mx-auto w-full max-w-screen-md px-2 py-4">
-    <h1 class="heading-1 flex items-center">
-        <span>Transactions</span>
-        <a href="/new-transaction" class="button ml-auto">New transaction</a>
-    </h1>
-    <hr />
+  <h1 class="heading-1 flex items-center">
+    <span>Transactions</span>
+    <a href="/new-transaction" class="button ml-auto">New transaction</a>
+  </h1>
+  <hr class="border-t-2 border-dashed py-1" />
+  <!-- created message -->
+  {% if created %}
+  <section class="card bg-success text-success-contrast">
+    Transaction created.
+  </section>
+  {% endif %}
+  <!-- error message -->
+  {% if transactions.is_none() %}
+  <section class="card bg-danger text-danger-contrast">
+    Something went wrong while loading this page. Please try again later.
+  </section>
+  {% endif %}
+  <!-- transactions list -->
+  {% if let Some(transactions) = transactions %}
+  {% for transaction in transactions %}
+  <section class="card grid grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto_auto_1fr] gap-1">
+    <h2 class="heading-3 col-span-2 sm:col-span-5">{{ transaction.note }}</h2>
+    <!-- == credit == -->
+    <!-- account/user -->
+    <strong class="flex gap-1 sm:col-start-1 sm:row-start-2 items-center">
+      <span class="icon">
+        {% match transaction.credit %}
+        {% when Either::Left with (account) %}
+        {% include "icons/wallet.svg" %}
+        {% when Either::Right with (users) %}
+        {% include "icons/users.svg" %}
+        {% endmatch %}
+      </span>
+      <span>Credit:</span>
+    </strong>
+    <span class="sm:col-start-2 sm:row-start-2 text-ellipsis overflow-hidden text-nowrap">
+      {% match transaction.credit %}
+      {% when Either::Left with (account) %}
+      {{ account.name }}
+      {% when Either::Right with (users) %}
+      {% for user in users %}
+      {{ user.email }}{% if !loop.last %},{% endif %}
+      {% endfor %}
+      {% endmatch %}
+    </span>
+    <!-- amount -->
+    <strong class="flex gap-1 sm:col-start-1 sm:row-start-3 items-center">
+      <span class="icon">
+        {% include "icons/banknotes.svg" %}
+      </span>
+      <span>Amount:</span>
+    </strong>
+    <span class="sm:col-start-2 sm:row-start-3">
+      {{ transaction.credit_asset.symbol.clone().unwrap_or(transaction.credit_asset.ticker.clone()) }}{{
+      transaction.credit_amount }}
+    </span>
+    <!-- timestamp -->
+    <strong class="flex gap-1 sm:col-start-1 sm:row-start-4 items-center">
+      <span class="icon">
+        {% include "icons/clock.svg" %}
+      </span>
+      <span>Time:</span>
+    </strong>
+    <time datetime="{{ transaction.credit_stamp }}" class="sm:col-start-2 sm:row-start-4">
+      {{ transaction.credit_stamp_nice }}
+    </time>
+    <!-- == divider == -->
+    <div class="hidden sm:block icon-md col-start-3 row-start-2 row-span-3 self-center mx-2">
+      {% include "icons/arrow-right.svg" %}
+    </div>
+    <div class="block sm:hidden icon-md col-span-2 justify-self-center my-2">
+      {% include "icons/arrow-down.svg" %}
+    </div>
+    <!-- == debit == -->
+    <!-- account/user -->
+    <strong class="flex gap-1 sm:col-start-4 sm:row-start-2 items-center">
+      <span class="icon">
+        {% match transaction.debit %}
+        {% when Either::Left with (account) %}
+        {% include "icons/wallet.svg" %}
+        {% when Either::Right with (users) %}
+        {% for user in users %}
+        {% include "icons/users.svg" %}
+        {% endfor %}
+        {% endmatch %}
+      </span>
+      <span>Debit:</span>
+    </strong>
+    <span class="sm:col-start-5 sm:row-start-2 text-ellipsis overflow-hidden text-nowrap">
+      {% match transaction.debit %}
+      {% when Either::Left with (account) %}
+      {{ account.name }}
+      {% when Either::Right with (users) %}
+      {% for user in users %}
+      {{ user.email }}{% if !loop.last %},{% endif %}
+      {% endfor %}
+      {% endmatch %}
+    </span>
+    <!-- amount -->
+    <strong class="flex gap-1 sm:col-start-4 sm:row-start-3 items-center">
+      <span class="icon">
+        {% include "icons/banknotes.svg" %}
+      </span>
+      <span>Amount:</span>
+    </strong>
+    <span class="sm:col-start-5 sm:row-start-3">
+      {{ transaction.debit_asset.symbol.clone().unwrap_or(transaction.debit_asset.ticker.clone()) }}{{
+      transaction.debit_amount }}
+    </span>
+    <!-- timestamp -->
+    <strong class="flex gap-1 sm:col-start-4 sm:row-start-4 items-center">
+      <span class="icon">
+        {% include "icons/clock.svg" %}
+      </span>
+      <span>Time:</span>
+    </strong>
+    <time datetime="{{ transaction.debit_stamp }}" class="sm:col-start-5 sm:row-start-4">
+      {{ transaction.debit_stamp_nice }}
+    </time>
+  </section>
+  {% endfor %}
+  {% endif %}
 </div>
 {% endblock %}

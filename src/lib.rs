@@ -29,6 +29,11 @@ pub mod transactions;
 pub mod user;
 pub mod validation;
 
+pub const DATE_TIME_FORMAT: &str = "%Y-%m-%dT%H:%M";
+pub const DATE_TIME_FORMAT_NICE: &str = "%d %b %Y @ %H:%M";
+pub const DEFAULT_PAGE_SIZE: i64 = 25;
+pub const PAGE_SIZE_LIMITS: (i64, i64) = (10, 100);
+
 #[derive(Clone)]
 pub struct AppState {
     pub configuration: config::Configuration,

@@ -8,12 +8,16 @@ pub enum TransactionCreationError {
     InvalidNote,
     AccountsNotOwned,
     MatchingAccounts,
+    MissingCreditAccount,
+    MissingDebitAccount,
     MissingCreditAsset,
     MissingDebitAsset,
     InvalidCreditAsset,
     InvalidDebitAsset,
     MissingCreditAmount,
     MissingDebitAmount,
+    InvalidCreditAmount,
+    InvalidDebitAmount,
     Unknown,
 }
 
@@ -28,6 +32,12 @@ impl IntoResponse for TransactionCreationError {
             }
             TransactionCreationError::MatchingAccounts => {
                 Redirect::to("/new-transaction?error=matching-accounts").into_response()
+            }
+            TransactionCreationError::MissingCreditAccount => {
+                Redirect::to("/new-transaction?error=missing-credit-account").into_response()
+            }
+            TransactionCreationError::MissingDebitAccount => {
+                Redirect::to("/new-transaction?error=missing-debit-account").into_response()
             }
             TransactionCreationError::MissingCreditAsset => {
                 Redirect::to("/new-transaction?error=missing-credit-asset").into_response()
@@ -46,6 +56,12 @@ impl IntoResponse for TransactionCreationError {
             }
             TransactionCreationError::MissingDebitAmount => {
                 Redirect::to("/new-transaction?error=missing-debit-amount").into_response()
+            }
+            TransactionCreationError::InvalidCreditAmount => {
+                Redirect::to("/new-transaction?error=invalid-credit-amount").into_response()
+            }
+            TransactionCreationError::InvalidDebitAmount => {
+                Redirect::to("/new-transaction?error=invalid-debit-amount").into_response()
             }
             TransactionCreationError::Unknown => {
                 Redirect::to("/new-transaction?error=unknown").into_response()

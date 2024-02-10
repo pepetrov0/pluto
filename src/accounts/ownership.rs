@@ -47,6 +47,7 @@ impl AccountOwnershipRepository for PgPool {
             .bind(account)
             .fetch_one(self)
             .await
+            .map_err(|v| tracing::error!("{:#?}", v))
             .ok()
     }
 
@@ -55,6 +56,7 @@ impl AccountOwnershipRepository for PgPool {
         sqlx::query_as::<_, AccountOwnership>("select id, usr, account from accounts_ownerships")
             .fetch_all(self)
             .await
+            .map_err(|v| tracing::error!("{:#?}", v))
             .ok()
     }
 
@@ -66,6 +68,7 @@ impl AccountOwnershipRepository for PgPool {
         .bind(user)
         .fetch_all(self)
         .await
+        .map_err(|v| tracing::error!("{:#?}", v))
         .ok()
     }
 
@@ -84,6 +87,7 @@ impl AccountOwnershipRepository for PgPool {
         .bind(&ids[..])
         .fetch_all(self)
         .await
+        .map_err(|v| tracing::error!("{:#?}", v))
         .ok()
     }
 }

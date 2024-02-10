@@ -1,6 +1,6 @@
 {% extends "page-with-nav.html" %}
 
-{% include "macros/asset-list.html" %}
+{% include "partials/asset-list.html" %}
 
 {% block head %}
 <title>New transaction</title>
@@ -9,7 +9,7 @@
 {% block content %}
 <div class="flex flex-col gap-2 mx-auto w-full max-w-screen-md px-2 py-4">
   <h1 class="heading-1">New transaction</h1>
-  <hr />
+  <hr class="border-t-2 border-dashed py-1" />
   {% if
   csrf_token.is_none() ||
   own_accounts.is_none() ||
@@ -88,41 +88,41 @@
       <div class="flex flex-col w-full gap-1">
         <label for="credit-asset" class="label">Credit asset:</label>
         <select id="credit-asset" name="credit_asset" class="input w-full">
-          {% include "macros/asset-list.html" %}
+          {% include "partials/asset-list.html" %}
         </select>
       </div>
       <!-- Credit Amount -->
       <div class="flex flex-col w-full gap-1">
         <label for="credit-amount" class="label">Credit amount:</label>
         <input id="credit-amount" name="credit_amount" class="input w-full" type="number" placeholder="Credit amount.."
-          step="0.0001" required />
+          step="0.0001" min="0.0001" required />
       </div>
       <!-- Debit Asset -->
       <div class="flex flex-col w-full gap-1">
         <label for="debit-asset" class="label">Debit asset:</label>
         <select id="debit-asset" name="debit_asset" class="input w-full">
-          {% include "macros/asset-list.html" %}
+          {% include "partials/asset-list.html" %}
         </select>
       </div>
       <!-- Debit Amount -->
       <div class="flex flex-col w-full gap-1">
         <label for="debit-amount" class="label">Debit amount:</label>
         <input id="debit-amount" name="debit_amount" class="input w-full" type="number" placeholder="Debit amount.."
-          step="0.0001" required />
+          step="0.0001" min="0.0001" required />
       </div>
       {% else %}
       <!-- Asset -->
       <div class="flex flex-col w-full gap-1">
         <label for="asset" class="label">Asset:</label>
         <select id="asset" name="asset" class="input w-full">
-          {% include "macros/asset-list.html" %}
+          {% include "partials/asset-list.html" %}
         </select>
       </div>
       <!-- Amount -->
       <div class="flex flex-col w-full gap-1">
         <label for="amount" class="label">Amount:</label>
-        <input id="amount" name="amount" class="input w-full" type="number" placeholder="Amount.." step="0.0001" min="0"
-          required />
+        <input id="amount" name="amount" class="input w-full" type="number" placeholder="Amount.." step="0.0001"
+          min="0.0001" required />
       </div>
       {% endif %}
       <!-- Multi-asset switch -->
@@ -144,7 +144,8 @@
       <!-- Date -->
       <div class="flex flex-col w-full gap-1 col-span-1 md:col-span-2">
         <label for="timestamp" class="label">Date and time:</label>
-        <input id="timestamp" name="timestamp" class="input w-full" type="datetime-local" required />
+        <input id="timestamp" name="timestamp" class="input w-full" type="datetime-local" value="{{current_timestamp}}"
+          required />
       </div>
     </section>
     <!-- actions -->
@@ -166,6 +167,12 @@
     {% when TransactionCreationError::MatchingAccounts %}
     Oops! It seems you've used the same account for both debit and credit. Please provide different accounts and try
     again.
+    {% when TransactionCreationError::MissingCreditAccount %}
+    Oops! Your transaction must include a credit account to proceed. Please make sure to specify a valid credit account
+    and try again.
+    {% when TransactionCreationError::MissingDebitAccount %}
+    Oops! Your transaction must include a debit account to proceed. Please make sure to specify a valid debit account
+    and try again.
     {% when TransactionCreationError::MissingCreditAsset %}
     Oops! Your transaction must include a credit asset to proceed. Please make sure to specify a valid credit asset and
     try again.
@@ -184,6 +191,12 @@
     {% when TransactionCreationError::MissingDebitAmount %}
     Oops! Your transaction must include a debit amount to proceed. Please make sure to specify a valid debit amount and
     try again.
+    {% when TransactionCreationError::InvalidCreditAmount %}
+    Oops! Your transaction must include a positive credit amount to proceed. Please make sure to specify a valid credit
+    amount and try again.
+    {% when TransactionCreationError::InvalidDebitAmount %}
+    Oops! Your transaction must include a positive debit amount to proceed. Please make sure to specify a valid debit
+    amount and try again.
     {% when TransactionCreationError::Unknown %}
     Something went wrong. Please try again later.
     {% endmatch %}

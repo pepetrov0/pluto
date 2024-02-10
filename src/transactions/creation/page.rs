@@ -4,11 +4,13 @@ use std::collections::HashSet;
 
 use askama::Template;
 use axum::extract::{Query, State};
+use chrono::Utc;
+use chrono_tz::Tz;
 use serde::Deserialize;
 
 use crate::{
     accounts::component::Account, assets::component::Asset, auth::principal::AuthPrincipal,
-    csrf_tokens::CsrfToken, templates::HtmlTemplate, user::User, AppState,
+    csrf_tokens::CsrfToken, templates::HtmlTemplate, user::User, AppState, DATE_TIME_FORMAT,
 };
 
 use super::error::TransactionCreationError;
@@ -35,6 +37,7 @@ pub struct NewTransactionPage {
     pub new_credit: bool,
     pub new_debit: bool,
     pub multi_asset: bool,
+    pub current_timestamp: String,
     pub error: Option<TransactionCreationError>,
 }
 
@@ -43,25 +46,34 @@ pub async fn handler(
     Query(query): Query<NewTransactionQuery>,
     State(state): State<AppState>,
 ) -> Result<HtmlTemplate<NewTransactionPage>, HtmlTemplate<NewTransactionPage>> {
+    let construct_error = || HtmlTemplate(NewTransactionPage::default());
+
     // create csrf token
     let csrf_token = state
         .csrf_token_repository
         .create_csrf_token(user.id.clone(), super::CSRF_TOKEN_USAGE)
         .await;
 
+    // current timestamp
+    let tz = Tz::from_str_insensitive(&user.timezone);
+    let current_timestamp = tz
+        .map(|v| Utc::now().with_timezone(&v))
+        .map(|v| v.format(DATE_TIME_FORMAT).to_string())
+        .unwrap_or_default();
+
     // accounts
     let accounts = state
         .account_repository
         .list_accounts()
         .await
-        .ok_or_else(|| HtmlTemplate(NewTransactionPage::default()))?;
+        .ok_or_else(construct_error)?;
 
     // accounts ownerships
     let ownerships = state
         .account_ownership_repository
         .list_account_ownerships()
         .await
-        .ok_or_else(|| HtmlTemplate(NewTransactionPage::default()))?;
+        .ok_or_else(construct_error)?;
 
     // owned accounts
     let own_accounts: HashSet<_> = ownerships
@@ -88,7 +100,7 @@ pub async fn handler(
         .user_repository
         .list_users()
         .await
-        .ok_or_else(|| HtmlTemplate(NewTransactionPage::default()))?
+        .ok_or_else(construct_error)?
         .into_iter()
         .filter(|v| v.id != user.id)
         .collect();
@@ -98,7 +110,7 @@ pub async fn handler(
         .asset_repository
         .list_assets()
         .await
-        .ok_or_else(|| HtmlTemplate(NewTransactionPage::default()))?;
+        .ok_or_else(construct_error)?;
 
     let page = NewTransactionPage {
         csrf_token,
@@ -109,6 +121,7 @@ pub async fn handler(
         new_credit: query.new_credit,
         new_debit: query.new_debit,
         multi_asset: query.multi_asset,
+        current_timestamp,
         error: query.error,
     };
     Ok(HtmlTemplate(page))

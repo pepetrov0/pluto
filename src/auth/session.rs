@@ -66,6 +66,7 @@ impl SessionRepository for PgPool {
         .bind(user)
         .fetch_one(self)
         .await
+        .map_err(|v| tracing::error!("{:#?}", v))
         .ok()
     }
 
@@ -75,6 +76,7 @@ impl SessionRepository for PgPool {
             .bind(id)
             .fetch_one(self)
             .await
+            .map_err(|v| tracing::error!("{:#?}", v))
             .ok()
     }
 
@@ -83,7 +85,8 @@ impl SessionRepository for PgPool {
         let _ = sqlx::query("delete from sessions where id=$1")
             .bind(id)
             .execute(self)
-            .await;
+            .await
+            .map_err(|v| tracing::error!("{:#?}", v));
     }
 }
 

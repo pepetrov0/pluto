@@ -32,6 +32,7 @@ impl AccountRepository for PgPool {
             .bind(name)
             .fetch_one(self)
             .await
+            .map_err(|v| tracing::error!("{:#?}", v))
             .ok()
     }
 
@@ -40,6 +41,7 @@ impl AccountRepository for PgPool {
         sqlx::query_as::<_, Account>("select id, name from accounts order by name")
             .fetch_all(self)
             .await
+            .map_err(|v| tracing::error!("{:#?}", v))
             .ok()
     }
 
@@ -55,6 +57,7 @@ impl AccountRepository for PgPool {
         .bind(&ids[..])
         .fetch_all(self)
         .await
+        .map_err(|v| tracing::error!("{:#?}", v))
         .ok()
     }
 }

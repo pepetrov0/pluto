@@ -1,7 +1,5 @@
 //! Implements serving of static files
 
-use std::time::Duration;
-
 use axum::{
     http::{StatusCode, Uri},
     response::{IntoResponse, Response},
@@ -34,7 +32,12 @@ where
 
                 (
                     TypedHeader(ContentType::from(mime)),
-                    TypedHeader(CacheControl::new().with_max_age(Duration::from_secs(3600))),
+                    #[cfg(debug_assertions)]
+                    TypedHeader(CacheControl::new().with_no_cache().with_no_store()),
+                    #[cfg(not(debug_assertions))]
+                    TypedHeader(
+                        CacheControl::new().with_max_age(std::time::Duration::from_secs(3600)),
+                    ),
                     content.data,
                 )
                     .into_response()

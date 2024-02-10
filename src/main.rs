@@ -13,9 +13,16 @@ use pluto::{
 #[tokio::main]
 async fn main() {
     // initialize tracing
+    #[cfg(debug_assertions)]
     tracing_subscriber::fmt()
         .compact()
         .with_max_level(tracing::Level::TRACE)
+        .init();
+
+    #[cfg(not(debug_assertions))]
+    tracing_subscriber::fmt()
+        .compact()
+        .with_max_level(tracing::Level::WARN)
         .init();
 
     // load in configuration

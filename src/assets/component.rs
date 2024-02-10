@@ -56,6 +56,7 @@ impl AssetRepository for PgPool {
         )
         .fetch_all(self)
         .await
+        .map_err(|v| tracing::error!("{:#?}", v))
         .ok()
     }
 
@@ -71,6 +72,7 @@ impl AssetRepository for PgPool {
         .bind(&ids[..])
         .fetch_all(self)
         .await
+        .map_err(|v| tracing::error!("{:#?}", v))
         .ok()
     }
 
@@ -82,6 +84,7 @@ impl AssetRepository for PgPool {
         .bind(ticker)
         .fetch_one(self)
         .await
+        .map_err(|v| tracing::error!("{:#?}", v))
         .ok()
     }
 
@@ -105,6 +108,7 @@ impl AssetRepository for PgPool {
         .bind(atype)
         .fetch_one(self)
         .await
+        .map_err(|v| tracing::error!("{:#?}", v))
         .ok()
     }
 }

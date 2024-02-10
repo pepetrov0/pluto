@@ -10,7 +10,7 @@
     <span>Accounts</span>
     <a href="/new-account" class="button ml-auto">New account</a>
   </h1>
-  <hr />
+  <hr class="border-t-2 border-dashed py-1" />
   <!-- created message -->
   {% if created %}
   <section class="card bg-success text-success-contrast">
@@ -29,7 +29,10 @@
   <section class="card grid grid-cols-[auto_1fr] md:grid-cols-[auto_1fr_auto_1fr] gap-1">
     <h2 class="heading-3 col-span-2 sm:col-span-4">{{ account.name }}</h2>
     <!-- owners -->
-    <span class="col-span-2 md:col-span-4 text-ellipsis overflow-hidden text-nowrap text-sm pt-2">
+    <span class="icon self-center">
+      {% include "icons/users.svg" %}
+    </span>
+    <span class="col-span-1 md:col-span-3 text-ellipsis overflow-hidden text-nowrap">
       {% for owner in owners %}
       {{ owner.email }}{% if !loop.last %},{% endif %}
       {% endfor %}
