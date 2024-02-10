@@ -59,8 +59,9 @@
       <span>Amount:</span>
     </strong>
     <span class="sm:col-start-2 sm:row-start-3">
-      {{ transaction.credit_asset.symbol.clone().unwrap_or(transaction.credit_asset.ticker.clone()) }}{{
-      transaction.credit_amount }}
+      {% let symbol = transaction.credit_asset.symbol.clone() %}
+      {% let ticker = format!("{} ", transaction.credit_asset.ticker.to_uppercase()) %}
+      {{ symbol.unwrap_or(ticker.clone()) }}{{ transaction.credit_amount }}
     </span>
     <!-- timestamp -->
     <strong class="flex gap-1 sm:col-start-1 sm:row-start-4 items-center">
@@ -112,8 +113,9 @@
       <span>Amount:</span>
     </strong>
     <span class="sm:col-start-5 sm:row-start-3">
-      {{ transaction.debit_asset.symbol.clone().unwrap_or(transaction.debit_asset.ticker.clone()) }}{{
-      transaction.debit_amount }}
+      {% let symbol = transaction.debit_asset.symbol.clone() %}
+      {% let ticker = format!("{} ", transaction.debit_asset.ticker.to_uppercase()) %}
+      {{ symbol.unwrap_or(ticker.clone()) }}{{ transaction.debit_amount }}
     </span>
     <!-- timestamp -->
     <strong class="flex gap-1 sm:col-start-4 sm:row-start-4 items-center">

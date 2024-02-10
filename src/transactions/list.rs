@@ -134,7 +134,7 @@ async fn handler(
         .ok_or_else(construct_error)?;
 
     // transactions
-    let transactions = transactions
+    let transactions: Vec<_> = transactions
         .into_iter()
         .filter_map(|v| {
             // ownership
