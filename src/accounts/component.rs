@@ -3,7 +3,7 @@
 use axum::async_trait;
 use sqlx::{prelude::FromRow, Postgres};
 
-use crate::database::AsExecutor;
+use crate::database::{AsReadonlyExecutor, AsWriteExecutor};
 
 /// Represents an account
 #[derive(Debug, Clone, FromRow)]
@@ -12,12 +12,9 @@ pub struct Account {
     pub name: String,
 }
 
-/// Represents an account repository
+/// Represents an account readonly repository
 #[async_trait]
-pub trait AccountRepository {
-    /// Creates an account
-    async fn create_account(&mut self, name: String) -> Option<Account>;
-
+pub trait AccountReadonlyRepository {
     /// List all accounts
     async fn list_accounts(&mut self) -> Option<Vec<Account>>;
 
@@ -25,24 +22,18 @@ pub trait AccountRepository {
     async fn list_accounts_by_ids(&mut self, ids: Vec<String>) -> Option<Vec<Account>>;
 }
 
+/// Represents an account write repository
 #[async_trait]
-impl<T> AccountRepository for T
-where
-    T: AsExecutor<Postgres> + Send + std::fmt::Debug,
-{
-    #[tracing::instrument]
-    async fn create_account(&mut self, name: String) -> Option<Account> {
-        sqlx::query_as::<_, Account>(
-            "insert into accounts (id, name) values ($1, $2) returning id, name",
-        )
-        .bind(nanoid::nanoid!())
-        .bind(name)
-        .fetch_one(self.as_executor())
-        .await
-        .map_err(|v| tracing::error!("{:#?}", v))
-        .ok()
-    }
+pub trait AccountWriteRepository {
+    /// Creates an account
+    async fn create_account(&mut self, name: String) -> Option<Account>;
+}
 
+#[async_trait]
+impl<T> AccountReadonlyRepository for T
+where
+    T: AsReadonlyExecutor<Postgres> + Send + std::fmt::Debug,
+{
     #[tracing::instrument]
     async fn list_accounts(&mut self) -> Option<Vec<Account>> {
         sqlx::query_as::<_, Account>("select id, name from accounts order by name")
@@ -63,6 +54,25 @@ where
         )
         .bind(&ids[..])
         .fetch_all(self.as_executor())
+        .await
+        .map_err(|v| tracing::error!("{:#?}", v))
+        .ok()
+    }
+}
+
+#[async_trait]
+impl<T> AccountWriteRepository for T
+where
+    T: AsWriteExecutor<Postgres> + Send + std::fmt::Debug,
+{
+    #[tracing::instrument]
+    async fn create_account(&mut self, name: String) -> Option<Account> {
+        sqlx::query_as::<_, Account>(
+            "insert into accounts (id, name) values ($1, $2) returning id, name",
+        )
+        .bind(nanoid::nanoid!())
+        .bind(name)
+        .fetch_one(self.as_executor())
         .await
         .map_err(|v| tracing::error!("{:#?}", v))
         .ok()

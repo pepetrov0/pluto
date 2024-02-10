@@ -9,7 +9,7 @@ use axum::{
 
 use crate::{auth::principal::AuthPrincipal, templates::HtmlTemplate, AppState};
 
-use super::component::{Asset, AssetRepository, AssetType};
+use super::component::{Asset, AssetReadonlyRepository, AssetType};
 
 #[derive(serde::Deserialize)]
 pub struct AssetsListQuery {

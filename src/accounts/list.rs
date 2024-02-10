@@ -7,11 +7,14 @@ use axum::{
 };
 
 use crate::{
-    accounts::component::Account, auth::principal::AuthPrincipal, templates::HtmlTemplate,
-    user::{User, UserRepository}, AppState,
+    accounts::component::Account,
+    auth::principal::AuthPrincipal,
+    templates::HtmlTemplate,
+    user::{User, UserReadonlyRepository},
+    AppState,
 };
 
-use super::{component::AccountRepository, ownership::AccountOwnershipRepository};
+use super::{component::AccountReadonlyRepository, ownership::AccountOwnershipReadonlyRepository};
 
 type AccountBundle = (Account, Vec<User>);
 

@@ -5,7 +5,7 @@ use nanoid::nanoid;
 use serde::{Deserialize, Serialize};
 use sqlx::{prelude::FromRow, Postgres, Type};
 
-use crate::database::AsExecutor;
+use crate::database::{AsReadonlyExecutor, AsWriteExecutor};
 
 /// Represents an asset type
 #[derive(Debug, Clone, PartialEq, Eq, Type, Serialize, Deserialize)]
@@ -26,9 +26,9 @@ pub struct Asset {
     pub atype: AssetType,
 }
 
-/// An asset repository
+/// An asset readonly repository
 #[async_trait]
-pub trait AssetRepository {
+pub trait AssetReadonlyRepository {
     /// lists all assets
     async fn list_assets(&mut self) -> Option<Vec<Asset>>;
 
@@ -37,7 +37,11 @@ pub trait AssetRepository {
 
     /// find an asset by ticker
     async fn find_asset_by_ticker(&mut self, ticker: &str) -> Option<Asset>;
+}
 
+/// An asset write repository
+#[async_trait]
+pub trait AssetWriteRepository {
     /// create an asset
     async fn create_asset(
         &mut self,
@@ -50,9 +54,9 @@ pub trait AssetRepository {
 }
 
 #[async_trait]
-impl<T> AssetRepository for T
+impl<T> AssetReadonlyRepository for T
 where
-    T: AsExecutor<Postgres> + std::fmt::Debug + Send,
+    T: AsReadonlyExecutor<Postgres> + std::fmt::Debug + Send,
 {
     #[tracing::instrument]
     async fn list_assets(&mut self) -> Option<Vec<Asset>> {
@@ -92,7 +96,13 @@ where
         .map_err(|v| tracing::error!("{:#?}", v))
         .ok()
     }
+}
 
+#[async_trait]
+impl<T> AssetWriteRepository for T
+where
+    T: AsWriteExecutor<Postgres> + std::fmt::Debug + Send,
+{
     #[tracing::instrument]
     async fn create_asset(
         &mut self,

@@ -4,7 +4,7 @@ use axum::async_trait;
 use chrono_tz::Tz;
 use sqlx::{FromRow, Postgres};
 
-use crate::database::AsExecutor;
+use crate::database::{AsReadonlyExecutor, AsWriteExecutor};
 
 /// Represents a user
 #[derive(Debug, Clone, FromRow)]
@@ -23,17 +23,9 @@ pub struct UserWithPassword {
     pub timezone: String,
 }
 
-/// A user repository
+/// A user readonly repository
 #[async_trait]
-pub trait UserRepository {
-    /// Creates a user
-    async fn create_user(
-        &mut self,
-        email: String,
-        password: Option<String>,
-        timezone: Tz,
-    ) -> Option<User>;
-
+pub trait UserReadonlyRepository {
     /// Finds a user by id or by email
     async fn find_user(&mut self, id_or_email: &str) -> Option<User>;
 
@@ -47,31 +39,23 @@ pub trait UserRepository {
     async fn list_users_by_ids(&mut self, ids: Vec<String>) -> Option<Vec<User>>;
 }
 
+/// A user write repository
 #[async_trait]
-impl<T> UserRepository for T
-where
-    T: AsExecutor<Postgres> + Send + std::fmt::Debug,
-{
-    #[tracing::instrument]
+pub trait UserWriteRepository {
+    /// Creates a user
     async fn create_user(
         &mut self,
         email: String,
         password: Option<String>,
         timezone: Tz,
-    ) -> Option<User> {
-        sqlx::query_as::<_, User>(
-            "insert into users (id, email, password, timezone) values ($1, $2, $3, $4) returning id, email, timezone",
-        )
-        .bind(nanoid::nanoid!())
-        .bind(email)
-        .bind(password)
-        .bind(timezone.name())
-        .fetch_one(self.as_executor())
-        .await
-        .map_err(|v| tracing::error!("{:#?}", v))
-        .ok()
-    }
+    ) -> Option<User>;
+}
 
+#[async_trait]
+impl<T> UserReadonlyRepository for T
+where
+    T: AsReadonlyExecutor<Postgres> + Send + std::fmt::Debug,
+{
     #[tracing::instrument]
     async fn find_user(&mut self, id_or_email: &str) -> Option<User> {
         sqlx::query_as::<_, User>("select id, email, timezone from users where id=$1 or email=$1")
@@ -114,6 +98,32 @@ where
         )
         .bind(&ids[..])
         .fetch_all(self.as_executor())
+        .await
+        .map_err(|v| tracing::error!("{:#?}", v))
+        .ok()
+    }
+}
+
+#[async_trait]
+impl<T> UserWriteRepository for T
+where
+    T: AsWriteExecutor<Postgres> + Send + std::fmt::Debug,
+{
+    #[tracing::instrument]
+    async fn create_user(
+        &mut self,
+        email: String,
+        password: Option<String>,
+        timezone: Tz,
+    ) -> Option<User> {
+        sqlx::query_as::<_, User>(
+            "insert into users (id, email, password, timezone) values ($1, $2, $3, $4) returning id, email, timezone",
+        )
+        .bind(nanoid::nanoid!())
+        .bind(email)
+        .bind(password)
+        .bind(timezone.name())
+        .fetch_one(self.as_executor())
         .await
         .map_err(|v| tracing::error!("{:#?}", v))
         .ok()

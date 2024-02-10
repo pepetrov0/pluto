@@ -4,7 +4,7 @@ use axum::{extract::State, response::Redirect, Form};
 use serde::Deserialize;
 
 use crate::{
-    assets::component::{AssetRepository, AssetType},
+    assets::component::{AssetReadonlyRepository, AssetType, AssetWriteRepository},
     auth::principal::AuthPrincipal,
     csrf_tokens::CsrfTokenRepository,
     AppState,
@@ -24,9 +24,15 @@ pub struct NewAssetForm {
 
 pub async fn handler(
     AuthPrincipal(user): AuthPrincipal,
-    State(mut state): State<AppState>,
+    State(state): State<AppState>,
     Form(details): Form<NewAssetForm>,
 ) -> Result<Redirect, AssetCreationError> {
+    let mut tx = state
+        .database
+        .begin()
+        .await
+        .map_err(|_| AssetCreationError::Unknown)?;
+
     let details = NewAssetForm {
         label: details.label.trim().to_owned(),
         ticker: details.ticker.trim().to_lowercase().to_owned(),
@@ -40,10 +46,7 @@ pub async fn handler(
     };
 
     // check csrf
-    let csrf = state
-        .database
-        .consume_csrf_token(details.csrf.as_str())
-        .await;
+    let csrf = tx.consume_csrf_token(details.csrf.as_str()).await;
     if csrf
         .filter(|v| v.usr == user.id)
         .filter(|v| v.usage == super::CSRF_TOKEN_USAGE)
@@ -74,26 +77,20 @@ pub async fn handler(
         return Err(AssetCreationError::InvalidPrecision);
     }
 
-    if state
-        .database
-        .find_asset_by_ticker(&details.ticker)
-        .await
-        .is_some()
-    {
+    if tx.find_asset_by_ticker(&details.ticker).await.is_some() {
         return Err(AssetCreationError::AlreadyExists);
     }
 
-    state
-        .database
-        .create_asset(
-            details.ticker,
-            details.symbol,
-            details.label,
-            details.precision,
-            details.atype,
-        )
-        .await
-        .ok_or(AssetCreationError::Unknown)?;
+    tx.create_asset(
+        details.ticker,
+        details.symbol,
+        details.label,
+        details.precision,
+        details.atype,
+    )
+    .await
+    .ok_or(AssetCreationError::Unknown)?;
 
+    tx.commit().await.map_err(|_| AssetCreationError::Unknown)?;
     Ok(Redirect::to("/assets?created=true"))
 }

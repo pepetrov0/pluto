@@ -3,7 +3,7 @@
 use axum::async_trait;
 use sqlx::{prelude::FromRow, Postgres};
 
-use crate::database::AsExecutor;
+use crate::database::AsWriteExecutor;
 
 /// Represents a CSRF token
 #[derive(Debug, Clone, FromRow)]
@@ -26,7 +26,7 @@ pub trait CsrfTokenRepository {
 #[async_trait]
 impl<T> CsrfTokenRepository for T
 where
-    T: AsExecutor<Postgres> + Send + std::fmt::Debug,
+    T: AsWriteExecutor<Postgres> + Send + std::fmt::Debug,
 {
     /// Find and remove a CSRF token
     async fn consume_csrf_token(&mut self, id: &str) -> Option<CsrfToken> {
@@ -36,6 +36,7 @@ where
         .bind(id)
         .fetch_one(self.as_executor())
         .await
+        .map_err(|v| tracing::error!("{:#?}", v))
         .ok()
     }
 
@@ -49,6 +50,7 @@ where
         .bind(usage)
         .fetch_one(self.as_executor())
         .await
+        .map_err(|v| tracing::error!("{:#?}", v))
         .ok()
     }
 }

@@ -10,12 +10,19 @@ pub trait AsExecutor<DB: sqlx::Database> {
     fn as_executor(&mut self) -> impl Executor<'_, Database = DB>;
 }
 
+pub trait AsReadonlyExecutor<DB: sqlx::Database>: AsExecutor<DB> {}
+
+pub trait AsWriteExecutor<DB: sqlx::Database>: AsReadonlyExecutor<DB> {}
+
+impl AsReadonlyExecutor<Postgres> for Transaction<'static, Postgres> {}
+impl AsWriteExecutor<Postgres> for Transaction<'static, Postgres> {}
 impl AsExecutor<Postgres> for Transaction<'static, Postgres> {
     fn as_executor(&mut self) -> impl Executor<'_, Database = Postgres> {
         &mut **self
     }
 }
 
+impl AsReadonlyExecutor<Postgres> for PgPool {}
 impl AsExecutor<Postgres> for PgPool {
     fn as_executor(&mut self) -> impl Executor<'_, Database = Postgres> {
         &*self

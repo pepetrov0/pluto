@@ -4,7 +4,7 @@ use axum::{extract::State, response::Redirect, Form};
 use serde::Deserialize;
 
 use crate::{
-    accounts::{component::AccountRepository, ownership::AccountOwnershipRepository},
+    accounts::{component::AccountWriteRepository, ownership::AccountOwnershipWriteRepository},
     auth::principal::AuthPrincipal,
     csrf_tokens::CsrfTokenRepository,
     AppState,
@@ -20,7 +20,7 @@ pub struct NewAccountForm {
 
 pub async fn handler(
     AuthPrincipal(user): AuthPrincipal,
-    State(mut state): State<AppState>,
+    State(state): State<AppState>,
     Form(details): Form<NewAccountForm>,
 ) -> Result<Redirect, AccountCreationError> {
     let details = NewAccountForm {
@@ -28,11 +28,14 @@ pub async fn handler(
         csrf: details.csrf.trim().to_owned(),
     };
 
-    // check csrf
-    let csrf = state
+    let mut tx = state
         .database
-        .consume_csrf_token(details.csrf.as_str())
-        .await;
+        .begin()
+        .await
+        .map_err(|_| AccountCreationError::Unknown)?;
+
+    // check csrf
+    let csrf = tx.consume_csrf_token(details.csrf.as_str()).await;
     if csrf
         .filter(|v| v.usr == user.id)
         .filter(|v| v.usage == super::CSRF_TOKEN_USAGE)
@@ -47,16 +50,17 @@ pub async fn handler(
     }
 
     // create account and ownership
-    let account = state
-        .database
+    let account = tx
         .create_account(details.name)
         .await
         .ok_or(AccountCreationError::Unknown)?;
-    let _ = state
-        .database
+    let _ = tx
         .create_account_ownership(user.id, account.id)
         .await
         .ok_or(AccountCreationError::Unknown)?;
 
+    tx.commit()
+        .await
+        .map_err(|_| AccountCreationError::Unknown)?;
     Ok(Redirect::to("/accounts?created=true"))
 }

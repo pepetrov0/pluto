@@ -44,8 +44,6 @@
         Passwords do not match.
         {% when RegistrationError::EmailTaken %}
         The email address provided is already registered.
-        {% when RegistrationError::SessionCreationError %}
-        Something went wrong. Please try again later.
         {% when RegistrationError::Unknown %}
         Something went wrong. Please try again later.
         {% endmatch %}

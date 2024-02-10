@@ -9,12 +9,18 @@ use chrono_tz::Tz;
 use either::Either;
 
 use crate::{
-    accounts::{component::{Account, AccountRepository}, ownership::AccountOwnershipRepository}, assets::component::{Asset, AssetRepository}, auth::principal::AuthPrincipal,
-    templates::HtmlTemplate, user::{User, UserRepository}, AppState, DATE_TIME_FORMAT, DATE_TIME_FORMAT_NICE,
-    DEFAULT_PAGE_SIZE, PAGE_SIZE_LIMITS,
+    accounts::{
+        component::{Account, AccountReadonlyRepository},
+        ownership::AccountOwnershipReadonlyRepository,
+    },
+    assets::component::{Asset, AssetReadonlyRepository},
+    auth::principal::AuthPrincipal,
+    templates::HtmlTemplate,
+    user::{User, UserReadonlyRepository},
+    AppState, DATE_TIME_FORMAT, DATE_TIME_FORMAT_NICE, DEFAULT_PAGE_SIZE, PAGE_SIZE_LIMITS,
 };
 
-use super::component::TransactionRepository;
+use super::component::TransactionReadonlyRepository;
 
 #[derive(serde::Deserialize)]
 pub struct AccountsListQuery {

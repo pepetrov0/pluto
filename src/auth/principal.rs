@@ -5,7 +5,7 @@ use axum::{
     RequestPartsExt,
 };
 
-use crate::{user::{User, UserRepository}, AppState};
+use crate::{user::{User, UserReadonlyRepository}, AppState};
 
 use super::session::Session;
 

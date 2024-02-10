@@ -54,7 +54,7 @@
       <a href="/assets" class="button-outline">Cancel</a>
       <button class="button" type="submit">Create</button>
     </section>
-    <input class="hidden" name="csrf" value="{{ csrf_token.id }}" />
+    <input name="csrf" value="{{ csrf_token.id }}" hidden />
   </form>
   {% endif %}
   {% if let Some(error) = error %}

@@ -12,7 +12,7 @@ use axum_extra::extract::{
     PrivateCookieJar,
 };
 
-use crate::{auth::session::{Session, SessionRepository}, AppState};
+use crate::{auth::session::{Session, SessionReadonlyRepository}, AppState};
 
 const DEFAULT_SESSION_COOKIE_NAME: &str = "x-pluto-session";
 

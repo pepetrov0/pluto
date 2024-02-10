@@ -3,7 +3,7 @@
 use axum::{async_trait, extract::FromRequestParts, http::request::Parts, Extension};
 use sqlx::{prelude::FromRow, Postgres};
 
-use crate::{database::AsExecutor, AppState};
+use crate::{database::{AsReadonlyExecutor, AsWriteExecutor}, AppState};
 
 /// Represents a session
 #[derive(Debug, Clone, FromRow)]
@@ -14,23 +14,43 @@ pub struct Session {
     pub usr: String,
 }
 
-/// A session repository
+/// A session readonly repository
 #[async_trait]
-pub trait SessionRepository {
-    /// Creates a session
-    async fn create_session(&mut self, user: String) -> Option<Session>;
-
+pub trait SessionReadonlyRepository {
     /// Finds a session
     async fn find_session(&mut self, id: &str) -> Option<Session>;
+}
+
+/// A session write repository
+#[async_trait]
+pub trait SessionWriteRepository {
+    /// Creates a session
+    async fn create_session(&mut self, user: String) -> Option<Session>;
 
     /// Deletes a session
     async fn delete_session(&mut self, id: &str);
 }
 
 #[async_trait]
-impl<T> SessionRepository for T
+impl<T> SessionReadonlyRepository for T
 where
-    T: AsExecutor<Postgres> + Send + std::fmt::Debug,
+    T: AsReadonlyExecutor<Postgres> + Send + std::fmt::Debug,
+{
+    #[tracing::instrument]
+    async fn find_session(&mut self, id: &str) -> Option<Session> {
+        sqlx::query_as::<_, Session>("select id, usr from sessions where id=$1")
+            .bind(id)
+            .fetch_one(self.as_executor())
+            .await
+            .map_err(|v| tracing::error!("{:#?}", v))
+            .ok()
+    }
+}
+
+#[async_trait]
+impl<T> SessionWriteRepository for T
+where
+    T: AsWriteExecutor<Postgres> + Send + std::fmt::Debug,
 {
     #[tracing::instrument]
     async fn create_session(&mut self, user: String) -> Option<Session> {
@@ -43,16 +63,6 @@ where
         .await
         .map_err(|v| tracing::error!("{:#?}", v))
         .ok()
-    }
-
-    #[tracing::instrument]
-    async fn find_session(&mut self, id: &str) -> Option<Session> {
-        sqlx::query_as::<_, Session>("select id, usr from sessions where id=$1")
-            .bind(id)
-            .fetch_one(self.as_executor())
-            .await
-            .map_err(|v| tracing::error!("{:#?}", v))
-            .ok()
     }
 
     #[tracing::instrument]

@@ -4,10 +4,10 @@ use axum::{extract::State, response::Redirect, Form};
 
 use crate::{
     auth::{
-        principal::NoAuthPrincipal, session::SessionRepository,
+        principal::NoAuthPrincipal, session::SessionWriteRepository,
         session_providers::cookie::SetCookieSession,
     },
-    user::UserRepository,
+    user::UserReadonlyRepository,
     validation, AppState,
 };
 
@@ -21,15 +21,20 @@ pub struct RegisterForm {
 
 pub async fn handler(
     _: NoAuthPrincipal,
-    State(mut state): State<AppState>,
+    State(state): State<AppState>,
     Form(details): Form<RegisterForm>,
 ) -> Result<(SetCookieSession, Redirect), LoginError> {
+    let mut tx = state
+        .database
+        .begin()
+        .await
+        .map_err(|_| LoginError::Unknown)?;
+
     if !validation::is_email(&details.email) {
         return Err(LoginError::InvalidCredentials);
     }
 
-    let user = state
-        .database
+    let user = tx
         .find_user_with_password(&details.email)
         .await
         .ok_or(LoginError::InvalidCredentials)?;
@@ -46,8 +51,11 @@ pub async fn handler(
         return Err(LoginError::InvalidCredentials);
     }
 
-    match state.database.create_session(user.id).await {
-        Some(session) => Ok((SetCookieSession(session), Redirect::to("/"))),
-        None => Err(LoginError::Unknown),
-    }
+    let session = tx
+        .create_session(user.id)
+        .await
+        .ok_or(LoginError::Unknown)?;
+
+    tx.commit().await.map_err(|_| LoginError::Unknown)?;
+    Ok((SetCookieSession(session), Redirect::to("/")))
 }
