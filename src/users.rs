@@ -12,6 +12,8 @@ pub struct User {
     pub id: String,
     pub email: String,
     pub timezone: String,
+    pub favorite_asset: String,
+    pub favorite_account: String,
 }
 
 /// Represents a user with password
@@ -21,6 +23,8 @@ pub struct UserWithPassword {
     pub email: String,
     pub password: Option<String>,
     pub timezone: String,
+    pub favorite_asset: String,
+    pub favorite_account: String,
 }
 
 /// A user readonly repository
@@ -45,9 +49,11 @@ pub trait UserWriteRepository {
     /// Creates a user
     async fn create_user(
         &mut self,
-        email: String,
+        email: &str,
         password: Option<String>,
         timezone: Tz,
+        favorite_asset: &str,
+        favorite_account: &str,
     ) -> Option<User>;
 }
 
@@ -58,7 +64,7 @@ where
 {
     #[tracing::instrument]
     async fn find_user(&mut self, id_or_email: &str) -> Option<User> {
-        sqlx::query_as::<_, User>("select id, email, timezone from users where id=$1 or email=$1")
+        sqlx::query_as::<_, User>("select id, email, timezone, favorite_asset, favorite_account from users where id=$1 or email=$1")
             .bind(id_or_email)
             .fetch_one(self.as_executor())
             .await
@@ -69,7 +75,7 @@ where
     #[tracing::instrument]
     async fn find_user_with_password(&mut self, id_or_email: &str) -> Option<UserWithPassword> {
         sqlx::query_as::<_, UserWithPassword>(
-            "select id, email, password, timezone from users where id=$1 or email=$1",
+            "select id, email, password, timezone, favorite_asset, favorite_account from users where id=$1 or email=$1",
         )
         .bind(id_or_email)
         .fetch_one(self.as_executor())
@@ -80,7 +86,7 @@ where
 
     #[tracing::instrument]
     async fn list_users(&mut self) -> Option<Vec<User>> {
-        sqlx::query_as::<_, User>("select id, email, timezone from users order by email")
+        sqlx::query_as::<_, User>("select id, email, timezone, favorite_asset, favorite_account from users order by email")
             .fetch_all(self.as_executor())
             .await
             .map_err(|v| tracing::error!("{:#?}", v))
@@ -94,7 +100,7 @@ where
         }
 
         sqlx::query_as::<_, User>(
-            "select id, email, timezone from users where id=ANY($1) order by email",
+            "select id, email, timezone, favorite_asset, favorite_account from users where id=ANY($1) order by email",
         )
         .bind(&ids[..])
         .fetch_all(self.as_executor())
@@ -112,17 +118,21 @@ where
     #[tracing::instrument]
     async fn create_user(
         &mut self,
-        email: String,
+        email: &str,
         password: Option<String>,
         timezone: Tz,
+        favorite_asset: &str,
+        favorite_account: &str,
     ) -> Option<User> {
         sqlx::query_as::<_, User>(
-            "insert into users (id, email, password, timezone) values ($1, $2, $3, $4) returning id, email, timezone",
+            "insert into users (id, email, password, timezone, favorite_asset, favorite_account) values ($1, $2, $3, $4, $5, $6) returning id, email, timezone, favorite_asset, favorite_account",
         )
         .bind(nanoid::nanoid!())
         .bind(email)
         .bind(password)
         .bind(timezone.name())
+        .bind(favorite_asset)
+        .bind(favorite_account)
         .fetch_one(self.as_executor())
         .await
         .map_err(|v| tracing::error!("{:#?}", v))

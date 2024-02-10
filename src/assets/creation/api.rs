@@ -77,7 +77,7 @@ pub async fn handler(
         return Err(AssetCreationError::InvalidPrecision);
     }
 
-    if tx.find_asset_by_ticker(&details.ticker).await.is_some() {
+    if tx.find_asset(&details.ticker).await.is_some() {
         return Err(AssetCreationError::AlreadyExists);
     }
 

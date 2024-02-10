@@ -17,7 +17,7 @@ use crate::{
     auth::principal::AuthPrincipal,
     csrf_tokens::{CsrfToken, CsrfTokenRepository},
     templates::HtmlTemplate,
-    user::{User, UserReadonlyRepository},
+    users::{User, UserReadonlyRepository},
     AppState, DATE_TIME_FORMAT,
 };
 
@@ -34,7 +34,7 @@ pub struct NewTransactionQuery {
     pub error: Option<TransactionCreationError>,
 }
 
-#[derive(Template, Default)]
+#[derive(Template)]
 #[template(path = "transactions/creation.html")]
 pub struct NewTransactionPage {
     pub csrf_token: Option<CsrfToken>,
@@ -47,6 +47,7 @@ pub struct NewTransactionPage {
     pub multi_asset: bool,
     pub current_timestamp: String,
     pub error: Option<TransactionCreationError>,
+    pub principal: User,
 }
 
 pub async fn handler(
@@ -54,7 +55,28 @@ pub async fn handler(
     Query(query): Query<NewTransactionQuery>,
     State(state): State<AppState>,
 ) -> Result<HtmlTemplate<NewTransactionPage>, HtmlTemplate<NewTransactionPage>> {
-    let construct_error = || HtmlTemplate(NewTransactionPage::default());
+    // current timestamp
+    let tz = Tz::from_str_insensitive(&user.timezone);
+    let current_timestamp = tz
+        .map(|v| Utc::now().with_timezone(&v))
+        .map(|v| v.format(DATE_TIME_FORMAT).to_string())
+        .unwrap_or_default();
+
+    let construct_error = || {
+        HtmlTemplate(NewTransactionPage {
+            csrf_token: None,
+            own_accounts: None,
+            other_accounts: None,
+            other_users: None,
+            assets: None,
+            new_credit: query.new_credit,
+            new_debit: query.new_debit,
+            multi_asset: query.multi_asset,
+            current_timestamp: current_timestamp.clone(),
+            error: None,
+            principal: user.clone(),
+        })
+    };
 
     let mut tx = state
         .database
@@ -66,13 +88,6 @@ pub async fn handler(
     let csrf_token = tx
         .create_csrf_token(&user.id, super::CSRF_TOKEN_USAGE)
         .await;
-
-    // current timestamp
-    let tz = Tz::from_str_insensitive(&user.timezone);
-    let current_timestamp = tz
-        .map(|v| Utc::now().with_timezone(&v))
-        .map(|v| v.format(DATE_TIME_FORMAT).to_string())
-        .unwrap_or_default();
 
     // accounts
     let accounts = tx.list_accounts().await.ok_or_else(construct_error)?;
@@ -127,6 +142,7 @@ pub async fn handler(
         multi_asset: query.multi_asset,
         current_timestamp,
         error: query.error,
+        principal: user,
     };
     Ok(HtmlTemplate(page))
 }

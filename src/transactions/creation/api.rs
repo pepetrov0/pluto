@@ -14,6 +14,7 @@ use crate::{
     auth::principal::AuthPrincipal,
     csrf_tokens::CsrfTokenRepository,
     transactions::component::TransactionWriteRepository,
+    users::UserReadonlyRepository,
     AppState, DATE_TIME_FORMAT,
 };
 
@@ -102,7 +103,7 @@ pub async fn handler(
 
     // account ownerships
     let ownerships = tx
-        .list_account_ownerships_by_accounts(vec![
+        .list_account_ownerships_by_users_or_accounts(vec![
             details.debit_account.clone(),
             details.credit_account.clone(),
         ])
@@ -126,12 +127,12 @@ pub async fn handler(
             > 0;
     let credit_account_owned = ownerships
         .iter()
-        .filter(|&v| v.account == details.credit_account)
+        .filter(|&v| v.usr == details.credit_account || v.account == details.credit_account)
         .count()
         > 0;
     let debit_account_owned = ownerships
         .iter()
-        .filter(|&v| v.account == details.debit_account)
+        .filter(|&v| v.usr == details.debit_account || v.account == details.debit_account)
         .count()
         > 0;
 
@@ -140,29 +141,50 @@ pub async fn handler(
         return Err(TransactionCreationError::AccountsNotOwned);
     }
 
-    // accounts
-    let accounts = tx
-        .list_accounts_by_ids(vec![
-            details.debit_account.clone(),
+    // users
+    let users = tx
+        .list_users_by_ids(vec![
             details.credit_account.clone(),
+            details.debit_account.clone(),
         ])
+        .await
+        .ok_or(TransactionCreationError::Unknown)?;
+
+    // accounts
+    let accounts = vec![
+        details.credit_account.clone(),
+        details.debit_account.clone(),
+    ]
+    .into_iter();
+    let user_accounts = users.iter().map(|v| v.favorite_account.clone());
+    let accounts = accounts.chain(user_accounts).collect();
+    let accounts = tx
+        .list_accounts_by_ids(accounts)
         .await
         .ok_or(TransactionCreationError::Unknown)?;
 
     // credit and debit accounts
     let credit_account = match details.create_credit_account {
         true => None,
-        false => accounts
-            .iter()
-            .find(|&v| v.id == details.credit_account)
-            .cloned(),
+        false => {
+            let account = users
+                .iter()
+                .find(|&u| u.id == details.credit_account)
+                .map(|v| v.favorite_account.clone())
+                .unwrap_or_else(|| details.credit_account.clone());
+            accounts.iter().find(|&v| v.id == account).cloned()
+        }
     };
     let debit_account = match details.create_debit_account {
         true => None,
-        false => accounts
-            .iter()
-            .find(|&v| v.id == details.debit_account)
-            .cloned(),
+        false => {
+            let account = users
+                .iter()
+                .find(|&u| u.id == details.debit_account)
+                .map(|v| v.favorite_account.clone())
+                .unwrap_or_else(|| details.debit_account.clone());
+            accounts.iter().find(|&v| v.id == account).cloned()
+        }
     };
 
     // assert that accounts are different
@@ -219,7 +241,7 @@ pub async fn handler(
     let credit_account = match credit_account {
         Some(account) => account,
         None if details.create_credit_account => tx
-            .create_account(details.credit_account)
+            .create_account(&details.credit_account)
             .await
             .ok_or(TransactionCreationError::Unknown)?,
         None => return Err(TransactionCreationError::MissingCreditAccount),
@@ -227,7 +249,7 @@ pub async fn handler(
     let debit_account = match debit_account {
         Some(account) => account,
         None if details.create_debit_account => tx
-            .create_account(details.debit_account)
+            .create_account(&details.debit_account)
             .await
             .ok_or(TransactionCreationError::Unknown)?,
         None => return Err(TransactionCreationError::MissingDebitAccount),

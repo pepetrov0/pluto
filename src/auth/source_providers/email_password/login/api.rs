@@ -7,7 +7,7 @@ use crate::{
         principal::NoAuthPrincipal, session::SessionWriteRepository,
         session_providers::cookie::SetCookieSession,
     },
-    user::UserReadonlyRepository,
+    users::UserReadonlyRepository,
     validation, AppState,
 };
 

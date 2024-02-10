@@ -7,7 +7,7 @@ use axum::{
     routing, Router,
 };
 
-use crate::{auth::principal::AuthPrincipal, templates::HtmlTemplate, AppState};
+use crate::{auth::principal::AuthPrincipal, templates::HtmlTemplate, users::User, AppState};
 
 use super::component::{Asset, AssetReadonlyRepository, AssetType};
 
@@ -22,10 +22,11 @@ pub struct AssetsListQuery {
 struct AssetsListPage {
     pub created: bool,
     pub currencies: Option<Vec<Asset>>,
+    pub principal: User,
 }
 
 async fn handler(
-    _: AuthPrincipal,
+    AuthPrincipal(user): AuthPrincipal,
     Query(query): Query<AssetsListQuery>,
     State(mut state): State<AppState>,
 ) -> Result<HtmlTemplate<AssetsListPage>, StatusCode> {
@@ -38,6 +39,7 @@ async fn handler(
                 .filter(|v| v.atype == AssetType::Currency)
                 .collect()
         }),
+        principal: user,
     };
     Ok(HtmlTemplate(page))
 }

@@ -16,7 +16,7 @@ use crate::{
     assets::component::{Asset, AssetReadonlyRepository},
     auth::principal::AuthPrincipal,
     templates::HtmlTemplate,
-    user::{User, UserReadonlyRepository},
+    users::{User, UserReadonlyRepository},
     AppState, DATE_TIME_FORMAT, DATE_TIME_FORMAT_NICE, DEFAULT_PAGE_SIZE, PAGE_SIZE_LIMITS,
 };
 
@@ -66,7 +66,7 @@ async fn handler(
     // all owned accounts for the user
     let owned_accounts: Vec<_> = state
         .database
-        .list_account_ownerships_by_user(&user.id)
+        .list_account_ownerships_by_user_or_account(&user.id)
         .await
         .ok_or_else(construct_error)?
         .into_iter()
@@ -121,7 +121,7 @@ async fn handler(
     let ownerships = accounts.iter().map(|v| v.id.clone()).collect();
     let ownerships = state
         .database
-        .list_account_ownerships_by_accounts(ownerships)
+        .list_account_ownerships_by_users_or_accounts(ownerships)
         .await
         .ok_or_else(construct_error)?;
 

@@ -26,7 +26,7 @@ pub trait AccountReadonlyRepository {
 #[async_trait]
 pub trait AccountWriteRepository {
     /// Creates an account
-    async fn create_account(&mut self, name: String) -> Option<Account>;
+    async fn create_account(&mut self, name: &str) -> Option<Account>;
 }
 
 #[async_trait]
@@ -66,7 +66,7 @@ where
     T: AsWriteExecutor<Postgres> + Send + std::fmt::Debug,
 {
     #[tracing::instrument]
-    async fn create_account(&mut self, name: String) -> Option<Account> {
+    async fn create_account(&mut self, name: &str) -> Option<Account> {
         sqlx::query_as::<_, Account>(
             "insert into accounts (id, name) values ($1, $2) returning id, name",
         )

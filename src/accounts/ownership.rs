@@ -19,14 +19,14 @@ pub trait AccountOwnershipReadonlyRepository {
     /// List all account ownerships
     async fn list_account_ownerships(&mut self) -> Option<Vec<AccountOwnership>>;
 
-    /// List all account ownerships for a user
-    async fn list_account_ownerships_by_user(
+    /// List all account ownerships for a user or account
+    async fn list_account_ownerships_by_user_or_account(
         &mut self,
-        user: &str,
+        user_or_account: &str,
     ) -> Option<Vec<AccountOwnership>>;
 
-    /// List all account ownerships for accounts
-    async fn list_account_ownerships_by_accounts(
+    /// List all account ownerships for users or accounts
+    async fn list_account_ownerships_by_users_or_accounts(
         &mut self,
         ids: Vec<String>,
     ) -> Option<Vec<AccountOwnership>>;
@@ -38,8 +38,8 @@ pub trait AccountOwnershipWriteRepository {
     /// Creates an account ownership
     async fn create_account_ownership(
         &mut self,
-        user: String,
-        account: String,
+        user: &str,
+        account: &str,
     ) -> Option<AccountOwnership>;
 }
 
@@ -58,14 +58,14 @@ where
     }
 
     #[tracing::instrument]
-    async fn list_account_ownerships_by_user(
+    async fn list_account_ownerships_by_user_or_account(
         &mut self,
-        user: &str,
+        user_or_account: &str,
     ) -> Option<Vec<AccountOwnership>> {
         sqlx::query_as::<_, AccountOwnership>(
-            "select id, usr, account from accounts_ownerships where usr=$1",
+            "select id, usr, account from accounts_ownerships where usr=$1 or account=$1",
         )
-        .bind(user)
+        .bind(user_or_account)
         .fetch_all(self.as_executor())
         .await
         .map_err(|v| tracing::error!("{:#?}", v))
@@ -73,7 +73,7 @@ where
     }
 
     #[tracing::instrument]
-    async fn list_account_ownerships_by_accounts(
+    async fn list_account_ownerships_by_users_or_accounts(
         &mut self,
         ids: Vec<String>,
     ) -> Option<Vec<AccountOwnership>> {
@@ -82,7 +82,7 @@ where
         }
 
         sqlx::query_as::<_, AccountOwnership>(
-            "select id, usr, account from accounts_ownerships where account=ANY($1)",
+            "select id, usr, account from accounts_ownerships where usr=ANY($1) or account=ANY($1)",
         )
         .bind(&ids[..])
         .fetch_all(self.as_executor())
@@ -100,8 +100,8 @@ where
     #[tracing::instrument]
     async fn create_account_ownership(
         &mut self,
-        user: String,
-        account: String,
+        user: &str,
+        account: &str,
     ) -> Option<AccountOwnership> {
         sqlx::query_as::<_, AccountOwnership>("insert into accounts_ownerships (usr, account) values ($1, $2) returning id, usr, account")
             .bind(user)

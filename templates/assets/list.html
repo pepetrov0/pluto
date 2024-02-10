@@ -28,7 +28,14 @@
   <h2 class="heading-2">Currencies</h2>
   {% for currency in currencies %}
   <section class="card grid grid-flow-row grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto_1fr] gap-1">
-    <h3 class="heading-3 col-span-2 sm:col-span-4">{{ currency.label }}</h3>
+    <h3 class="heading-3 col-span-2 sm:col-span-4 flex items-center gap-1">
+      <span>{{ currency.label }}</span>
+      {% if currency.id == principal.favorite_asset %}
+      <span class="icon">
+        {% include "icons/star.svg" %}
+      </span>
+      {% endif %}
+    </h3>
     <!-- ticker -->
     <strong class="flex gap-1 items-center">
       <span class="icon">

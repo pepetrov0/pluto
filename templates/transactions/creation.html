@@ -30,17 +30,17 @@
     <!-- essential details -->
     <section class="card grid grid-cols-1 md:grid-cols-2 grid-flow-row gap-4">
       <!-- Note -->
-      <div class="flex flex-col w-full gap-1 col-span-1 md:col-span-2">
+      <div class="flex flex-col gap-1 col-span-1 md:col-span-2">
         <label for="note" class="label">Note:</label>
-        <input id="note" name="note" class="input w-full" type="text" placeholder="Note.." minlength="1" maxlength="200"
+        <input id="note" name="note" class="input" type="text" placeholder="Note.." minlength="1" maxlength="200"
           required />
       </div>
       <!-- Credit Account -->
-      <div class="flex flex-col w-full gap-1">
+      <div class="flex flex-col gap-1">
         <label for="credit-account" class="label">Credit account:</label>
         <input name="create_credit_account" type="text" value="{{new_credit}}" hidden />
         {% if !new_credit %}
-        <select id="credit-account" name="credit_account" class="input w-full" required>
+        <select id="credit-account" name="credit_account" class="input" required>
           {% call account_options %}
         </select>
         <span>
@@ -49,7 +49,7 @@
           </a>
         </span>
         {% else %}
-        <input id="credit-account" name="credit_account" class="input w-full" placeholder="New credit account name.."
+        <input id="credit-account" name="credit_account" class="input" placeholder="New credit account name.."
           minlength="1" maxlength="200" required />
         <span>
           <a class="link text-sm"
@@ -60,11 +60,11 @@
         {% endif %}
       </div>
       <!-- Debit Account -->
-      <div class="flex flex-col w-full gap-1">
+      <div class="flex flex-col gap-1">
         <label for="debit-account" class="label">Debit account:</label>
         <input name="create_debit_account" type="text" value="{{new_debit}}" hidden />
         {% if !new_debit %}
-        <select id="debit-account" name="debit_account" class="input w-full" required>
+        <select id="debit-account" name="debit_account" class="input" required>
           {% call account_options %}
         </select>
         <span>
@@ -73,7 +73,7 @@
           </a>
         </span>
         {% else %}
-        <input id="debit-account" name="debit_account" class="input w-full" placeholder="New debit account name.."
+        <input id="debit-account" name="debit_account" class="input" placeholder="New debit account name.."
           minlength="1" maxlength="200" required />
         <span>
           <a class="link text-sm"
@@ -85,43 +85,43 @@
       </div>
       {% if multi_asset %}
       <!-- Credit Asset -->
-      <div class="flex flex-col w-full gap-1">
+      <div class="flex flex-col gap-1">
         <label for="credit-asset" class="label">Credit asset:</label>
-        <select id="credit-asset" name="credit_asset" class="input w-full">
+        <select id="credit-asset" name="credit_asset" class="input">
           {% include "partials/asset-list.html" %}
         </select>
       </div>
       <!-- Credit Amount -->
-      <div class="flex flex-col w-full gap-1">
+      <div class="flex flex-col gap-1">
         <label for="credit-amount" class="label">Credit amount:</label>
-        <input id="credit-amount" name="credit_amount" class="input w-full" type="number" placeholder="Credit amount.."
+        <input id="credit-amount" name="credit_amount" class="input" type="number" placeholder="Credit amount.."
           step="0.0001" min="0.0001" required />
       </div>
       <!-- Debit Asset -->
-      <div class="flex flex-col w-full gap-1">
+      <div class="flex flex-col gap-1">
         <label for="debit-asset" class="label">Debit asset:</label>
-        <select id="debit-asset" name="debit_asset" class="input w-full">
+        <select id="debit-asset" name="debit_asset" class="input">
           {% include "partials/asset-list.html" %}
         </select>
       </div>
       <!-- Debit Amount -->
-      <div class="flex flex-col w-full gap-1">
+      <div class="flex flex-col gap-1">
         <label for="debit-amount" class="label">Debit amount:</label>
-        <input id="debit-amount" name="debit_amount" class="input w-full" type="number" placeholder="Debit amount.."
+        <input id="debit-amount" name="debit_amount" class="input" type="number" placeholder="Debit amount.."
           step="0.0001" min="0.0001" required />
       </div>
       {% else %}
       <!-- Asset -->
-      <div class="flex flex-col w-full gap-1">
+      <div class="flex flex-col gap-1">
         <label for="asset" class="label">Asset:</label>
-        <select id="asset" name="asset" class="input w-full">
+        <select id="asset" name="asset" class="input">
           {% include "partials/asset-list.html" %}
         </select>
       </div>
       <!-- Amount -->
-      <div class="flex flex-col w-full gap-1">
+      <div class="flex flex-col gap-1">
         <label for="amount" class="label">Amount:</label>
-        <input id="amount" name="amount" class="input w-full" type="number" placeholder="Amount.." step="0.0001"
+        <input id="amount" name="amount" class="input" type="number" placeholder="Amount.." step="0.0001"
           min="0.0001" required />
       </div>
       {% endif %}
@@ -142,9 +142,9 @@
       </span>
       {% endif %}
       <!-- Date -->
-      <div class="flex flex-col w-full gap-1 col-span-1 md:col-span-2">
+      <div class="flex flex-col gap-1 col-span-1 md:col-span-2">
         <label for="timestamp" class="label">Date and time:</label>
-        <input id="timestamp" name="timestamp" class="input w-full" type="datetime-local" value="{{current_timestamp}}"
+        <input id="timestamp" name="timestamp" class="input" type="datetime-local" value="{{current_timestamp}}"
           required />
       </div>
     </section>
@@ -216,7 +216,7 @@
 {% macro account_options %}
 <optgroup label="My accounts">
   {% for account in own_accounts %}
-  <option value="{{account.id}}">{{account.name}}</option>
+  <option value="{{account.id}}" {% if principal.favorite_account==account.id %}selected{% endif %}>{{account.name}}</option>
   {% endfor %}
 </optgroup>
 <optgroup label="Other users">

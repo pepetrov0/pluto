@@ -1,9 +1,14 @@
 //! Implements the registration page
 
 use askama::Template;
-use axum::extract::Query;
+use axum::extract::{Query, State};
 
-use crate::{auth::principal::NoAuthPrincipal, templates::HtmlTemplate};
+use crate::{
+    assets::component::{Asset, AssetReadonlyRepository},
+    auth::principal::NoAuthPrincipal,
+    templates::HtmlTemplate,
+    AppState,
+};
 
 use super::error::RegistrationError;
 
@@ -17,19 +22,25 @@ pub struct RegisterQuery {
 pub struct RegisterPage {
     pub error: Option<RegistrationError>,
     pub timezones: Vec<String>,
+    pub assets: Option<Vec<Asset>>,
 }
 
 pub async fn handler(
     _: NoAuthPrincipal,
     Query(query): Query<RegisterQuery>,
+    State(mut state): State<AppState>,
 ) -> HtmlTemplate<RegisterPage> {
     let timezones = chrono_tz::TZ_VARIANTS
         .iter()
         .map(|v| v.name().to_owned())
         .collect();
+
+    let assets = state.database.list_assets().await;
+
     HtmlTemplate(RegisterPage {
         error: query.error,
         timezones,
+        assets,
     })
 }
 

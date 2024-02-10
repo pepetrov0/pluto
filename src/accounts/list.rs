@@ -10,7 +10,7 @@ use crate::{
     accounts::component::Account,
     auth::principal::AuthPrincipal,
     templates::HtmlTemplate,
-    user::{User, UserReadonlyRepository},
+    users::{User, UserReadonlyRepository},
     AppState,
 };
 
@@ -29,6 +29,7 @@ pub struct AccountsListQuery {
 struct AccountsListPage {
     pub created: bool,
     pub accounts: Option<Vec<AccountBundle>>,
+    pub principal: User,
 }
 
 async fn handler(
@@ -40,13 +41,14 @@ async fn handler(
         HtmlTemplate(AccountsListPage {
             created: query.created,
             accounts: None,
+            principal: user.clone(),
         })
     };
 
     // fetch all account ownerships
     let ownerships = state
         .database
-        .list_account_ownerships_by_user(&user.id)
+        .list_account_ownerships_by_user_or_account(&user.id)
         .await
         .ok_or_else(construct_error)?;
 
@@ -62,7 +64,7 @@ async fn handler(
     let ownerships = accounts_owned.iter().cloned().map(|v| v.id).collect();
     let ownerships = state
         .database
-        .list_account_ownerships_by_accounts(ownerships)
+        .list_account_ownerships_by_users_or_accounts(ownerships)
         .await
         .ok_or_else(construct_error)?;
 
@@ -91,6 +93,7 @@ async fn handler(
     let page = AccountsListPage {
         created: query.created,
         accounts: Some(accounts_owned),
+        principal: user,
     };
     Ok(HtmlTemplate(page))
 }

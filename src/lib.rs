@@ -20,7 +20,7 @@ pub mod shutdown;
 pub mod static_files;
 pub mod templates;
 pub mod transactions;
-pub mod user;
+pub mod users;
 pub mod validation;
 
 pub const DATE_TIME_FORMAT: &str = "%Y-%m-%dT%H:%M";

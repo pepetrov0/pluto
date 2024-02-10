@@ -4,21 +4,26 @@ use axum::{extract::State, response::Redirect, Form};
 use chrono_tz::Tz;
 
 use crate::{
+    accounts::{component::AccountWriteRepository, ownership::AccountOwnershipWriteRepository},
+    assets::component::AssetReadonlyRepository,
     auth::{
         principal::NoAuthPrincipal, session::SessionWriteRepository,
         session_providers::cookie::SetCookieSession,
     },
-    user::{UserReadonlyRepository, UserWriteRepository},
+    users::{UserReadonlyRepository, UserWriteRepository},
     validation, AppState,
 };
 
 use super::error::RegistrationError;
+
+const DEFAULT_ACCOUNT_NAME: &str = "Default";
 
 #[derive(serde::Deserialize)]
 pub struct RegisterForm {
     pub email: String,
     pub password: String,
     pub confirm_password: String,
+    pub favorite_asset: String,
     pub timezone: String,
 }
 
@@ -65,11 +70,35 @@ pub async fn handler(
         None => return Err(RegistrationError::Unknown),
     };
 
+    // find asset
+    let favorite_asset = tx
+        .find_asset(&details.favorite_asset)
+        .await
+        .ok_or(RegistrationError::InvalidFavoriteAsset)?;
+
+    // parse timezone
     let timezone = Tz::from_str_insensitive(&details.timezone).unwrap_or_default();
 
-    // attempt creating a user and a session
+    // create default account
+    let favorite_account = tx
+        .create_account(DEFAULT_ACCOUNT_NAME)
+        .await
+        .ok_or(RegistrationError::Unknown)?;
+
+    // attempt creating a user
     let user = tx
-        .create_user(details.email, Some(hash), timezone)
+        .create_user(
+            &details.email,
+            Some(hash),
+            timezone,
+            &favorite_asset.id,
+            &favorite_account.id,
+        )
+        .await
+        .ok_or(RegistrationError::Unknown)?;
+
+    // create ownership to default account
+    tx.create_account_ownership(&user.id, &favorite_account.id)
         .await
         .ok_or(RegistrationError::Unknown)?;
 

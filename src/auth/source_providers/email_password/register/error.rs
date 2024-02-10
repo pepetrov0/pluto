@@ -9,6 +9,7 @@ pub enum RegistrationError {
     PasswordTooShort,
     PasswordsMismatch,
     EmailTaken,
+    InvalidFavoriteAsset,
     Unknown,
 }
 
@@ -26,6 +27,9 @@ impl IntoResponse for RegistrationError {
             }
             RegistrationError::EmailTaken => {
                 Redirect::to("/register?error=email-taken").into_response()
+            }
+            RegistrationError::InvalidFavoriteAsset => {
+                Redirect::to("/register?error=invalid-favorite-asset").into_response()
             }
             RegistrationError::Unknown => Redirect::to("/register?error=unknown").into_response(),
         }

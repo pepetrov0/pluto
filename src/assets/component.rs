@@ -35,8 +35,8 @@ pub trait AssetReadonlyRepository {
     /// lists all assets filtered by id
     async fn list_assets_by_ids(&mut self, ids: Vec<String>) -> Option<Vec<Asset>>;
 
-    /// find an asset by ticker
-    async fn find_asset_by_ticker(&mut self, ticker: &str) -> Option<Asset>;
+    /// find an asset by id or ticker
+    async fn find_asset(&mut self, id_or_ticker: &str) -> Option<Asset>;
 }
 
 /// An asset write repository
@@ -86,11 +86,11 @@ where
     }
 
     #[tracing::instrument]
-    async fn find_asset_by_ticker(&mut self, ticker: &str) -> Option<Asset> {
+    async fn find_asset(&mut self, id_or_ticker: &str) -> Option<Asset> {
         sqlx::query_as::<_, Asset>(
-            "select id, ticker, symbol, label, precision, atype from assets where ticker=$1",
+            "select id, ticker, symbol, label, precision, atype from assets where id=$1 or ticker=$1",
         )
-        .bind(ticker)
+        .bind(id_or_ticker)
         .fetch_one(self.as_executor())
         .await
         .map_err(|v| tracing::error!("{:#?}", v))

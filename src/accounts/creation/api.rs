@@ -51,11 +51,11 @@ pub async fn handler(
 
     // create account and ownership
     let account = tx
-        .create_account(details.name)
+        .create_account(&details.name)
         .await
         .ok_or(AccountCreationError::Unknown)?;
     let _ = tx
-        .create_account_ownership(user.id, account.id)
+        .create_account_ownership(&user.id, &account.id)
         .await
         .ok_or(AccountCreationError::Unknown)?;
 

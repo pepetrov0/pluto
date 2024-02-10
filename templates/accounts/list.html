@@ -27,7 +27,14 @@
   {% if let Some(accs) = accounts %}
   {% for (account, owners) in accs %}
   <section class="card grid grid-cols-[auto_1fr] md:grid-cols-[auto_1fr_auto_1fr] gap-1">
-    <h2 class="heading-3 col-span-2 sm:col-span-4">{{ account.name }}</h2>
+    <h2 class="heading-3 col-span-2 sm:col-span-4 flex items-center gap-1">
+      <span>{{ account.name }}</span>
+      {% if account.id == principal.favorite_account %}
+      <span class="icon">
+        {% include "icons/star.svg" %}
+      </span>
+      {% endif %}
+    </h2>
     <!-- owners -->
     <span class="icon self-center">
       {% include "icons/users.svg" %}
