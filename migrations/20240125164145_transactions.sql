@@ -16,9 +16,9 @@ create table if not exists
     constraint credit_stamp_le_debit_stamp_check check (credit_stamp <= debit_stamp)
   );
 
--- create the entries view
+-- create the credit_entries view
 create or replace view
-  entries (id, note, account, asset, stamp, amount, settled) as
+  credit_entries (id, note, account, asset, stamp, amount, settled) as
 select
   id,
   note,
@@ -28,8 +28,11 @@ select
   (credit_amount * -1::bigint) as amount,
   credit_settled as settled
 from
-  transactions
-union all
+  transactions;
+
+-- create the debit_entries view
+create or replace view
+  debit_entries (id, note, account, asset, stamp, amount, settled) as
 select
   id,
   note,
@@ -40,3 +43,28 @@ select
   debit_settled as settled
 from
   transactions;
+
+-- create the entries view
+create or replace view
+  entries (id, note, account, asset, stamp, amount, settled) as
+select
+  id,
+  note,
+  account,
+  asset,
+  stamp,
+  amount,
+  settled
+from
+  credit_entries
+union all
+select
+  id,
+  note,
+  account,
+  asset,
+  stamp,
+  amount,
+  settled
+from
+  debit_entries;

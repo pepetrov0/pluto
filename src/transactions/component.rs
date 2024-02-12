@@ -74,7 +74,7 @@ where
             .bind(&accounts[..])
             .fetch_one(self.as_executor())
             .await
-            .map_err(|v| tracing::error!("{:#?}", v))
+            .map_err(|v| tracing::warn!("{:#?}", v))
             .ok()
             .map(|(v,)| v)
     }
@@ -96,7 +96,7 @@ where
             .bind(&accounts[..])
             .fetch_all(self.as_executor())
             .await
-            .map_err(|v| tracing::error!("{:#?}", v))
+            .map_err(|v| tracing::warn!("{:#?}", v))
             .ok()
     }
 }
@@ -136,7 +136,7 @@ where
             .bind(debit_settled)
             .fetch_one(self.as_executor())
             .await
-            .map_err(|v| tracing::error!("{:#?}", v))
+            .map_err(|v| tracing::warn!("{:#?}", v))
             .ok()
     }
 }

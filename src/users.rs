@@ -68,7 +68,7 @@ where
             .bind(id_or_email)
             .fetch_one(self.as_executor())
             .await
-            .map_err(|v| tracing::error!("{:#?}", v))
+            .map_err(|v| tracing::warn!("{:#?}", v))
             .ok()
     }
 
@@ -80,7 +80,7 @@ where
         .bind(id_or_email)
         .fetch_one(self.as_executor())
         .await
-        .map_err(|v| tracing::error!("{:#?}", v))
+        .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
     }
 
@@ -89,7 +89,7 @@ where
         sqlx::query_as::<_, User>("select id, email, timezone, favorite_asset, favorite_account from users order by email")
             .fetch_all(self.as_executor())
             .await
-            .map_err(|v| tracing::error!("{:#?}", v))
+            .map_err(|v| tracing::warn!("{:#?}", v))
             .ok()
     }
 
@@ -105,7 +105,7 @@ where
         .bind(&ids[..])
         .fetch_all(self.as_executor())
         .await
-        .map_err(|v| tracing::error!("{:#?}", v))
+        .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
     }
 }
@@ -135,7 +135,7 @@ where
         .bind(favorite_account)
         .fetch_one(self.as_executor())
         .await
-        .map_err(|v| tracing::error!("{:#?}", v))
+        .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
     }
 }

@@ -65,7 +65,7 @@ where
         )
         .fetch_all(self.as_executor())
         .await
-        .map_err(|v| tracing::error!("{:#?}", v))
+        .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
     }
 
@@ -81,7 +81,7 @@ where
         .bind(&ids[..])
         .fetch_all(self.as_executor())
         .await
-        .map_err(|v| tracing::error!("{:#?}", v))
+        .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
     }
 
@@ -93,7 +93,7 @@ where
         .bind(id_or_ticker)
         .fetch_one(self.as_executor())
         .await
-        .map_err(|v| tracing::error!("{:#?}", v))
+        .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
     }
 }
@@ -123,7 +123,7 @@ where
         .bind(atype)
         .fetch_one(self.as_executor())
         .await
-        .map_err(|v| tracing::error!("{:#?}", v))
+        .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
     }
 }

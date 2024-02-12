@@ -1,8 +1,7 @@
 //! Implements the entries component
 
-use axum::async_trait;
 use chrono::NaiveDateTime;
-use sqlx::{prelude::FromRow, PgPool};
+use sqlx::prelude::FromRow;
 
 /// Represents an entry
 #[derive(Debug, Clone, FromRow)]

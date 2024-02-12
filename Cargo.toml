@@ -8,6 +8,9 @@ lto = true        # Enable link-time optimization
 codegen-units = 1 # Reduce number of codegen units to increase optimizations
 strip = true      # Strip symbols from binary*
 
+[build-dependencies]
+nanoid = "0"
+
 [dependencies]
 argon2 = "0"
 askama = "0"
@@ -22,6 +25,7 @@ rust-embed = "8"
 serde_json = "1"
 tracing = "0"
 tracing-subscriber = "0"
+hex = "0"
 
 [dependencies.tokio]
 version = "1"

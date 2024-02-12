@@ -12,4 +12,5 @@ FROM alpine
 WORKDIR /app
 COPY --from=build /app/bin/pluto .
 
+EXPOSE 46963
 CMD ["pluto"]

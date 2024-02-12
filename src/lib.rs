@@ -23,6 +23,8 @@ pub mod transactions;
 pub mod users;
 pub mod validation;
 
+pub const BUILD_ID: &str = env!("PLUTO_BUILD_ID");
+
 pub const DATE_TIME_FORMAT: &str = "%Y-%m-%dT%H:%M";
 pub const DATE_TIME_FORMAT_NICE: &str = "%d %b %Y @ %H:%M";
 pub const DEFAULT_PAGE_SIZE: i64 = 25;

@@ -8,13 +8,13 @@
   <meta name="description" content="pluto: a personal finance management app">
 
   <!-- stylesheet -->
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/styles.css?hash={{crate::BUILD_ID}}" />
 
   <!-- icon -->
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-  <link rel="manifest" href="/site.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?hash={{crate::BUILD_ID}}">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?hash={{crate::BUILD_ID}}">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?hash={{crate::BUILD_ID}}">
+  <link rel="manifest" href="/site.webmanifest?hash={{crate::BUILD_ID}}">
 
   <!-- fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,7 +33,7 @@
   </main>
   {% endblock %}
 
-  <script src="/script.js" defer>
+  <script src="/script.js?hash={{crate::BUILD_ID}}" defer>
   </script>
 </body>
 

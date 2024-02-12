@@ -41,7 +41,9 @@ async fn main() {
     let router = pluto::router(state);
 
     // initialize listener
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:8000").await.unwrap();
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:46963")
+        .await
+        .unwrap();
 
     // serve on listener
     axum::serve(listener, router)

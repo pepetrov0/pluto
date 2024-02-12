@@ -32,11 +32,10 @@ where
 
                 (
                     TypedHeader(ContentType::from(mime)),
-                    #[cfg(debug_assertions)]
-                    TypedHeader(CacheControl::new().with_no_cache().with_no_store()),
-                    #[cfg(not(debug_assertions))]
                     TypedHeader(
-                        CacheControl::new().with_max_age(std::time::Duration::from_secs(3600)),
+                        CacheControl::new()
+                            .with_immutable()
+                            .with_max_age(std::time::Duration::from_secs(31536000)),
                     ),
                     content.data,
                 )

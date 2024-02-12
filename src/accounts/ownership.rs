@@ -53,7 +53,7 @@ where
         sqlx::query_as::<_, AccountOwnership>("select id, usr, account from accounts_ownerships")
             .fetch_all(self.as_executor())
             .await
-            .map_err(|v| tracing::error!("{:#?}", v))
+            .map_err(|v| tracing::warn!("{:#?}", v))
             .ok()
     }
 
@@ -68,7 +68,7 @@ where
         .bind(user_or_account)
         .fetch_all(self.as_executor())
         .await
-        .map_err(|v| tracing::error!("{:#?}", v))
+        .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
     }
 
@@ -87,7 +87,7 @@ where
         .bind(&ids[..])
         .fetch_all(self.as_executor())
         .await
-        .map_err(|v| tracing::error!("{:#?}", v))
+        .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
     }
 }
@@ -108,7 +108,7 @@ where
             .bind(account)
             .fetch_one(self.as_executor())
             .await
-            .map_err(|v| tracing::error!("{:#?}", v))
+            .map_err(|v| tracing::warn!("{:#?}", v))
             .ok()
     }
 }

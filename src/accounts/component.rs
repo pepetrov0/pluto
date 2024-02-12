@@ -39,7 +39,7 @@ where
         sqlx::query_as::<_, Account>("select id, name from accounts order by name")
             .fetch_all(self.as_executor())
             .await
-            .map_err(|v| tracing::error!("{:#?}", v))
+            .map_err(|v| tracing::warn!("{:#?}", v))
             .ok()
     }
 
@@ -55,7 +55,7 @@ where
         .bind(&ids[..])
         .fetch_all(self.as_executor())
         .await
-        .map_err(|v| tracing::error!("{:#?}", v))
+        .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
     }
 }
@@ -74,7 +74,7 @@ where
         .bind(name)
         .fetch_one(self.as_executor())
         .await
-        .map_err(|v| tracing::error!("{:#?}", v))
+        .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
     }
 }

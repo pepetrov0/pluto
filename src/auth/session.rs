@@ -3,7 +3,10 @@
 use axum::{async_trait, extract::FromRequestParts, http::request::Parts, Extension};
 use sqlx::{prelude::FromRow, Postgres};
 
-use crate::{database::{AsReadonlyExecutor, AsWriteExecutor}, AppState};
+use crate::{
+    database::{AsReadonlyExecutor, AsWriteExecutor},
+    AppState,
+};
 
 /// Represents a session
 #[derive(Debug, Clone, FromRow)]
@@ -42,7 +45,7 @@ where
             .bind(id)
             .fetch_one(self.as_executor())
             .await
-            .map_err(|v| tracing::error!("{:#?}", v))
+            .map_err(|v| tracing::warn!("{:#?}", v))
             .ok()
     }
 }
@@ -61,7 +64,7 @@ where
         .bind(user)
         .fetch_one(self.as_executor())
         .await
-        .map_err(|v| tracing::error!("{:#?}", v))
+        .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
     }
 
@@ -71,7 +74,7 @@ where
             .bind(id)
             .execute(self.as_executor())
             .await
-            .map_err(|v| tracing::error!("{:#?}", v));
+            .map_err(|v| tracing::warn!("{:#?}", v));
     }
 }
 

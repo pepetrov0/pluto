@@ -36,7 +36,7 @@ where
         .bind(id)
         .fetch_one(self.as_executor())
         .await
-        .map_err(|v| tracing::error!("{:#?}", v))
+        .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
     }
 
@@ -50,7 +50,7 @@ where
         .bind(usage)
         .fetch_one(self.as_executor())
         .await
-        .map_err(|v| tracing::error!("{:#?}", v))
+        .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
     }
 }
