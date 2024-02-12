@@ -15,10 +15,3 @@ pub struct Entry {
     pub amount: i64,
     pub settled: bool,
 }
-
-/// Represents an entry repository
-#[async_trait]
-pub trait EntryRepository {}
-
-#[async_trait]
-impl EntryRepository for PgPool {}
