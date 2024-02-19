@@ -1,9 +1,11 @@
+{% macro assets(selected) %}
 <optgroup label="Currencies">
   {% for asset in assets %}
   {% if asset.atype == crate::assets::component::AssetType::Currency %}
-  <option value="{{asset.id}}" {% if principal.favorite_asset==asset.id %}selected{% endif %}>
+  <option value="{{asset.id}}" {% if selected==asset.id %}selected{% endif %}>
     {{asset.label}}
   </option>
   {% endif %}
   {% endfor %}
 </optgroup>
+{% endmacro %}

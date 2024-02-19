@@ -9,6 +9,7 @@ use tower_http::trace::TraceLayer;
 pub mod accounts;
 pub mod assets;
 pub mod auth;
+pub mod cache_policy;
 pub mod compression;
 pub mod config;
 pub mod content_security_policy;
@@ -67,6 +68,7 @@ pub fn router(state: AppState) -> Router {
         ))
         .layer(compression::default())
         .layer(middleware::from_fn(content_security_policy::middleware))
+        .layer(middleware::from_fn(cache_policy::middleware))
         .layer(TraceLayer::new_for_http())
         .with_state(state)
 }

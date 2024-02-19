@@ -24,14 +24,32 @@ use crate::{
 use super::error::TransactionCreationError;
 
 #[derive(Deserialize, Default)]
-#[serde(rename_all = "kebab-case")]
+#[serde(default)]
+pub struct NewTransactionPresetQuery {}
+
+#[derive(Deserialize, Default)]
 #[serde(default)]
 pub struct NewTransactionQuery {
+    pub error: Option<TransactionCreationError>,
+    #[serde(rename = "preset[new-credit]")]
+    pub new_credit: bool,
+    #[serde(rename = "preset[new-debit]")]
+    pub new_debit: bool,
+    #[serde(rename = "preset[multi-asset]")]
+    pub multi_asset: bool,
+}
+
+#[derive(Debug)]
+pub struct NewTransactionPreset {
+    pub credit_account: String,
+    pub debit_account: String,
+    pub asset: String,
+    pub credit_asset: String,
+    pub debit_asset: String,
     pub new_credit: bool,
     pub new_debit: bool,
     pub multi_asset: bool,
-    #[serde(default)]
-    pub error: Option<TransactionCreationError>,
+    pub timestamp: String,
 }
 
 #[derive(Template)]
@@ -42,12 +60,8 @@ pub struct NewTransactionPage {
     pub other_accounts: Option<Vec<Account>>,
     pub other_users: Option<Vec<User>>,
     pub assets: Option<Vec<Asset>>,
-    pub new_credit: bool,
-    pub new_debit: bool,
-    pub multi_asset: bool,
-    pub current_timestamp: String,
+    pub preset: Option<NewTransactionPreset>,
     pub error: Option<TransactionCreationError>,
-    pub principal: User,
 }
 
 pub async fn handler(
@@ -69,12 +83,8 @@ pub async fn handler(
             other_accounts: None,
             other_users: None,
             assets: None,
-            new_credit: query.new_credit,
-            new_debit: query.new_debit,
-            multi_asset: query.multi_asset,
-            current_timestamp: current_timestamp.clone(),
+            preset: None,
             error: None,
-            principal: user.clone(),
         })
     };
 
@@ -130,6 +140,19 @@ pub async fn handler(
     // assets
     let assets = tx.list_assets().await.ok_or_else(construct_error)?;
 
+    // preset
+    let preset = NewTransactionPreset {
+        credit_account: user.favorite_account.clone(),
+        debit_account: user.favorite_account.clone(),
+        asset: user.favorite_asset.clone(),
+        credit_asset: user.favorite_asset.clone(),
+        debit_asset: user.favorite_asset.clone(),
+        new_credit: query.new_credit && !query.new_debit,
+        new_debit: query.new_debit && !query.new_credit,
+        multi_asset: query.multi_asset,
+        timestamp: current_timestamp,
+    };
+
     tx.commit().await.map_err(|_| construct_error())?;
     let page = NewTransactionPage {
         csrf_token,
@@ -137,12 +160,8 @@ pub async fn handler(
         other_accounts: Some(other_accounts),
         other_users: Some(other_users),
         assets: Some(assets),
-        new_credit: query.new_credit,
-        new_debit: query.new_debit,
-        multi_asset: query.multi_asset,
-        current_timestamp,
+        preset: Some(preset),
         error: query.error,
-        principal: user,
     };
     Ok(HtmlTemplate(page))
 }

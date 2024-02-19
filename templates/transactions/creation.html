@@ -1,6 +1,6 @@
 {% extends "page-with-nav.html" %}
 
-{% include "partials/asset-list.html" %}
+{% import "partials/asset-list.html" as asset_list %}
 
 {% block head %}
 <title>New transaction</title>
@@ -11,11 +11,12 @@
   <h1 class="heading-1">New transaction</h1>
   <hr class="border-t-2 border-dashed py-1" />
   {% if
-  csrf_token.is_none() ||
-  own_accounts.is_none() ||
-  other_accounts.is_none() ||
-  other_users.is_none() ||
-  assets.is_none()
+    csrf_token.is_none() ||
+    own_accounts.is_none() ||
+    other_accounts.is_none() ||
+    other_users.is_none() ||
+    assets.is_none() ||
+    preset.is_none()
   %}
   <section class="card bg-danger text-danger-contrast">
     Something went wrong while loading this page. Please try again later.
@@ -26,6 +27,7 @@
   {% if let Some(other_accounts) = other_accounts %}
   {% if let Some(other_users) = other_users %}
   {% if let Some(assets) = assets %}
+  {% if let Some(fpreset) = preset %}
   <form class="flex flex-col gap-2" method="POST" action="/new-transaction">
     <!-- essential details -->
     <section class="card grid grid-cols-1 md:grid-cols-2 grid-flow-row gap-4">
@@ -38,13 +40,13 @@
       <!-- Credit Account -->
       <div class="flex flex-col gap-1">
         <label for="credit-account" class="label">Credit account:</label>
-        <input name="create_credit_account" type="text" value="{{new_credit}}" hidden />
-        {% if !new_credit %}
+        <input name="create_credit_account" type="text" value="{{fpreset.new_credit}}" hidden />
+        {% if !fpreset.new_credit %}
         <select id="credit-account" name="credit_account" class="input" required>
-          {% call account_options %}
+          {% call account_options(fpreset.credit_account) %}
         </select>
         <span>
-          <a class="link text-sm" href="/new-transaction?new-credit=true&new-debit=false&multi-asset={{multi_asset}}">
+          <a class="link text-sm" href="/new-transaction?preset[new-credit]=true&preset[new-debit]=false&preset[multi-asset]={{fpreset.multi_asset}}">
             Need a new account?
           </a>
         </span>
@@ -53,7 +55,7 @@
           minlength="1" maxlength="200" required />
         <span>
           <a class="link text-sm"
-            href="/new-transaction?new-credit=false&new-debit={{new_debit}}&multi-asset={{multi_asset}}">
+            href="/new-transaction?preset[new-credit]=false&preset[new-debit]={{fpreset.new_debit}}&preset[multi-asset]={{fpreset.multi_asset}}">
             Prefer selecting from existing accounts?
           </a>
         </span>
@@ -62,13 +64,13 @@
       <!-- Debit Account -->
       <div class="flex flex-col gap-1">
         <label for="debit-account" class="label">Debit account:</label>
-        <input name="create_debit_account" type="text" value="{{new_debit}}" hidden />
-        {% if !new_debit %}
+        <input name="create_debit_account" type="text" value="{{fpreset.new_debit}}" hidden />
+        {% if !fpreset.new_debit %}
         <select id="debit-account" name="debit_account" class="input" required>
-          {% call account_options %}
+          {% call account_options(fpreset.debit_account) %}
         </select>
         <span>
-          <a class="link text-sm" href="/new-transaction?new-credit=false&new-debit=true&multi-asset={{multi_asset}}">
+          <a class="link text-sm" href="/new-transaction?preset[new-credit]=false&preset[new-debit]=true&preset[multi-asset]={{fpreset.multi_asset}}">
             Need a new account?
           </a>
         </span>
@@ -77,18 +79,18 @@
           minlength="1" maxlength="200" required />
         <span>
           <a class="link text-sm"
-            href="/new-transaction?new-credit={{new_credit}}&new-debit=false&multi-asset={{multi_asset}}">
+            href="/new-transaction?preset[new-credit]={{fpreset.new_credit}}&preset[new-debit]=false&preset[multi-asset]={{fpreset.multi_asset}}">
             Prefer selecting from existing accounts?
           </a>
         </span>
         {% endif %}
       </div>
-      {% if multi_asset %}
+      {% if fpreset.multi_asset %}
       <!-- Credit Asset -->
       <div class="flex flex-col gap-1">
         <label for="credit-asset" class="label">Credit asset:</label>
         <select id="credit-asset" name="credit_asset" class="input">
-          {% include "partials/asset-list.html" %}
+          {% call asset_list::assets(preset.credit_asset) %}
         </select>
       </div>
       <!-- Credit Amount -->
@@ -101,7 +103,7 @@
       <div class="flex flex-col gap-1">
         <label for="debit-asset" class="label">Debit asset:</label>
         <select id="debit-asset" name="debit_asset" class="input">
-          {% include "partials/asset-list.html" %}
+          {% call asset_list::assets(preset.credit_asset) %}
         </select>
       </div>
       <!-- Debit Amount -->
@@ -115,28 +117,28 @@
       <div class="flex flex-col gap-1">
         <label for="asset" class="label">Asset:</label>
         <select id="asset" name="asset" class="input">
-          {% include "partials/asset-list.html" %}
+          {% call asset_list::assets(preset.asset) %}
         </select>
       </div>
       <!-- Amount -->
       <div class="flex flex-col gap-1">
         <label for="amount" class="label">Amount:</label>
-        <input id="amount" name="amount" class="input" type="number" placeholder="Amount.." step="0.0001"
-          min="0.0001" required />
+        <input id="amount" name="amount" class="input" type="number" placeholder="Amount.." step="0.0001" min="0.0001"
+          required />
       </div>
       {% endif %}
       <!-- Multi-asset switch -->
-      {% if multi_asset %}
+      {% if fpreset.multi_asset %}
       <span class="text-center col-span-1 md:col-span-2">
         <a class="link text-sm"
-          href="/new-transaction?new-credit={{new_credit}}&new-debit={{new_debit}}&multi-asset=false">
+          href="/new-transaction?preset[new-credit]={{fpreset.new_credit}}&preset[new-debit]={{fpreset.new_debit}}&preset[multi-asset]=false">
           Creating a single-asset transaction?
         </a>
       </span>
       {% else %}
       <span class="text-center col-span-1 md:col-span-2">
         <a class="link text-sm"
-          href="/new-transaction?new-credit={{new_credit}}&new-debit={{new_debit}}&multi-asset=true">
+          href="/new-transaction?preset[new-credit]={{fpreset.new_credit}}&preset[new-debit]={{fpreset.new_debit}}&preset[multi-asset]=true">
           Creating a multi-asset transaction?
         </a>
       </span>
@@ -144,14 +146,14 @@
       <!-- Date -->
       <div class="flex flex-col gap-1 col-span-1 md:col-span-2">
         <label for="timestamp" class="label">Date and time:</label>
-        <input id="timestamp" name="timestamp" class="input" type="datetime-local" value="{{current_timestamp}}"
+        <input id="timestamp" name="timestamp" class="input" type="datetime-local" value="{{fpreset.timestamp}}"
           required />
       </div>
     </section>
     <!-- actions -->
     <section class="card flex justify-end gap-2">
-      <a href="/transactions" class="button-outline">Cancel</a>
-      <button class="button" type="submit">Create</button>
+      <a href="/transactions" class="button button-outlined button-lg">Cancel</a>
+      <button class="button button-lg" type="submit">Create</button>
     </section>
     <input name="csrf" value="{{ csrf_token.id }}" hidden />
   </form>
@@ -203,6 +205,7 @@
     Something went wrong. Please try again later.
     {% endmatch %}
   </section>
+  {% endif %} <!-- if let Some(preset) = preset -->
   {% endif %} <!-- if let Some(error) = error -->
   {% endif %} <!-- if let Some(assets) = assets -->
   {% endif %} <!-- if let Some(other_users) = other_users -->
@@ -213,10 +216,11 @@
 {% endblock %}
 
 <!-- macro to construct account options -->
-{% macro account_options %}
+{% macro account_options(preset) %}
 <optgroup label="My accounts">
   {% for account in own_accounts %}
-  <option value="{{account.id}}" {% if principal.favorite_account==account.id %}selected{% endif %}>{{account.name}}</option>
+  <option value="{{account.id}}" {% if preset==account.id %}selected{% endif %}>{{account.name}}
+  </option>
   {% endfor %}
 </optgroup>
 <optgroup label="Other users">

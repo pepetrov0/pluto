@@ -20,26 +20,25 @@
       <!-- label -->
       <div class="flex flex-col gap-1 col-span-1 md:col-span-2">
         <label for="label" class="label">Label:</label>
-        <input id="label" name="label" class="input" type="text" placeholder="Label.." minlength="1"
-          maxlength="200" required />
+        <input id="label" name="label" class="input" type="text" placeholder="Label.." minlength="1" maxlength="200"
+          required />
       </div>
       <!-- ticker -->
       <div class="flex flex-col gap-1">
         <label for="ticker" class="label">Ticker:</label>
-        <input id="ticker" name="ticker" class="input" type="text" placeholder="Ticker.." minlength="1"
-          maxlength="8" required />
+        <input id="ticker" name="ticker" class="input" type="text" placeholder="Ticker.." minlength="1" maxlength="8"
+          required />
       </div>
       <!-- symbol -->
       <div class="flex flex-col gap-1">
         <label for="symbol" class="label">Symbol:</label>
-        <input id="symbol" name="symbol" class="input" type="text" placeholder="Symbol.." minlength="1"
-          maxlength="8" />
+        <input id="symbol" name="symbol" class="input" type="text" placeholder="Symbol.." minlength="1" maxlength="8" />
       </div>
       <!-- precision -->
       <div class="flex flex-col gap-1">
         <label for="precision" class="label">Precision:</label>
-        <input id="precision" name="precision" class="input" type="number" placeholder="Precision.." min="0"
-          max="4" value="0" required />
+        <input id="precision" name="precision" class="input" type="number" placeholder="Precision.." min="0" max="4"
+          value="0" required />
       </div>
       <!-- type -->
       <div class="flex flex-col gap-1">
@@ -51,8 +50,8 @@
     </section>
     <!-- actions -->
     <section class="card flex justify-end gap-2">
-      <a href="/assets" class="button-outline">Cancel</a>
-      <button class="button" type="submit">Create</button>
+      <a href="/assets" class="button button-outlined button-lg">Cancel</a>
+      <button class="button button-lg" type="submit">Create</button>
     </section>
     <input name="csrf" value="{{ csrf_token.id }}" hidden />
   </form>

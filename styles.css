@@ -19,7 +19,7 @@
   }
 
   .button {
-    @apply bg-accent text-accent-contrast font-normal text-base px-4 py-2 rounded shadow cursor-pointer border-2 border-accent disabled:bg-disabled disabled:text-disabled-darker disabled:cursor-not-allowed;
+    @apply bg-accent text-accent-contrast font-normal text-base px-2 py-1 rounded shadow cursor-pointer border-2 border-accent disabled:bg-disabled disabled:text-disabled-darker disabled:cursor-not-allowed;
   }
 
   .button-danger {
@@ -30,8 +30,8 @@
     @apply bg-default text-default-contrast border-accent;
   }
 
-  .button-sm {
-    @apply px-2 py-1;
+  .button-lg {
+    @apply px-4 py-2;
   }
 
   .input {
@@ -41,15 +41,15 @@
   }
 
   .heading-3 {
-    @apply text-lg md:text-xl font-bold pb-2;
+    @apply text-lg sm:text-xl font-bold pb-2;
   }
 
   .heading-2 {
-    @apply text-xl md:text-2xl font-bold pb-2;
+    @apply text-xl sm:text-2xl font-bold pb-2;
   }
 
   .heading-1 {
-    @apply text-2xl md:text-3xl font-bold pb-2;
+    @apply text-2xl sm:text-3xl font-bold pb-2;
   }
 
   .icon {
