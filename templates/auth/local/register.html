@@ -41,7 +41,7 @@
     <!-- timezone -->
     <div class="flex flex-col gap-1">
       <label for="timezone" class="label">Timezone:</label>
-      <select id="timezone" name="timezone" class="input" required>
+      <select id="timezone" name="timezone" class="timezone input" required>
         {% for timezone in timezones %}
         <option value="{{ timezone }}">{{ timezone|under_to_space|slash_to_pipe }}</option>
         {% endfor %}
