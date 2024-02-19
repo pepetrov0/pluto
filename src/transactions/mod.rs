@@ -6,6 +6,7 @@ use crate::AppState;
 
 pub mod component;
 pub mod entries;
+pub mod models;
 
 mod creation;
 mod list;

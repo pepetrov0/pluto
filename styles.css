@@ -19,11 +19,19 @@
   }
 
   .button {
-    @apply bg-accent text-accent-contrast font-normal text-base px-4 py-2 rounded shadow cursor-pointer disabled:bg-disabled disabled:text-disabled-darker disabled:cursor-not-allowed;
+    @apply bg-accent text-accent-contrast font-normal text-base px-4 py-2 rounded shadow cursor-pointer border-2 border-accent disabled:bg-disabled disabled:text-disabled-darker disabled:cursor-not-allowed;
   }
 
-  .button-outline {
-    @apply bg-default text-accent font-normal text-base px-4 py-2 rounded shadow cursor-pointer border-2 border-accent disabled:bg-disabled disabled:text-disabled-darker disabled:border-disabled-darker disabled:cursor-not-allowed;
+  .button-danger {
+    @apply bg-danger text-danger-contrast border-danger-darker;
+  }
+
+  .button-outlined {
+    @apply bg-default text-default-contrast border-accent;
+  }
+
+  .button-sm {
+    @apply px-2 py-1;
   }
 
   .input {
@@ -49,9 +57,13 @@
   }
 
   .icon-md {
+    @apply min-w-[1.25rem] min-h-[1.25rem] max-w-[1rem] max-h-[1rem];
+  }
+
+  .icon-lg {
     @apply min-w-[1.5rem] min-h-[1.5rem] max-w-[1.5rem] max-h-[1.5rem];
   }
-  
+
   .card {
     @apply p-3 rounded shadow bg-default text-default-contrast;
   }

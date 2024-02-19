@@ -18,15 +18,40 @@
   </section>
   {% endif %}
   <!-- error message -->
-  {% if transactions.is_none() %}
+  {% if settled_transactions.is_none() || unsettled_transactions.is_none() %}
   <section class="card bg-danger text-danger-contrast">
     Something went wrong while loading this page. Please try again later.
   </section>
   {% endif %}
   <!-- transactions list -->
-  {% if let Some(transactions) = transactions %}
-  {% for transaction in transactions %}
-  <section class="card grid grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto_auto_1fr] gap-1">
+  {% if let Some(settled_transactions) = settled_transactions %}
+  {% if let Some(unsettled_transactions) = unsettled_transactions %}
+  {% if !settled_transactions.is_empty() && !unsettled_transactions.is_empty() %}
+  <h2 class="heading-2">Unsettled</h2>
+  {% endif %} <!-- if !settled_transactions.is_empty() && !unsettled_transactions.is_empty() -->
+  {% for transaction in unsettled_transactions %}
+  {% call transaction_card(transaction, false) %}
+  {% endfor %}
+  {% if !settled_transactions.is_empty() && !unsettled_transactions.is_empty() %}
+  <h2 class="heading-2 pt-4">Settled</h2>
+  {% endif %} <!-- if !settled_transactions.is_empty() && !unsettled_transactions.is_empty() -->
+  {% for transaction in settled_transactions %}
+  {% call transaction_card(transaction, true) %}
+  {% endfor %}
+  {% endif %} <!-- if let Some(unsettled_transactions) = unsettled_transactions -->
+  {% endif %} <!-- if let Some(settled_transactions) = settled_transactions -->
+</div>
+{% endblock %}
+
+{% macro transaction_card(transaction, settled) %}
+{% if settled %}
+<section class="card grid grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto_auto_1fr] gap-1">
+{% else %}
+<section class="relative card grid grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto_auto_1fr] gap-1 border-warn-darker border-2 border-solid">
+    <span class="icon-md absolute top-2 right-2 motion-safe:animate-wiggle text-warn-darker">
+      {% include "icons/bell-alert.svg" %}
+    </span>
+{% endif %}
     <h2 class="heading-3 col-span-2 sm:col-span-5">{{ transaction.note }}</h2>
     <!-- == credit == -->
     <!-- account/user -->
@@ -74,10 +99,10 @@
       {{ transaction.credit_stamp_nice }}
     </time>
     <!-- == divider == -->
-    <div class="hidden sm:block icon-md col-start-3 row-start-2 row-span-3 self-center mx-2">
+    <div class="hidden sm:block icon-lg col-start-3 row-start-2 row-span-3 self-center mx-2">
       {% include "icons/arrow-right.svg" %}
     </div>
-    <div class="block sm:hidden icon-md col-span-2 justify-self-center my-2">
+    <div class="block sm:hidden icon-lg col-span-2 justify-self-center my-2">
       {% include "icons/arrow-down.svg" %}
     </div>
     <!-- == debit == -->
@@ -127,8 +152,49 @@
     <time datetime="{{ transaction.debit_stamp }}" class="sm:col-start-5 sm:row-start-4">
       {{ transaction.debit_stamp_nice }}
     </time>
+    <!-- actions -->
+    <div class="flex gap-1 pt-4 col-span-2 sm:col-span-5 items-center justify-end">
+      <!-- delete -->
+      <a href="#" class="button button-sm button-danger flex gap-1 items-center">
+        <span class="icon">
+          {% include "icons/trash.svg" %}
+        </span>
+        <span>
+          Delete
+        </span>
+      </a>
+      <!-- divider -->
+      <div class="mr-auto"></div>
+      {% if settled %}
+      <!-- duplicate -->
+      <a href="#" class="button button-sm button-outlined flex gap-1 items-center">
+        <span class="icon">
+          {% include "icons/document-duplicate.svg" %}
+        </span>
+        <span>
+          Clone
+        </span>
+      </a>
+      <!-- edit -->
+      <a href="#" class="button button-sm flex gap-1 items-center">
+        <span class="icon">
+          {% include "icons/pencil.svg" %}
+        </span>
+        <span>
+          Edit
+        </span>
+      </a>
+      {% else %}
+      <!-- settle -->
+      <a href="#" class="button button-sm flex gap-1 items-center">
+        <span class="icon">
+          {% include "icons/check-circle.svg" %}
+        </span>
+        <span>
+          Settle
+        </span>
+      </a>
+      {% endif %}
+    </div>
   </section>
-  {% endfor %}
-  {% endif %}
-</div>
-{% endblock %}
+{% endmacro %}

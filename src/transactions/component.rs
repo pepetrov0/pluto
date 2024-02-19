@@ -27,14 +27,20 @@ pub struct Transaction {
 #[async_trait]
 pub trait TransactionReadonlyRepository {
     /// Count of transactions
-    async fn count_settled_transactions(&mut self, accounts: Vec<String>) -> Option<i64>;
+    async fn count_settled_transactions(&mut self, accounts: &[String]) -> Option<i64>;
 
-    /// List transactions by page
+    /// List settled transactions by page
     async fn list_settled_transactions(
         &mut self,
         page_offset: i64,
         page_size: i64,
-        accounts: Vec<String>,
+        accounts: &[String],
+    ) -> Option<Vec<Transaction>>;
+
+    /// List unsettled transactions by page
+    async fn list_unsettled_transactions(
+        &mut self,
+        accounts: &[String],
     ) -> Option<Vec<Transaction>>;
 }
 
@@ -65,13 +71,13 @@ where
     T: AsReadonlyExecutor<Postgres> + Send + std::fmt::Debug,
 {
     #[tracing::instrument]
-    async fn count_settled_transactions(&mut self, accounts: Vec<String>) -> Option<i64> {
+    async fn count_settled_transactions(&mut self, accounts: &[String]) -> Option<i64> {
         if accounts.is_empty() {
             return Some(0);
         }
 
         sqlx::query_as::<_, (i64,)>(include_str!("sql/count-settled.pg.sql"))
-            .bind(&accounts[..])
+            .bind(accounts)
             .fetch_one(self.as_executor())
             .await
             .map_err(|v| tracing::warn!("{:#?}", v))
@@ -84,7 +90,7 @@ where
         &mut self,
         page_offset: i64,
         page_size: i64,
-        accounts: Vec<String>,
+        accounts: &[String],
     ) -> Option<Vec<Transaction>> {
         if accounts.is_empty() {
             return Some(vec![]);
@@ -93,7 +99,24 @@ where
         sqlx::query_as::<_, Transaction>(include_str!("sql/list-settled.pg.sql"))
             .bind(page_offset)
             .bind(page_size)
-            .bind(&accounts[..])
+            .bind(accounts)
+            .fetch_all(self.as_executor())
+            .await
+            .map_err(|v| tracing::warn!("{:#?}", v))
+            .ok()
+    }
+
+    #[tracing::instrument]
+    async fn list_unsettled_transactions(
+        &mut self,
+        accounts: &[String],
+    ) -> Option<Vec<Transaction>> {
+        if accounts.is_empty() {
+            return Some(vec![]);
+        }
+
+        sqlx::query_as::<_, Transaction>(include_str!("sql/list-unsettled.pg.sql"))
+            .bind(accounts)
             .fetch_all(self.as_executor())
             .await
             .map_err(|v| tracing::warn!("{:#?}", v))
