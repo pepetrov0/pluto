@@ -7,8 +7,7 @@ use crate::{
         principal::NoAuthPrincipal, session::SessionWriteRepository,
         session_providers::cookie::SetCookieSession,
     },
-    users::UserReadonlyRepository,
-    validation, AppState,
+    domain, validation, AppState,
 };
 
 use super::error::LoginError;
@@ -34,8 +33,7 @@ pub async fn handler(
         return Err(LoginError::InvalidCredentials);
     }
 
-    let user = tx
-        .find_user_with_password(&details.email)
+    let user = domain::users::find_with_password(&mut tx, &details.email)
         .await
         .ok_or(LoginError::InvalidCredentials)?;
 

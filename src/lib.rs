@@ -6,6 +6,9 @@ use axum_extra::extract::cookie::Key;
 use sqlx::PgPool;
 use tower_http::trace::TraceLayer;
 
+pub mod domain;
+
+// old modules
 pub mod accounts;
 pub mod assets;
 pub mod auth;
@@ -21,7 +24,6 @@ pub mod shutdown;
 pub mod static_files;
 pub mod templates;
 pub mod transactions;
-pub mod users;
 pub mod validation;
 
 pub const BUILD_ID: &str = env!("PLUTO_BUILD_ID");

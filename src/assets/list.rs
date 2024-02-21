@@ -7,7 +7,9 @@ use axum::{
     routing, Router,
 };
 
-use crate::{auth::principal::AuthPrincipal, templates::HtmlTemplate, users::User, AppState};
+use crate::{
+    auth::principal::AuthPrincipal, domain::users::User, templates::HtmlTemplate, AppState,
+};
 
 use super::component::{Asset, AssetReadonlyRepository, AssetType};
 

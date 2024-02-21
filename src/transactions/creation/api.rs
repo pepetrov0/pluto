@@ -13,8 +13,8 @@ use crate::{
     assets::component::AssetReadonlyRepository,
     auth::principal::AuthPrincipal,
     csrf_tokens::CsrfTokenRepository,
+    domain,
     transactions::component::TransactionWriteRepository,
-    users::UserReadonlyRepository,
     AppState, DATE_TIME_FORMAT,
 };
 
@@ -187,13 +187,15 @@ pub async fn handler(
     }
 
     // users
-    let users = tx
-        .list_users_by_ids(vec![
+    let users = domain::users::list_by_ids_or_emails(
+        &mut tx,
+        &[
             details.credit_account.clone(),
             details.debit_account.clone(),
-        ])
-        .await
-        .ok_or(TransactionCreationError::Unknown)?;
+        ],
+    )
+    .await
+    .ok_or(TransactionCreationError::Unknown)?;
 
     // accounts
     let accounts = users

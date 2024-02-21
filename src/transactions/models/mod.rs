@@ -4,7 +4,7 @@ use either::Either;
 use crate::{
     accounts::{component::Account, ownership::AccountOwnership},
     assets::component::Asset,
-    users::User,
+    domain::users::User,
     DATE_TIME_FORMAT, DATE_TIME_FORMAT_NICE,
 };
 

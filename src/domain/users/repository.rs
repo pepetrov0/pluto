@@ -1,31 +1,10 @@
-//! Implements a user component
-
 use axum::async_trait;
 use chrono_tz::Tz;
-use sqlx::{FromRow, Postgres};
+use sqlx::Postgres;
 
 use crate::database::{AsReadonlyExecutor, AsWriteExecutor};
 
-/// Represents a user
-#[derive(Debug, Clone, FromRow)]
-pub struct User {
-    pub id: String,
-    pub email: String,
-    pub timezone: String,
-    pub favorite_asset: String,
-    pub favorite_account: String,
-}
-
-/// Represents a user with password
-#[derive(Debug, FromRow)]
-pub struct UserWithPassword {
-    pub id: String,
-    pub email: String,
-    pub password: Option<String>,
-    pub timezone: String,
-    pub favorite_asset: String,
-    pub favorite_account: String,
-}
+use super::{User, UserWithPassword};
 
 /// A user readonly repository
 #[async_trait]
@@ -40,7 +19,7 @@ pub trait UserReadonlyRepository {
     async fn list_users(&mut self) -> Option<Vec<User>>;
 
     /// Lists all users by IDs
-    async fn list_users_by_ids(&mut self, ids: Vec<String>) -> Option<Vec<User>>;
+    async fn list_users_by_ids_or_emails(&mut self, ids: &[String]) -> Option<Vec<User>>;
 }
 
 /// A user write repository
@@ -86,23 +65,25 @@ where
 
     #[tracing::instrument]
     async fn list_users(&mut self) -> Option<Vec<User>> {
-        sqlx::query_as::<_, User>("select id, email, timezone, favorite_asset, favorite_account from users order by email")
-            .fetch_all(self.as_executor())
-            .await
-            .map_err(|v| tracing::warn!("{:#?}", v))
-            .ok()
+        sqlx::query_as::<_, User>(
+            "select id, email, timezone, favorite_asset, favorite_account from users",
+        )
+        .fetch_all(self.as_executor())
+        .await
+        .map_err(|v| tracing::warn!("{:#?}", v))
+        .ok()
     }
 
     #[tracing::instrument]
-    async fn list_users_by_ids(&mut self, ids: Vec<String>) -> Option<Vec<User>> {
-        if ids.is_empty() {
+    async fn list_users_by_ids_or_emails(&mut self, ids_or_emails: &[String]) -> Option<Vec<User>> {
+        if ids_or_emails.is_empty() {
             return Some(vec![]);
         }
 
         sqlx::query_as::<_, User>(
-            "select id, email, timezone, favorite_asset, favorite_account from users where id=ANY($1) order by email",
+            "select id, email, timezone, favorite_asset, favorite_account from users where id=ANY($1) or email=ANY($1)",
         )
-        .bind(&ids[..])
+        .bind(ids_or_emails)
         .fetch_all(self.as_executor())
         .await
         .map_err(|v| tracing::warn!("{:#?}", v))

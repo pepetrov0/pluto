@@ -5,7 +5,7 @@ use axum::{
     RequestPartsExt,
 };
 
-use crate::{users::{User, UserReadonlyRepository}, AppState};
+use crate::{domain::{self, users::User}, AppState};
 
 use super::session::Session;
 
@@ -46,10 +46,7 @@ impl FromRequestParts<AppState> for AuthPrincipal {
             .map(|v| v.usr)
             .map_err(|_| Redirect::to("/login"))?;
 
-        state
-            .clone()
-            .database
-            .find_user(&user)
+        domain::users::find(&mut state.database.clone(), &user)
             .await
             .map(AuthPrincipal)
             .ok_or(Redirect::to("/login"))

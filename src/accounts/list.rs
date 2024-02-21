@@ -5,13 +5,11 @@ use axum::{
     extract::{Query, State},
     routing, Router,
 };
+use itertools::Itertools;
 
 use crate::{
-    accounts::component::Account,
-    auth::principal::AuthPrincipal,
-    templates::HtmlTemplate,
-    users::{User, UserReadonlyRepository},
-    AppState,
+    accounts::component::Account, auth::principal::AuthPrincipal, domain, domain::users::User,
+    templates::HtmlTemplate, AppState,
 };
 
 use super::{component::AccountReadonlyRepository, ownership::AccountOwnershipReadonlyRepository};
@@ -69,10 +67,8 @@ async fn handler(
         .ok_or_else(construct_error)?;
 
     // fetch all users
-    let users = ownerships.iter().cloned().map(|v| v.usr).collect();
-    let users = state
-        .database
-        .list_users_by_ids(users)
+    let users = ownerships.iter().cloned().map(|v| v.usr).collect_vec();
+    let users = domain::users::list_by_ids_or_emails(&mut state.database, &users)
         .await
         .ok_or_else(construct_error)?;
 

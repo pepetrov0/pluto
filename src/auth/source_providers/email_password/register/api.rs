@@ -10,8 +10,7 @@ use crate::{
         principal::NoAuthPrincipal, session::SessionWriteRepository,
         session_providers::cookie::SetCookieSession,
     },
-    users::{UserReadonlyRepository, UserWriteRepository},
-    validation, AppState,
+    domain, validation, AppState,
 };
 
 use super::error::RegistrationError;
@@ -49,19 +48,9 @@ pub async fn handler(
         return Err(RegistrationError::InvalidEmail);
     }
 
-    // validate password
-    if !validation::is_password(&details.password) {
-        return Err(RegistrationError::PasswordTooShort);
-    }
-
     // validate matching passwords
     if details.password != details.confirm_password {
         return Err(RegistrationError::PasswordsMismatch);
-    }
-
-    // check if email is already taken
-    if tx.find_user(&details.email).await.is_some() {
-        return Err(RegistrationError::EmailTaken);
     }
 
     // attempt hashing the password
@@ -86,16 +75,16 @@ pub async fn handler(
         .ok_or(RegistrationError::Unknown)?;
 
     // attempt creating a user
-    let user = tx
-        .create_user(
-            &details.email,
-            Some(hash),
-            timezone,
-            &favorite_asset.id,
-            &favorite_account.id,
-        )
-        .await
-        .ok_or(RegistrationError::Unknown)?;
+    let user = domain::users::create(
+        &mut tx,
+        &details.email,
+        Some(hash),
+        timezone,
+        &favorite_asset,
+        &favorite_account,
+    )
+    .await
+    .map_err(RegistrationError::from)?;
 
     // create ownership to default account
     tx.create_account_ownership(&user.id, &favorite_account.id)

@@ -16,8 +16,8 @@ use crate::{
     assets::component::{Asset, AssetReadonlyRepository},
     auth::principal::AuthPrincipal,
     csrf_tokens::{CsrfToken, CsrfTokenRepository},
+    domain::{self, users::User},
     templates::HtmlTemplate,
-    users::{User, UserReadonlyRepository},
     AppState, DATE_TIME_FORMAT,
 };
 
@@ -129,8 +129,7 @@ pub async fn handler(
         .collect();
 
     // other users
-    let other_users = tx
-        .list_users()
+    let other_users = domain::users::list(&mut tx)
         .await
         .ok_or_else(construct_error)?
         .into_iter()

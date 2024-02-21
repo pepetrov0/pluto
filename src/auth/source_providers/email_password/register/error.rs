@@ -2,6 +2,8 @@
 
 use axum::response::{IntoResponse, Redirect};
 
+use crate::domain::users::AccountCreationError;
+
 #[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum RegistrationError {
@@ -11,6 +13,16 @@ pub enum RegistrationError {
     EmailTaken,
     InvalidFavoriteAsset,
     Unknown,
+}
+
+impl From<AccountCreationError> for RegistrationError {
+    fn from(err: AccountCreationError) -> Self {
+        match err {
+            AccountCreationError::InvalidEmail => RegistrationError::InvalidEmail,
+            AccountCreationError::EmailTaken => RegistrationError::EmailTaken,
+            AccountCreationError::Unknown => RegistrationError::Unknown,
+        }
+    }
 }
 
 impl IntoResponse for RegistrationError {

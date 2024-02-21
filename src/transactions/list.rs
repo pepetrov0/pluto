@@ -7,6 +7,7 @@ use axum::{
 };
 use chrono_tz::Tz;
 use either::Either;
+use itertools::Itertools;
 
 use crate::{
     accounts::{
@@ -14,8 +15,8 @@ use crate::{
     },
     assets::component::AssetReadonlyRepository,
     auth::principal::AuthPrincipal,
+    domain,
     templates::HtmlTemplate,
-    users::UserReadonlyRepository,
     AppState, DEFAULT_PAGE_SIZE, PAGE_SIZE_LIMITS,
 };
 
@@ -121,10 +122,8 @@ async fn handler(
         .ok_or_else(construct_error)?;
 
     // users
-    let users = ownerships.iter().map(|v| v.usr.clone()).collect();
-    let users = state
-        .database
-        .list_users_by_ids(users)
+    let users = ownerships.iter().map(|v| v.usr.clone()).collect_vec();
+    let users = domain::users::list_by_ids_or_emails(&mut state.database, &users)
         .await
         .ok_or_else(construct_error)?;
 
