@@ -10,6 +10,7 @@ use crate::{
         principal::NoAuthPrincipal, session::SessionWriteRepository,
         session_providers::cookie::SetCookieSession,
     },
+    database::WriteRepository,
     domain, validation, AppState,
 };
 
@@ -31,11 +32,9 @@ pub async fn handler(
     State(state): State<AppState>,
     Form(details): Form<RegisterForm>,
 ) -> Result<(SetCookieSession, Redirect), RegistrationError> {
-    let mut tx = state
-        .database
-        .begin()
+    let mut repository = WriteRepository::from_pool(&state.database)
         .await
-        .map_err(|_| RegistrationError::Unknown)?;
+        .ok_or(RegistrationError::Unknown)?;
 
     // trim details (email)
     let details = RegisterForm {
@@ -60,7 +59,7 @@ pub async fn handler(
     };
 
     // find asset
-    let favorite_asset = tx
+    let favorite_asset = repository
         .find_asset(&details.favorite_asset)
         .await
         .ok_or(RegistrationError::InvalidFavoriteAsset)?;
@@ -69,14 +68,14 @@ pub async fn handler(
     let timezone = Tz::from_str_insensitive(&details.timezone).unwrap_or_default();
 
     // create default account
-    let favorite_account = tx
+    let favorite_account = repository
         .create_account(DEFAULT_ACCOUNT_NAME)
         .await
         .ok_or(RegistrationError::Unknown)?;
 
     // attempt creating a user
     let user = domain::users::create(
-        &mut tx,
+        &mut repository,
         &details.email,
         Some(hash),
         timezone,
@@ -87,16 +86,20 @@ pub async fn handler(
     .map_err(RegistrationError::from)?;
 
     // create ownership to default account
-    tx.create_account_ownership(&user.id, &favorite_account.id)
+    repository
+        .create_account_ownership(&user.id, &favorite_account.id)
         .await
         .ok_or(RegistrationError::Unknown)?;
 
     // create a session
-    let session = tx
+    let session = repository
         .create_session(user.id)
         .await
         .ok_or(RegistrationError::Unknown)?;
 
-    tx.commit().await.map_err(|_| RegistrationError::Unknown)?;
+    repository
+        .commit()
+        .await
+        .ok_or(RegistrationError::Unknown)?;
     Ok((SetCookieSession(session), Redirect::to("/")))
 }

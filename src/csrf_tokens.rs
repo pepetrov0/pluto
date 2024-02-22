@@ -3,7 +3,7 @@
 use axum::async_trait;
 use sqlx::{prelude::FromRow, Postgres};
 
-use crate::database::AsWriteExecutor;
+use crate::database::WriteDatabaseRepository;
 
 /// Represents a CSRF token
 #[derive(Debug, Clone, FromRow)]
@@ -26,7 +26,7 @@ pub trait CsrfTokenRepository {
 #[async_trait]
 impl<T> CsrfTokenRepository for T
 where
-    T: AsWriteExecutor<Postgres> + Send + std::fmt::Debug,
+    T: WriteDatabaseRepository<Postgres> + Send + std::fmt::Debug,
 {
     /// Find and remove a CSRF token
     async fn consume_csrf_token(&mut self, id: &str) -> Option<CsrfToken> {
@@ -34,7 +34,7 @@ where
             "delete from valid_csrf_tokens where id=$1 returning id, usr, usage",
         )
         .bind(id)
-        .fetch_one(self.as_executor())
+        .fetch_one(self.acquire().await?)
         .await
         .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
@@ -48,7 +48,7 @@ where
         .bind(nanoid::nanoid!())
         .bind(user)
         .bind(usage)
-        .fetch_one(self.as_executor())
+        .fetch_one(self.acquire().await?)
         .await
         .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()

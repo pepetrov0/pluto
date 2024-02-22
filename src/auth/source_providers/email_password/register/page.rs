@@ -6,6 +6,7 @@ use axum::extract::{Query, State};
 use crate::{
     assets::component::{Asset, AssetReadonlyRepository},
     auth::principal::NoAuthPrincipal,
+    database::ReadonlyRepository,
     templates::HtmlTemplate,
     AppState,
 };
@@ -28,20 +29,31 @@ pub struct RegisterPage {
 pub async fn handler(
     _: NoAuthPrincipal,
     Query(query): Query<RegisterQuery>,
-    State(mut state): State<AppState>,
-) -> HtmlTemplate<RegisterPage> {
+    State(state): State<AppState>,
+) -> Result<HtmlTemplate<RegisterPage>, HtmlTemplate<RegisterPage>> {
+    let construct_error = || {
+        HtmlTemplate(RegisterPage {
+            error: query.error,
+            timezones: vec![],
+            assets: None,
+        })
+    };
+    let mut repository = ReadonlyRepository::from_pool(&state.database)
+        .await
+        .ok_or_else(construct_error)?;
+
     let timezones = chrono_tz::TZ_VARIANTS
         .iter()
         .map(|v| v.name().to_owned())
         .collect();
+    let assets = repository.list_assets().await;
 
-    let assets = state.database.list_assets().await;
-
-    HtmlTemplate(RegisterPage {
+    let page = HtmlTemplate(RegisterPage {
         error: query.error,
         timezones,
         assets,
-    })
+    });
+    Ok(page)
 }
 
 mod filters {

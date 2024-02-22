@@ -5,6 +5,7 @@ use crate::{
     assets::component::{Asset, AssetReadonlyRepository},
     auth::principal::AuthPrincipal,
     csrf_tokens::{CsrfToken, CsrfTokenRepository},
+    database::WriteRepository,
     templates::HtmlTemplate,
     AppState,
 };
@@ -29,19 +30,17 @@ pub async fn handler(
     Query(query): Query<NewAccountQuery>,
     State(state): State<AppState>,
 ) -> Result<HtmlTemplate<NewAccountPage>, HtmlTemplate<NewAccountPage>> {
-    let mut tx = state
-        .database
-        .begin()
+    let mut repository = WriteRepository::from_pool(&state.database)
         .await
-        .map_err(|_| HtmlTemplate(NewAccountPage::default()))?;
+        .ok_or_else(|| HtmlTemplate(NewAccountPage::default()))?;
 
     // create csrf token
-    let csrf_token = tx
+    let csrf_token = repository
         .create_csrf_token(&user.id, super::CSRF_TOKEN_USAGE)
         .await;
 
     // fetch currencies
-    let currencies = tx.list_assets().await;
+    let currencies = repository.list_assets().await;
 
     let page = HtmlTemplate(NewAccountPage {
         csrf_token,
@@ -49,8 +48,9 @@ pub async fn handler(
         assets: currencies,
     });
 
-    tx.commit()
+    repository
+        .commit()
         .await
-        .map_err(|_| HtmlTemplate(NewAccountPage::default()))?;
+        .ok_or_else(|| HtmlTemplate(NewAccountPage::default()))?;
     Ok(page)
 }

@@ -1,11 +1,12 @@
 use chrono_tz::Tz;
+use sqlx::Postgres;
 
-use crate::{accounts::component::Account, assets::component::Asset, validation};
-
-use super::{
-    repository::{UserReadonlyRepository, UserWriteRepository},
-    User,
+use crate::{
+    accounts::component::Account, assets::component::Asset, database::WriteDatabaseRepository,
+    validation,
 };
+
+use super::{repository::UserWriteRepository, User};
 
 pub enum AccountCreationError {
     InvalidEmail,
@@ -22,7 +23,7 @@ pub async fn create<R>(
     favorite_account: &Account,
 ) -> Result<User, AccountCreationError>
 where
-    R: UserReadonlyRepository + UserWriteRepository,
+    R: WriteDatabaseRepository<Postgres>,
 {
     // validate email
     if !validation::is_email(email) {

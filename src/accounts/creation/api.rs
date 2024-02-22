@@ -7,6 +7,7 @@ use crate::{
     accounts::{component::AccountWriteRepository, ownership::AccountOwnershipWriteRepository},
     auth::principal::AuthPrincipal,
     csrf_tokens::CsrfTokenRepository,
+    database::WriteRepository,
     AppState,
 };
 
@@ -28,14 +29,12 @@ pub async fn handler(
         csrf: details.csrf.trim().to_owned(),
     };
 
-    let mut tx = state
-        .database
-        .begin()
+    let mut repository = WriteRepository::from_pool(&state.database)
         .await
-        .map_err(|_| AccountCreationError::Unknown)?;
+        .ok_or(AccountCreationError::Unknown)?;
 
     // check csrf
-    let csrf = tx.consume_csrf_token(details.csrf.as_str()).await;
+    let csrf = repository.consume_csrf_token(details.csrf.as_str()).await;
     if csrf
         .filter(|v| v.usr == user.id)
         .filter(|v| v.usage == super::CSRF_TOKEN_USAGE)
@@ -50,17 +49,18 @@ pub async fn handler(
     }
 
     // create account and ownership
-    let account = tx
+    let account = repository
         .create_account(&details.name)
         .await
         .ok_or(AccountCreationError::Unknown)?;
-    let _ = tx
+    let _ = repository
         .create_account_ownership(&user.id, &account.id)
         .await
         .ok_or(AccountCreationError::Unknown)?;
 
-    tx.commit()
+    repository
+        .commit()
         .await
-        .map_err(|_| AccountCreationError::Unknown)?;
+        .ok_or(AccountCreationError::Unknown)?;
     Ok(Redirect::to("/accounts?created=true"))
 }

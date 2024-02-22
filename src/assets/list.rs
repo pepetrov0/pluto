@@ -3,12 +3,12 @@
 use askama::Template;
 use axum::{
     extract::{Query, State},
-    http::StatusCode,
     routing, Router,
 };
 
 use crate::{
-    auth::principal::AuthPrincipal, domain::users::User, templates::HtmlTemplate, AppState,
+    auth::principal::AuthPrincipal, database::ReadonlyRepository, domain::users::User,
+    templates::HtmlTemplate, AppState,
 };
 
 use super::component::{Asset, AssetReadonlyRepository, AssetType};
@@ -30,9 +30,12 @@ struct AssetsListPage {
 async fn handler(
     AuthPrincipal(user): AuthPrincipal,
     Query(query): Query<AssetsListQuery>,
-    State(mut state): State<AppState>,
-) -> Result<HtmlTemplate<AssetsListPage>, StatusCode> {
-    let assets = state.database.list_assets().await;
+    State(state): State<AppState>,
+) -> HtmlTemplate<AssetsListPage> {
+    let assets = match ReadonlyRepository::from_pool(&state.database).await {
+        Some(mut repository) => repository.list_assets().await,
+        None => None,
+    };
 
     let page = AssetsListPage {
         created: query.created,
@@ -43,7 +46,7 @@ async fn handler(
         }),
         principal: user,
     };
-    Ok(HtmlTemplate(page))
+    HtmlTemplate(page)
 }
 
 pub fn router() -> Router<AppState> {

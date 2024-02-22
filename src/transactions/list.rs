@@ -15,6 +15,7 @@ use crate::{
     },
     assets::component::AssetReadonlyRepository,
     auth::principal::AuthPrincipal,
+    database::ReadonlyRepository,
     domain,
     templates::HtmlTemplate,
     AppState, DEFAULT_PAGE_SIZE, PAGE_SIZE_LIMITS,
@@ -43,15 +44,17 @@ struct TransactionsList {
 async fn handler(
     AuthPrincipal(user): AuthPrincipal,
     Query(query): Query<AccountsListQuery>,
-    State(mut state): State<AppState>,
+    State(state): State<AppState>,
 ) -> Result<HtmlTemplate<TransactionsList>, HtmlTemplate<TransactionsList>> {
     let construct_error = || HtmlTemplate(TransactionsList::default());
+    let mut repository = ReadonlyRepository::from_pool(&state.database)
+        .await
+        .ok_or_else(construct_error)?;
 
     let tz = Tz::from_str_insensitive(&user.timezone).map_err(|_| construct_error())?;
 
     // all owned accounts for the user
-    let owned_accounts: Vec<_> = state
-        .database
+    let owned_accounts: Vec<_> = repository
         .list_account_ownerships_by_user_or_account(&user.id)
         .await
         .ok_or_else(construct_error)?
@@ -60,8 +63,7 @@ async fn handler(
         .collect();
 
     // number of transactions
-    let number_of_transactions = state
-        .database
+    let number_of_transactions = repository
         .count_settled_transactions(&owned_accounts)
         .await
         .ok_or_else(construct_error)?;
@@ -75,13 +77,11 @@ async fn handler(
     let page_offset = (query.page - 1).clamp(0, num_pages - 1) * page_size;
 
     // transactions
-    let unsettled_transactions = state
-        .database
+    let unsettled_transactions = repository
         .list_unsettled_transactions(&owned_accounts)
         .await
         .ok_or_else(construct_error)?;
-    let settled_transactions = state
-        .database
+    let settled_transactions = repository
         .list_settled_transactions(page_offset, page_size, &owned_accounts)
         .await
         .ok_or_else(construct_error)?;
@@ -96,8 +96,7 @@ async fn handler(
         .iter()
         .flat_map(|v| [v.credit_asset.clone(), v.debit_asset.clone()])
         .collect();
-    let assets = state
-        .database
+    let assets = repository
         .list_assets_by_ids(assets)
         .await
         .ok_or_else(construct_error)?;
@@ -107,23 +106,21 @@ async fn handler(
         .iter()
         .flat_map(|v| [v.credit_account.clone(), v.debit_account.clone()])
         .collect();
-    let accounts = state
-        .database
+    let accounts = repository
         .list_accounts_by_ids(accounts)
         .await
         .ok_or_else(construct_error)?;
 
     // account ownerships
     let ownerships = accounts.iter().map(|v| v.id.clone()).collect();
-    let ownerships = state
-        .database
+    let ownerships = repository
         .list_account_ownerships_by_users_or_accounts(ownerships)
         .await
         .ok_or_else(construct_error)?;
 
     // users
     let users = ownerships.iter().map(|v| v.usr.clone()).collect_vec();
-    let users = domain::users::list_by_ids_or_emails(&mut state.database, &users)
+    let users = domain::users::list_by_ids_or_emails(&mut repository, &users)
         .await
         .ok_or_else(construct_error)?;
 

@@ -2,7 +2,7 @@ use axum::async_trait;
 use chrono_tz::Tz;
 use sqlx::Postgres;
 
-use crate::database::{AsReadonlyExecutor, AsWriteExecutor};
+use crate::database::{ReadonlyDatabaseRepository, WriteDatabaseRepository};
 
 use super::{User, UserWithPassword};
 
@@ -39,13 +39,13 @@ pub trait UserWriteRepository {
 #[async_trait]
 impl<T> UserReadonlyRepository for T
 where
-    T: AsReadonlyExecutor<Postgres> + Send + std::fmt::Debug,
+    T: ReadonlyDatabaseRepository<Postgres> + Send + std::fmt::Debug,
 {
     #[tracing::instrument]
     async fn find_user(&mut self, id_or_email: &str) -> Option<User> {
         sqlx::query_as::<_, User>("select id, email, timezone, favorite_asset, favorite_account from users where id=$1 or email=$1")
             .bind(id_or_email)
-            .fetch_one(self.as_executor())
+            .fetch_one(self.acquire().await?)
             .await
             .map_err(|v| tracing::warn!("{:#?}", v))
             .ok()
@@ -57,7 +57,7 @@ where
             "select id, email, password, timezone, favorite_asset, favorite_account from users where id=$1 or email=$1",
         )
         .bind(id_or_email)
-        .fetch_one(self.as_executor())
+        .fetch_one(self.acquire().await?)
         .await
         .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
@@ -68,7 +68,7 @@ where
         sqlx::query_as::<_, User>(
             "select id, email, timezone, favorite_asset, favorite_account from users",
         )
-        .fetch_all(self.as_executor())
+        .fetch_all(self.acquire().await?)
         .await
         .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
@@ -84,7 +84,7 @@ where
             "select id, email, timezone, favorite_asset, favorite_account from users where id=ANY($1) or email=ANY($1)",
         )
         .bind(ids_or_emails)
-        .fetch_all(self.as_executor())
+        .fetch_all(self.acquire().await?)
         .await
         .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
@@ -94,7 +94,7 @@ where
 #[async_trait]
 impl<T> UserWriteRepository for T
 where
-    T: AsWriteExecutor<Postgres> + Send + std::fmt::Debug,
+    T: WriteDatabaseRepository<Postgres> + Send + std::fmt::Debug,
 {
     #[tracing::instrument]
     async fn create_user(
@@ -114,7 +114,7 @@ where
         .bind(timezone.name())
         .bind(favorite_asset)
         .bind(favorite_account)
-        .fetch_one(self.as_executor())
+        .fetch_one(self.acquire().await?)
         .await
         .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()

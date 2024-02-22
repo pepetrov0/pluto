@@ -7,6 +7,7 @@ use crate::{
     assets::component::{AssetReadonlyRepository, AssetType, AssetWriteRepository},
     auth::principal::AuthPrincipal,
     csrf_tokens::CsrfTokenRepository,
+    database::WriteRepository,
     AppState,
 };
 
@@ -27,11 +28,9 @@ pub async fn handler(
     State(state): State<AppState>,
     Form(details): Form<NewAssetForm>,
 ) -> Result<Redirect, AssetCreationError> {
-    let mut tx = state
-        .database
-        .begin()
+    let mut repository = WriteRepository::from_pool(&state.database)
         .await
-        .map_err(|_| AssetCreationError::Unknown)?;
+        .ok_or(AssetCreationError::Unknown)?;
 
     let details = NewAssetForm {
         label: details.label.trim().to_owned(),
@@ -46,7 +45,7 @@ pub async fn handler(
     };
 
     // check csrf
-    let csrf = tx.consume_csrf_token(details.csrf.as_str()).await;
+    let csrf = repository.consume_csrf_token(details.csrf.as_str()).await;
     if csrf
         .filter(|v| v.usr == user.id)
         .filter(|v| v.usage == super::CSRF_TOKEN_USAGE)
@@ -77,20 +76,24 @@ pub async fn handler(
         return Err(AssetCreationError::InvalidPrecision);
     }
 
-    if tx.find_asset(&details.ticker).await.is_some() {
+    if repository.find_asset(&details.ticker).await.is_some() {
         return Err(AssetCreationError::AlreadyExists);
     }
 
-    tx.create_asset(
-        details.ticker,
-        details.symbol,
-        details.label,
-        details.precision,
-        details.atype,
-    )
-    .await
-    .ok_or(AssetCreationError::Unknown)?;
+    repository
+        .create_asset(
+            details.ticker,
+            details.symbol,
+            details.label,
+            details.precision,
+            details.atype,
+        )
+        .await
+        .ok_or(AssetCreationError::Unknown)?;
 
-    tx.commit().await.map_err(|_| AssetCreationError::Unknown)?;
+    repository
+        .commit()
+        .await
+        .ok_or(AssetCreationError::Unknown)?;
     Ok(Redirect::to("/assets?created=true"))
 }

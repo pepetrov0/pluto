@@ -13,6 +13,7 @@ use crate::{
     assets::component::AssetReadonlyRepository,
     auth::principal::AuthPrincipal,
     csrf_tokens::CsrfTokenRepository,
+    database::WriteRepository,
     domain,
     transactions::component::TransactionWriteRepository,
     AppState, DATE_TIME_FORMAT,
@@ -69,14 +70,12 @@ pub async fn handler(
         csrf: details.csrf.trim().to_owned(),
     };
 
-    let mut tx = state
-        .database
-        .begin()
+    let mut repository = WriteRepository::from_pool(&state.database)
         .await
-        .map_err(|_| TransactionCreationError::Unknown)?;
+        .ok_or(TransactionCreationError::Unknown)?;
 
     // check csrf
-    let csrf = tx.consume_csrf_token(details.csrf.as_str()).await;
+    let csrf = repository.consume_csrf_token(details.csrf.as_str()).await;
     if csrf
         .filter(|v| v.usr == user.id)
         .filter(|v| v.usage == super::CSRF_TOKEN_USAGE)
@@ -102,7 +101,7 @@ pub async fn handler(
         .naive_utc();
 
     // account ownerships
-    let ownerships = tx
+    let ownerships = repository
         .list_account_ownerships_by_users_or_accounts(vec![
             details.debit_account.clone(),
             details.credit_account.clone(),
@@ -151,7 +150,7 @@ pub async fn handler(
         .or(details.asset)
         .or(Some(credit_asset.clone()))
         .ok_or(TransactionCreationError::MissingDebitAsset)?;
-    let assets = tx
+    let assets = repository
         .list_assets_by_ids(vec![credit_asset.clone(), debit_asset.clone()])
         .await
         .ok_or(TransactionCreationError::Unknown)?;
@@ -188,7 +187,7 @@ pub async fn handler(
 
     // users
     let users = domain::users::list_by_ids_or_emails(
-        &mut tx,
+        &mut repository,
         &[
             details.credit_account.clone(),
             details.debit_account.clone(),
@@ -209,12 +208,12 @@ pub async fn handler(
             .into_iter(),
         )
         .collect();
-    let accounts = tx
+    let accounts = repository
         .list_accounts_by_ids(accounts)
         .await
         .ok_or(TransactionCreationError::Unknown)?;
     let credit_account = match details.create_credit_account {
-        true => tx
+        true => repository
             .create_account(&details.credit_account)
             .await
             .ok_or(TransactionCreationError::Unknown)?,
@@ -232,7 +231,7 @@ pub async fn handler(
         }
     };
     let debit_account = match details.create_debit_account {
-        true => tx
+        true => repository
             .create_account(&details.debit_account)
             .await
             .ok_or(TransactionCreationError::Unknown)?,
@@ -255,25 +254,27 @@ pub async fn handler(
         return Err(TransactionCreationError::MatchingAccounts);
     }
 
-    tx.create_transaction(
-        details.note,
-        credit_account.id,
-        debit_account.id,
-        credit_asset.id,
-        debit_asset.id,
-        timestamp,
-        timestamp,
-        credit_amount,
-        debit_amount,
-        credit_account_owned_by_self || !credit_account_owned,
-        debit_account_owned_by_self || !debit_account_owned,
-    )
-    .await
-    .ok_or(TransactionCreationError::Unknown)?;
-
-    tx.commit()
+    repository
+        .create_transaction(
+            details.note,
+            credit_account.id,
+            debit_account.id,
+            credit_asset.id,
+            debit_asset.id,
+            timestamp,
+            timestamp,
+            credit_amount,
+            debit_amount,
+            credit_account_owned_by_self || !credit_account_owned,
+            debit_account_owned_by_self || !debit_account_owned,
+        )
         .await
-        .map_err(|_| TransactionCreationError::Unknown)?;
+        .ok_or(TransactionCreationError::Unknown)?;
+
+    repository
+        .commit()
+        .await
+        .ok_or(TransactionCreationError::Unknown)?;
 
     Ok(Redirect::to("/transactions?created=true"))
 }

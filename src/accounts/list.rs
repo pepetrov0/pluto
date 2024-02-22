@@ -8,8 +8,12 @@ use axum::{
 use itertools::Itertools;
 
 use crate::{
-    accounts::component::Account, auth::principal::AuthPrincipal, domain, domain::users::User,
-    templates::HtmlTemplate, AppState,
+    accounts::component::Account,
+    auth::principal::AuthPrincipal,
+    database::ReadonlyRepository,
+    domain::{self, users::User},
+    templates::HtmlTemplate,
+    AppState,
 };
 
 use super::{component::AccountReadonlyRepository, ownership::AccountOwnershipReadonlyRepository};
@@ -33,7 +37,7 @@ struct AccountsListPage {
 async fn handler(
     AuthPrincipal(user): AuthPrincipal,
     Query(query): Query<AccountsListQuery>,
-    State(mut state): State<AppState>,
+    State(state): State<AppState>,
 ) -> Result<HtmlTemplate<AccountsListPage>, HtmlTemplate<AccountsListPage>> {
     let construct_error = || {
         HtmlTemplate(AccountsListPage {
@@ -42,33 +46,33 @@ async fn handler(
             principal: user.clone(),
         })
     };
+    let mut repository = ReadonlyRepository::from_pool(&state.database)
+        .await
+        .ok_or_else(construct_error)?;
 
     // fetch all account ownerships
-    let ownerships = state
-        .database
+    let ownerships = repository
         .list_account_ownerships_by_user_or_account(&user.id)
         .await
         .ok_or_else(construct_error)?;
 
     // fetch all accounts that are owned
     let accounts_owned = ownerships.into_iter().map(|v| v.account).collect();
-    let accounts_owned = state
-        .database
+    let accounts_owned = repository
         .list_accounts_by_ids(accounts_owned)
         .await
         .ok_or_else(construct_error)?;
 
     // fetch all ownerships
     let ownerships = accounts_owned.iter().cloned().map(|v| v.id).collect();
-    let ownerships = state
-        .database
+    let ownerships = repository
         .list_account_ownerships_by_users_or_accounts(ownerships)
         .await
         .ok_or_else(construct_error)?;
 
     // fetch all users
     let users = ownerships.iter().cloned().map(|v| v.usr).collect_vec();
-    let users = domain::users::list_by_ids_or_emails(&mut state.database, &users)
+    let users = domain::users::list_by_ids_or_emails(&mut repository, &users)
         .await
         .ok_or_else(construct_error)?;
 

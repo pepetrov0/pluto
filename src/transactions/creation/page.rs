@@ -16,6 +16,7 @@ use crate::{
     assets::component::{Asset, AssetReadonlyRepository},
     auth::principal::AuthPrincipal,
     csrf_tokens::{CsrfToken, CsrfTokenRepository},
+    database::WriteRepository,
     domain::{self, users::User},
     templates::HtmlTemplate,
     AppState, DATE_TIME_FORMAT,
@@ -69,13 +70,6 @@ pub async fn handler(
     Query(query): Query<NewTransactionQuery>,
     State(state): State<AppState>,
 ) -> Result<HtmlTemplate<NewTransactionPage>, HtmlTemplate<NewTransactionPage>> {
-    // current timestamp
-    let tz = Tz::from_str_insensitive(&user.timezone);
-    let current_timestamp = tz
-        .map(|v| Utc::now().with_timezone(&v))
-        .map(|v| v.format(DATE_TIME_FORMAT).to_string())
-        .unwrap_or_default();
-
     let construct_error = || {
         HtmlTemplate(NewTransactionPage {
             csrf_token: None,
@@ -87,23 +81,30 @@ pub async fn handler(
             error: None,
         })
     };
-
-    let mut tx = state
-        .database
-        .begin()
+    let mut repository = WriteRepository::from_pool(&state.database)
         .await
-        .map_err(|_| construct_error())?;
+        .ok_or_else(construct_error)?;
+
+    // current timestamp
+    let tz = Tz::from_str_insensitive(&user.timezone);
+    let current_timestamp = tz
+        .map(|v| Utc::now().with_timezone(&v))
+        .map(|v| v.format(DATE_TIME_FORMAT).to_string())
+        .unwrap_or_default();
 
     // create csrf token
-    let csrf_token = tx
+    let csrf_token = repository
         .create_csrf_token(&user.id, super::CSRF_TOKEN_USAGE)
         .await;
 
     // accounts
-    let accounts = tx.list_accounts().await.ok_or_else(construct_error)?;
+    let accounts = repository
+        .list_accounts()
+        .await
+        .ok_or_else(construct_error)?;
 
     // accounts ownerships
-    let ownerships = tx
+    let ownerships = repository
         .list_account_ownerships()
         .await
         .ok_or_else(construct_error)?;
@@ -129,7 +130,7 @@ pub async fn handler(
         .collect();
 
     // other users
-    let other_users = domain::users::list(&mut tx)
+    let other_users = domain::users::list(&mut repository)
         .await
         .ok_or_else(construct_error)?
         .into_iter()
@@ -137,7 +138,7 @@ pub async fn handler(
         .collect();
 
     // assets
-    let assets = tx.list_assets().await.ok_or_else(construct_error)?;
+    let assets = repository.list_assets().await.ok_or_else(construct_error)?;
 
     // preset
     let preset = NewTransactionPreset {
@@ -152,7 +153,7 @@ pub async fn handler(
         timestamp: current_timestamp,
     };
 
-    tx.commit().await.map_err(|_| construct_error())?;
+    repository.commit().await.ok_or_else(construct_error)?;
     let page = NewTransactionPage {
         csrf_token,
         own_accounts: Some(own_accounts),

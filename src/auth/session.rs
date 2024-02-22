@@ -4,7 +4,7 @@ use axum::{async_trait, extract::FromRequestParts, http::request::Parts, Extensi
 use sqlx::{prelude::FromRow, Postgres};
 
 use crate::{
-    database::{AsReadonlyExecutor, AsWriteExecutor},
+    database::{ReadonlyDatabaseRepository, WriteDatabaseRepository},
     AppState,
 };
 
@@ -31,19 +31,19 @@ pub trait SessionWriteRepository {
     async fn create_session(&mut self, user: String) -> Option<Session>;
 
     /// Deletes a session
-    async fn delete_session(&mut self, id: &str);
+    async fn delete_session(&mut self, id: &str) -> Option<()>;
 }
 
 #[async_trait]
 impl<T> SessionReadonlyRepository for T
 where
-    T: AsReadonlyExecutor<Postgres> + Send + std::fmt::Debug,
+    T: ReadonlyDatabaseRepository<Postgres> + Send + std::fmt::Debug,
 {
     #[tracing::instrument]
     async fn find_session(&mut self, id: &str) -> Option<Session> {
         sqlx::query_as::<_, Session>("select id, usr from sessions where id=$1")
             .bind(id)
-            .fetch_one(self.as_executor())
+            .fetch_one(self.acquire().await?)
             .await
             .map_err(|v| tracing::warn!("{:#?}", v))
             .ok()
@@ -53,7 +53,7 @@ where
 #[async_trait]
 impl<T> SessionWriteRepository for T
 where
-    T: AsWriteExecutor<Postgres> + Send + std::fmt::Debug,
+    T: WriteDatabaseRepository<Postgres> + Send + std::fmt::Debug,
 {
     #[tracing::instrument]
     async fn create_session(&mut self, user: String) -> Option<Session> {
@@ -62,19 +62,21 @@ where
         )
         .bind(nanoid::nanoid!())
         .bind(user)
-        .fetch_one(self.as_executor())
+        .fetch_one(self.acquire().await?)
         .await
         .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
     }
 
     #[tracing::instrument]
-    async fn delete_session(&mut self, id: &str) {
-        let _ = sqlx::query("delete from sessions where id=$1")
+    async fn delete_session(&mut self, id: &str) -> Option<()> {
+        sqlx::query("delete from sessions where id=$1")
             .bind(id)
-            .execute(self.as_executor())
+            .execute(self.acquire().await?)
             .await
-            .map_err(|v| tracing::warn!("{:#?}", v));
+            .map_err(|v| tracing::warn!("{:#?}", v))
+            .ok()?;
+        Some(())
     }
 }
 

@@ -5,7 +5,7 @@ use nanoid::nanoid;
 use serde::{Deserialize, Serialize};
 use sqlx::{prelude::FromRow, Postgres, Type};
 
-use crate::database::{AsReadonlyExecutor, AsWriteExecutor};
+use crate::database::{ReadonlyDatabaseRepository, WriteDatabaseRepository};
 
 /// Represents an asset type
 #[derive(Debug, Clone, PartialEq, Eq, Type, Serialize, Deserialize)]
@@ -56,14 +56,14 @@ pub trait AssetWriteRepository {
 #[async_trait]
 impl<T> AssetReadonlyRepository for T
 where
-    T: AsReadonlyExecutor<Postgres> + std::fmt::Debug + Send,
+    T: ReadonlyDatabaseRepository<Postgres> + std::fmt::Debug + Send,
 {
     #[tracing::instrument]
     async fn list_assets(&mut self) -> Option<Vec<Asset>> {
         sqlx::query_as::<_, Asset>(
             "select id, ticker, symbol, label, precision, atype from assets order by label",
         )
-        .fetch_all(self.as_executor())
+        .fetch_all(self.acquire().await?)
         .await
         .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
@@ -79,7 +79,7 @@ where
             "select id, ticker, symbol, label, precision, atype from assets where id=ANY($1) order by label",
         )
         .bind(&ids[..])
-        .fetch_all(self.as_executor())
+        .fetch_all(self.acquire().await?)
         .await
         .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
@@ -91,7 +91,7 @@ where
             "select id, ticker, symbol, label, precision, atype from assets where id=$1 or ticker=$1",
         )
         .bind(id_or_ticker)
-        .fetch_one(self.as_executor())
+        .fetch_one(self.acquire().await?)
         .await
         .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
@@ -101,7 +101,7 @@ where
 #[async_trait]
 impl<T> AssetWriteRepository for T
 where
-    T: AsWriteExecutor<Postgres> + std::fmt::Debug + Send,
+    T: WriteDatabaseRepository<Postgres> + std::fmt::Debug + Send,
 {
     #[tracing::instrument]
     async fn create_asset(
@@ -121,7 +121,7 @@ where
         .bind(label)
         .bind(precision)
         .bind(atype)
-        .fetch_one(self.as_executor())
+        .fetch_one(self.acquire().await?)
         .await
         .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()

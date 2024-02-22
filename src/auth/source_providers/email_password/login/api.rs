@@ -7,6 +7,7 @@ use crate::{
         principal::NoAuthPrincipal, session::SessionWriteRepository,
         session_providers::cookie::SetCookieSession,
     },
+    database::WriteRepository,
     domain, validation, AppState,
 };
 
@@ -23,17 +24,15 @@ pub async fn handler(
     State(state): State<AppState>,
     Form(details): Form<RegisterForm>,
 ) -> Result<(SetCookieSession, Redirect), LoginError> {
-    let mut tx = state
-        .database
-        .begin()
+    let mut repository = WriteRepository::from_pool(&state.database)
         .await
-        .map_err(|_| LoginError::Unknown)?;
+        .ok_or(LoginError::Unknown)?;
 
     if !validation::is_email(&details.email) {
         return Err(LoginError::InvalidCredentials);
     }
 
-    let user = domain::users::find_with_password(&mut tx, &details.email)
+    let user = domain::users::find_with_password(&mut repository, &details.email)
         .await
         .ok_or(LoginError::InvalidCredentials)?;
 
@@ -49,11 +48,14 @@ pub async fn handler(
         return Err(LoginError::InvalidCredentials);
     }
 
-    let session = tx
+    let session = repository
         .create_session(user.id)
         .await
         .ok_or(LoginError::Unknown)?;
 
-    tx.commit().await.map_err(|_| LoginError::Unknown)?;
+    repository
+        .commit()
+        .await
+        .ok_or(LoginError::Unknown)?;
     Ok((SetCookieSession(session), Redirect::to("/")))
 }

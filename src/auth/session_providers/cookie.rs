@@ -12,7 +12,11 @@ use axum_extra::extract::{
     PrivateCookieJar,
 };
 
-use crate::{auth::session::{Session, SessionReadonlyRepository}, AppState};
+use crate::{
+    auth::session::{Session, SessionReadonlyRepository},
+    database::ReadonlyRepository,
+    AppState,
+};
 
 const DEFAULT_SESSION_COOKIE_NAME: &str = "x-pluto-session";
 
@@ -26,7 +30,7 @@ pub struct RemoveCookieSession;
 
 /// Cookie session extraction middleware
 pub async fn middleware(
-    State(mut state): State<AppState>,
+    State(state): State<AppState>,
     mut jar: PrivateCookieJar<Key>,
     session: Option<Extension<Session>>,
     mut req: Request<Body>,
@@ -42,7 +46,10 @@ pub async fn middleware(
     if session.is_none() {
         if let Some(cookie) = jar.get(&session_cookie_name) {
             let session = cookie.value();
-            let session = state.database.find_session(session).await;
+            let session = match ReadonlyRepository::from_pool(&state.database).await {
+                Some(mut repository) => repository.find_session(session).await,
+                None => None,
+            };
             if let Some(session) = session {
                 req.extensions_mut().insert(session);
             }

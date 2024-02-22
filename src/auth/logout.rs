@@ -2,7 +2,7 @@
 
 use axum::{extract::State, response::Redirect, routing, Router};
 
-use crate::AppState;
+use crate::{database::WriteRepository, AppState};
 
 use super::{
     session::{Session, SessionWriteRepository},
@@ -13,16 +13,16 @@ async fn handler(
     State(state): State<AppState>,
     session: Option<Session>,
 ) -> (RemoveCookieSession, Redirect) {
-    let mut tx = match state.database.begin().await {
-        Ok(tx) => tx,
-        Err(_) => return (RemoveCookieSession, Redirect::to("/")),
+    let mut repository = match WriteRepository::from_pool(&state.database).await {
+        Some(tx) => tx,
+        None => return (RemoveCookieSession, Redirect::to("/")),
     };
 
     if let Some(session) = session {
-        tx.delete_session(&session.id).await;
+        repository.delete_session(&session.id).await;
     }
 
-    let _ = tx.commit().await;
+    let _ = repository.commit().await;
     (RemoveCookieSession, Redirect::to("/"))
 }
 

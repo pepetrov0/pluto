@@ -4,7 +4,7 @@ use axum::async_trait;
 use chrono::NaiveDateTime;
 use sqlx::{prelude::FromRow, Postgres};
 
-use crate::database::{AsReadonlyExecutor, AsWriteExecutor};
+use crate::database::{ReadonlyDatabaseRepository, WriteDatabaseRepository};
 
 /// Represents a transaction
 #[derive(Debug, Clone, FromRow)]
@@ -68,7 +68,7 @@ pub trait TransactionWriteRepository {
 #[async_trait]
 impl<T> TransactionReadonlyRepository for T
 where
-    T: AsReadonlyExecutor<Postgres> + Send + std::fmt::Debug,
+    T: ReadonlyDatabaseRepository<Postgres> + Send + std::fmt::Debug,
 {
     #[tracing::instrument]
     async fn count_settled_transactions(&mut self, accounts: &[String]) -> Option<i64> {
@@ -78,7 +78,7 @@ where
 
         sqlx::query_as::<_, (i64,)>(include_str!("sql/count-settled.pg.sql"))
             .bind(accounts)
-            .fetch_one(self.as_executor())
+            .fetch_one(self.acquire().await?)
             .await
             .map_err(|v| tracing::warn!("{:#?}", v))
             .ok()
@@ -100,7 +100,7 @@ where
             .bind(page_offset)
             .bind(page_size)
             .bind(accounts)
-            .fetch_all(self.as_executor())
+            .fetch_all(self.acquire().await?)
             .await
             .map_err(|v| tracing::warn!("{:#?}", v))
             .ok()
@@ -117,7 +117,7 @@ where
 
         sqlx::query_as::<_, Transaction>(include_str!("sql/list-unsettled.pg.sql"))
             .bind(accounts)
-            .fetch_all(self.as_executor())
+            .fetch_all(self.acquire().await?)
             .await
             .map_err(|v| tracing::warn!("{:#?}", v))
             .ok()
@@ -127,7 +127,7 @@ where
 #[async_trait]
 impl<T> TransactionWriteRepository for T
 where
-    T: AsWriteExecutor<Postgres> + Send + std::fmt::Debug,
+    T: WriteDatabaseRepository<Postgres> + Send + std::fmt::Debug,
 {
     #[tracing::instrument]
     async fn create_transaction(
@@ -157,7 +157,7 @@ where
             .bind(debit_amount)
             .bind(credit_settled)
             .bind(debit_settled)
-            .fetch_one(self.as_executor())
+            .fetch_one(self.acquire().await?)
             .await
             .map_err(|v| tracing::warn!("{:#?}", v))
             .ok()

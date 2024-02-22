@@ -3,7 +3,7 @@
 use axum::async_trait;
 use sqlx::{FromRow, Postgres};
 
-use crate::database::{AsReadonlyExecutor, AsWriteExecutor};
+use crate::database::{ReadonlyDatabaseRepository, WriteDatabaseRepository};
 
 /// Represents an account ownership
 #[derive(Debug, Clone, FromRow)]
@@ -46,12 +46,12 @@ pub trait AccountOwnershipWriteRepository {
 #[async_trait]
 impl<T> AccountOwnershipReadonlyRepository for T
 where
-    T: AsReadonlyExecutor<Postgres> + Send + std::fmt::Debug,
+    T: ReadonlyDatabaseRepository<Postgres> + Send + std::fmt::Debug,
 {
     #[tracing::instrument]
     async fn list_account_ownerships(&mut self) -> Option<Vec<AccountOwnership>> {
         sqlx::query_as::<_, AccountOwnership>("select id, usr, account from accounts_ownerships")
-            .fetch_all(self.as_executor())
+            .fetch_all(self.acquire().await?)
             .await
             .map_err(|v| tracing::warn!("{:#?}", v))
             .ok()
@@ -66,7 +66,7 @@ where
             "select id, usr, account from accounts_ownerships where usr=$1 or account=$1",
         )
         .bind(user_or_account)
-        .fetch_all(self.as_executor())
+        .fetch_all(self.acquire().await?)
         .await
         .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
@@ -85,7 +85,7 @@ where
             "select id, usr, account from accounts_ownerships where usr=ANY($1) or account=ANY($1)",
         )
         .bind(&ids[..])
-        .fetch_all(self.as_executor())
+        .fetch_all(self.acquire().await?)
         .await
         .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
@@ -95,7 +95,7 @@ where
 #[async_trait]
 impl<T> AccountOwnershipWriteRepository for T
 where
-    T: AsWriteExecutor<Postgres> + Send + std::fmt::Debug,
+    T: WriteDatabaseRepository<Postgres> + Send + std::fmt::Debug,
 {
     #[tracing::instrument]
     async fn create_account_ownership(
@@ -106,7 +106,7 @@ where
         sqlx::query_as::<_, AccountOwnership>("insert into accounts_ownerships (usr, account) values ($1, $2) returning id, usr, account")
             .bind(user)
             .bind(account)
-            .fetch_one(self.as_executor())
+            .fetch_one(self.acquire().await?)
             .await
             .map_err(|v| tracing::warn!("{:#?}", v))
             .ok()

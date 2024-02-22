@@ -1,31 +1,60 @@
 //! Implements a database connection
 
-use std::time::Duration;
+use std::{fmt::Debug, time::Duration};
 
-use sqlx::{postgres::PgPoolOptions, Executor, PgPool, Postgres, Transaction};
+use axum::async_trait;
+use sqlx::{pool::PoolConnection, postgres::PgPoolOptions, Acquire, PgPool, Pool, Transaction};
 
 use crate::config::Configuration;
 
-pub trait AsExecutor<DB: sqlx::Database> {
-    fn as_executor(&mut self) -> impl Executor<'_, Database = DB>;
+#[async_trait]
+pub trait DatabaseRepository<DB: sqlx::Database>: Debug + Send {
+    async fn acquire(&mut self) -> Option<&mut <DB as sqlx::Database>::Connection>;
 }
 
-pub trait AsReadonlyExecutor<DB: sqlx::Database>: AsExecutor<DB> {}
+pub trait ReadonlyDatabaseRepository<DB: sqlx::Database>: DatabaseRepository<DB> {}
 
-pub trait AsWriteExecutor<DB: sqlx::Database>: AsReadonlyExecutor<DB> {}
+pub trait WriteDatabaseRepository<DB: sqlx::Database>:
+    DatabaseRepository<DB> + ReadonlyDatabaseRepository<DB>
+{
+}
 
-impl AsReadonlyExecutor<Postgres> for Transaction<'static, Postgres> {}
-impl AsWriteExecutor<Postgres> for Transaction<'static, Postgres> {}
-impl AsExecutor<Postgres> for Transaction<'static, Postgres> {
-    fn as_executor(&mut self) -> impl Executor<'_, Database = Postgres> {
-        &mut **self
+#[derive(Debug)]
+pub struct ReadonlyRepository<DB: sqlx::Database>(PoolConnection<DB>);
+
+impl<DB: sqlx::Database> ReadonlyRepository<DB> {
+    pub async fn from_pool(pool: &Pool<DB>) -> Option<Self> {
+        pool.acquire().await.ok().map(Self)
     }
 }
 
-impl AsReadonlyExecutor<Postgres> for PgPool {}
-impl AsExecutor<Postgres> for PgPool {
-    fn as_executor(&mut self) -> impl Executor<'_, Database = Postgres> {
-        &*self
+impl<DB: sqlx::Database> ReadonlyDatabaseRepository<DB> for ReadonlyRepository<DB> {}
+#[async_trait]
+impl<DB: sqlx::Database> DatabaseRepository<DB> for ReadonlyRepository<DB> {
+    async fn acquire(&mut self) -> Option<&mut <DB as sqlx::Database>::Connection> {
+        self.0.acquire().await.ok()
+    }
+}
+
+#[derive(Debug)]
+pub struct WriteRepository<DB: sqlx::Database>(Transaction<'static, DB>);
+
+impl<DB: sqlx::Database> WriteRepository<DB> {
+    pub async fn from_pool(pool: &Pool<DB>) -> Option<Self> {
+        pool.begin().await.ok().map(Self)
+    }
+
+    pub async fn commit(self) -> Option<()> {
+        self.0.commit().await.ok()
+    }
+}
+
+impl<DB: sqlx::Database> ReadonlyDatabaseRepository<DB> for WriteRepository<DB> {}
+impl<DB: sqlx::Database> WriteDatabaseRepository<DB> for WriteRepository<DB> {}
+#[async_trait]
+impl<DB: sqlx::Database> DatabaseRepository<DB> for WriteRepository<DB> {
+    async fn acquire(&mut self) -> Option<&mut <DB as sqlx::Database>::Connection> {
+        self.0.acquire().await.ok()
     }
 }
 
