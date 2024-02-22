@@ -50,7 +50,7 @@ from
           where
             credit_settled = true
             and credit_account = any ($3)
-            and debit_account != any ($3)
+            and debit_account != all ($3)
         )
         union all
         -- ins
@@ -73,7 +73,7 @@ from
             transactions
           where
             debit_settled = true
-            and credit_account != any ($3)
+            and credit_account != all ($3)
             and debit_account = any ($3)
         )
       )
