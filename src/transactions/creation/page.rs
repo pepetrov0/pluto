@@ -15,9 +15,12 @@ use crate::{
     },
     assets::component::{Asset, AssetReadonlyRepository},
     auth::principal::AuthPrincipal,
-    csrf_tokens::{CsrfToken, CsrfTokenRepository},
     database::WriteRepository,
-    domain::{self, users::User},
+    domain::{
+        self,
+        csrf_tokens::{self, CsrfToken},
+        users::User,
+    },
     templates::HtmlTemplate,
     AppState, DATE_TIME_FORMAT,
 };
@@ -93,9 +96,9 @@ pub async fn handler(
         .unwrap_or_default();
 
     // create csrf token
-    let csrf_token = repository
-        .create_csrf_token(&user.id, super::CSRF_TOKEN_USAGE)
-        .await;
+    let csrf_token = csrf_tokens::create(&mut repository, &user, super::CSRF_TOKEN_USAGE)
+        .await
+        .ok();
 
     // accounts
     let accounts = repository

@@ -65,8 +65,8 @@ impl IntoResponse for TransactionCreationError {
                 Redirect::to("/new-transaction?error=invalid-debit-amount").into_response()
             }
             TransactionCreationError::InvalidCsrf => {
-              Redirect::to("/new-transaction?error=invalid-csrf").into_response()
-          }
+                Redirect::to("/new-transaction?error=invalid-csrf").into_response()
+            }
             TransactionCreationError::Unknown => {
                 Redirect::to("/new-transaction?error=unknown").into_response()
             }

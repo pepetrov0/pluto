@@ -46,6 +46,7 @@ async fn main() {
         .unwrap();
 
     // serve on listener
+    tracing::info!("listening on :46963");
     axum::serve(listener, router)
         .with_graceful_shutdown(shutdown::signal())
         .await

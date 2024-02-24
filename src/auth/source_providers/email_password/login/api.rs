@@ -53,9 +53,6 @@ pub async fn handler(
         .await
         .ok_or(LoginError::Unknown)?;
 
-    repository
-        .commit()
-        .await
-        .ok_or(LoginError::Unknown)?;
+    repository.commit().await.ok_or(LoginError::Unknown)?;
     Ok((SetCookieSession(session), Redirect::to("/")))
 }

@@ -2,7 +2,7 @@
 create table if not exists
   csrf_tokens (
     id varchar(21) primary key,
-    usr varchar(255) not null,
+    usr varchar(21) not null references users (id) on update cascade on delete cascade,
     usage varchar(128) not null,
     stamp timestamp not null default current_timestamp
   );

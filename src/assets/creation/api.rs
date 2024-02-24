@@ -6,8 +6,8 @@ use serde::Deserialize;
 use crate::{
     assets::component::{AssetReadonlyRepository, AssetType, AssetWriteRepository},
     auth::principal::AuthPrincipal,
-    csrf_tokens::CsrfTokenRepository,
     database::WriteRepository,
+    domain::csrf_tokens,
     AppState,
 };
 
@@ -45,11 +45,13 @@ pub async fn handler(
     };
 
     // check csrf
-    let csrf = repository.consume_csrf_token(details.csrf.as_str()).await;
-    if csrf
-        .filter(|v| v.usr == user.id)
-        .filter(|v| v.usage == super::CSRF_TOKEN_USAGE)
-        .is_none()
+    if !csrf_tokens::verify(
+        &mut repository,
+        &details.csrf,
+        &user,
+        super::CSRF_TOKEN_USAGE,
+    )
+    .await
     {
         return Err(AssetCreationError::InvalidCsrf);
     }

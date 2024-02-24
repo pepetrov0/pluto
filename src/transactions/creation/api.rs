@@ -1,7 +1,7 @@
 //! Implements transaction creation API
 
 use axum::{extract::State, response::Redirect, Form};
-use chrono::{NaiveDateTime, TimeZone};
+use chrono::{NaiveDateTime, TimeZone, Timelike, Utc};
 use chrono_tz::Tz;
 use serde::Deserialize;
 
@@ -12,9 +12,8 @@ use crate::{
     },
     assets::component::AssetReadonlyRepository,
     auth::principal::AuthPrincipal,
-    csrf_tokens::CsrfTokenRepository,
     database::WriteRepository,
-    domain,
+    domain::{self, csrf_tokens},
     transactions::component::TransactionWriteRepository,
     AppState, DATE_TIME_FORMAT,
 };
@@ -75,11 +74,13 @@ pub async fn handler(
         .ok_or(TransactionCreationError::Unknown)?;
 
     // check csrf
-    let csrf = repository.consume_csrf_token(details.csrf.as_str()).await;
-    if csrf
-        .filter(|v| v.usr == user.id)
-        .filter(|v| v.usage == super::CSRF_TOKEN_USAGE)
-        .is_none()
+    if !csrf_tokens::verify(
+        &mut repository,
+        &details.csrf,
+        &user,
+        super::CSRF_TOKEN_USAGE,
+    )
+    .await
     {
         return Err(TransactionCreationError::InvalidCsrf);
     }
@@ -98,7 +99,9 @@ pub async fn handler(
         .from_local_datetime(&timestamp)
         .latest()
         .ok_or(TransactionCreationError::Unknown)?
-        .naive_utc();
+        .naive_utc()
+        .with_second(Utc::now().second())
+        .expect("should never happen");
 
     // account ownerships
     let ownerships = repository
@@ -265,8 +268,8 @@ pub async fn handler(
             timestamp,
             credit_amount,
             debit_amount,
-            credit_account_owned_by_self || !credit_account_owned,
-            debit_account_owned_by_self || !debit_account_owned,
+            credit_account_owned_by_self && !debit_account_owned_by_self || !credit_account_owned,
+            debit_account_owned_by_self && !credit_account_owned_by_self || !debit_account_owned,
         )
         .await
         .ok_or(TransactionCreationError::Unknown)?;

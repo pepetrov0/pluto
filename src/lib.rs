@@ -16,7 +16,6 @@ pub mod cache_policy;
 pub mod compression;
 pub mod config;
 pub mod content_security_policy;
-pub mod csrf_tokens;
 pub mod dashboard;
 pub mod database;
 pub mod healthcheck;

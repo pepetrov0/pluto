@@ -5,8 +5,8 @@ use axum::extract::{Query, State};
 
 use crate::{
     auth::principal::AuthPrincipal,
-    csrf_tokens::{CsrfToken, CsrfTokenRepository},
     database::WriteRepository,
+    domain::csrf_tokens::{self, CsrfToken},
     templates::HtmlTemplate,
     AppState,
 };
@@ -35,9 +35,9 @@ pub async fn handler(
         .ok_or_else(|| HtmlTemplate(NewAssetPage::default()))?;
 
     // create csrf token
-    let csrf_token = repository
-        .create_csrf_token(&user.id, super::CSRF_TOKEN_USAGE)
-        .await;
+    let csrf_token = csrf_tokens::create(&mut repository, &user, super::CSRF_TOKEN_USAGE)
+        .await
+        .ok();
 
     let page = HtmlTemplate(NewAssetPage {
         csrf_token,

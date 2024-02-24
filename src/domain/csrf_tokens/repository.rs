@@ -1,17 +1,9 @@
-//! Implements CSRF tokens
-
 use axum::async_trait;
-use sqlx::{prelude::FromRow, Postgres};
+use sqlx::Postgres;
 
 use crate::database::WriteDatabaseRepository;
 
-/// Represents a CSRF token
-#[derive(Debug, Clone, FromRow)]
-pub struct CsrfToken {
-    pub id: String,
-    pub usr: String,
-    pub usage: String,
-}
+use super::CsrfToken;
 
 /// Represents a CSRF token repository
 #[async_trait]
