@@ -28,7 +28,8 @@ from
         debit_amount,
         credit_settled,
         debit_settled,
-        credit_stamp as stamp
+        credit_stamp as stamp,
+        seq
       from
         transactions
       where
@@ -52,7 +53,8 @@ from
         debit_amount,
         credit_settled,
         debit_settled,
-        debit_stamp as stamp
+        debit_stamp as stamp,
+        seq
       from
         transactions
       where
@@ -76,7 +78,8 @@ from
         debit_amount,
         credit_settled,
         debit_settled,
-        debit_stamp as stamp
+        debit_stamp as stamp,
+        seq
       from
         transactions
       where
@@ -86,7 +89,8 @@ from
     )
   )
 order by
-  stamp desc
+  stamp desc,
+  seq desc
 offset
   $1
 limit

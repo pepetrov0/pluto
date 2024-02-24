@@ -1,7 +1,7 @@
 //! Implements transaction creation API
 
 use axum::{extract::State, response::Redirect, Form};
-use chrono::{NaiveDateTime, TimeZone, Timelike, Utc};
+use chrono::{NaiveDateTime, TimeZone};
 use chrono_tz::Tz;
 use serde::Deserialize;
 
@@ -99,9 +99,7 @@ pub async fn handler(
         .from_local_datetime(&timestamp)
         .latest()
         .ok_or(TransactionCreationError::Unknown)?
-        .naive_utc()
-        .with_second(Utc::now().second())
-        .expect("should never happen");
+        .naive_utc();
 
     // account ownerships
     let ownerships = repository

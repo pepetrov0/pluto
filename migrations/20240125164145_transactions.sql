@@ -13,12 +13,13 @@ create table if not exists
     debit_amount bigint not null check (debit_amount > 0),
     credit_settled boolean not null default false,
     debit_settled boolean not null default false,
+    seq serial not null,
     constraint credit_stamp_le_debit_stamp_check check (credit_stamp <= debit_stamp)
   );
 
 -- create the credit_entries view
 create or replace view
-  credit_entries (id, note, account, asset, stamp, amount, settled) as
+  credit_entries (id, note, account, asset, stamp, amount, settled, seq) as
 select
   id,
   note,
@@ -26,13 +27,14 @@ select
   credit_asset as asset,
   credit_stamp as stamp,
   (credit_amount * -1::bigint) as amount,
-  credit_settled as settled
+  credit_settled as settled,
+  seq
 from
   transactions;
 
 -- create the debit_entries view
 create or replace view
-  debit_entries (id, note, account, asset, stamp, amount, settled) as
+  debit_entries (id, note, account, asset, stamp, amount, settled, seq) as
 select
   id,
   note,
@@ -40,13 +42,14 @@ select
   debit_asset as asset,
   debit_stamp as stamp,
   debit_amount as amount,
-  debit_settled as settled
+  debit_settled as settled,
+  seq
 from
   transactions;
 
 -- create the entries view
 create or replace view
-  entries (id, note, account, asset, stamp, amount, settled) as
+  entries (id, note, account, asset, stamp, amount, settled, seq) as
 select
   id,
   note,
@@ -54,7 +57,8 @@ select
   asset,
   stamp,
   amount,
-  settled
+  settled,
+  seq
 from
   credit_entries
 union all
@@ -65,6 +69,7 @@ select
   asset,
   stamp,
   amount,
-  settled
+  settled,
+  seq
 from
   debit_entries;
