@@ -5,11 +5,9 @@ use axum::{
 
 use crate::{
     core::database::ReadonlyRepository,
-    domain::{self, users::User},
+    domain::{self, sessions::Session, users::User},
     AppState,
 };
-
-use super::session::Session;
 
 pub struct NoAuthPrincipal;
 

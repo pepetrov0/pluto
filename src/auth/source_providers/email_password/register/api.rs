@@ -3,12 +3,10 @@ use chrono_tz::Tz;
 
 use crate::{
     accounts::{component::AccountWriteRepository, ownership::AccountOwnershipWriteRepository},
-    auth::{
-        principal::NoAuthPrincipal, session::SessionWriteRepository,
-        session_providers::cookie::SetCookieSession,
-    },
+    auth::{principal::NoAuthPrincipal, session_providers::cookie::SetCookieSession},
     core::database::WriteRepository,
-    domain, validation, AppState,
+    domain::{self, sessions::SessionCreationError},
+    validation, AppState,
 };
 
 use super::error::RegistrationError;
@@ -90,14 +88,21 @@ pub async fn handler(
         .ok_or(RegistrationError::Unknown)?;
 
     // create a session
-    let session = repository
-        .create_session(user.id)
+    let session = domain::sessions::create(&mut repository, &user)
         .await
-        .ok_or(RegistrationError::Unknown)?;
+        .map_err(RegistrationError::from)?;
 
     repository
         .commit()
         .await
         .ok_or(RegistrationError::Unknown)?;
     Ok((SetCookieSession(session), Redirect::to("/")))
+}
+
+impl From<SessionCreationError> for RegistrationError {
+    fn from(value: SessionCreationError) -> Self {
+        match value {
+            SessionCreationError::Unknown => Self::Unknown,
+        }
+    }
 }

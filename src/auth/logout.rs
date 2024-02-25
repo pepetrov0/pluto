@@ -1,11 +1,12 @@
 use axum::{extract::State, response::Redirect, routing, Router};
 
-use crate::{core::database::WriteRepository, AppState};
-
-use super::{
-    session::{Session, SessionWriteRepository},
-    session_providers::cookie::RemoveCookieSession,
+use crate::{
+    core::database::WriteRepository,
+    domain::{self, sessions::Session},
+    AppState,
 };
+
+use super::session_providers::cookie::RemoveCookieSession;
 
 async fn handler(
     State(state): State<AppState>,
@@ -17,7 +18,7 @@ async fn handler(
     };
 
     if let Some(session) = session {
-        repository.delete_session(&session.id).await;
+        let _ = domain::sessions::delete(&mut repository, &session).await;
     }
 
     let _ = repository.commit().await;

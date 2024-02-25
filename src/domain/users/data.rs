@@ -18,3 +18,15 @@ pub struct UserWithPassword {
     pub favorite_asset: String,
     pub favorite_account: String,
 }
+
+impl From<UserWithPassword> for User {
+    fn from(value: UserWithPassword) -> Self {
+        Self {
+            id: value.id,
+            email: value.email,
+            timezone: value.timezone,
+            favorite_asset: value.favorite_asset,
+            favorite_account: value.favorite_account,
+        }
+    }
+}

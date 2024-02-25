@@ -11,8 +11,8 @@ use axum_extra::extract::{
 };
 
 use crate::{
-    auth::session::{Session, SessionReadonlyRepository},
     core::database::ReadonlyRepository,
+    domain::{self, sessions::Session},
     AppState,
 };
 
@@ -42,7 +42,7 @@ pub async fn middleware(
         if let Some(cookie) = jar.get(&session_cookie_name) {
             let session = cookie.value();
             let session = match ReadonlyRepository::from_pool(&state.database).await {
-                Some(mut repository) => repository.find_session(session).await,
+                Some(mut repository) => domain::sessions::find(&mut repository, session).await.ok(),
                 None => None,
             };
             if let Some(session) = session {

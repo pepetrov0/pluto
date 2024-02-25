@@ -1,12 +1,10 @@
 use axum::{extract::State, response::Redirect, Form};
 
 use crate::{
-    auth::{
-        principal::NoAuthPrincipal, session::SessionWriteRepository,
-        session_providers::cookie::SetCookieSession,
-    },
+    auth::{principal::NoAuthPrincipal, session_providers::cookie::SetCookieSession},
     core::database::WriteRepository,
-    domain, validation, AppState,
+    domain::{self, sessions::SessionCreationError},
+    validation, AppState,
 };
 
 use super::error::LoginError;
@@ -36,23 +34,30 @@ pub async fn handler(
         .flatten()
         .ok_or(LoginError::InvalidCredentials)?;
 
-    let hash = match user.password {
+    let hash = match &user.password {
         Some(password) => password,
         None => return Err(LoginError::InvalidCredentials),
     };
 
     if !state
         .password_hasher
-        .verify(details.password.as_bytes(), &hash)
+        .verify(details.password.as_bytes(), hash.as_str())
     {
         return Err(LoginError::InvalidCredentials);
     }
 
-    let session = repository
-        .create_session(user.id)
+    let session = domain::sessions::create(&mut repository, &user.into())
         .await
-        .ok_or(LoginError::Unknown)?;
+        .map_err(LoginError::from)?;
 
     repository.commit().await.ok_or(LoginError::Unknown)?;
     Ok((SetCookieSession(session), Redirect::to("/")))
+}
+
+impl From<SessionCreationError> for LoginError {
+    fn from(value: SessionCreationError) -> Self {
+        match value {
+            SessionCreationError::Unknown => Self::Unknown,
+        }
+    }
 }
