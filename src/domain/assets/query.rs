@@ -43,7 +43,7 @@ where
 }
 
 impl From<RepositoryError> for AssetQueryError {
-    fn from(value: RepositoryError) -> Self {
+    fn from(_: RepositoryError) -> Self {
         Self::Unknown
     }
 }

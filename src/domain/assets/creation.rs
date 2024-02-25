@@ -68,7 +68,7 @@ impl From<AssetQueryError> for AssetCreationError {
 }
 
 impl From<RepositoryError> for AssetCreationError {
-    fn from(value: RepositoryError) -> Self {
+    fn from(_: RepositoryError) -> Self {
         Self::Unknown
     }
 }
