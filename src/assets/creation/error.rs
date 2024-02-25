@@ -43,7 +43,6 @@ impl IntoResponse for AssetCreationError {
     }
 }
 
-
 impl From<domain::assets::AssetCreationError> for AssetCreationError {
     fn from(value: domain::assets::AssetCreationError) -> Self {
         match value {

@@ -1,3 +1,4 @@
+use core::web::{cache_policy, compression, content_security_policy};
 use std::sync::Arc;
 
 use auth::password_hasher::PasswordHasher;
@@ -6,22 +7,14 @@ use axum_extra::extract::cookie::Key;
 use sqlx::PgPool;
 use tower_http::trace::TraceLayer;
 
+pub mod core;
 pub mod domain;
+pub mod presentation;
 
 // old modules
 pub mod accounts;
 pub mod assets;
 pub mod auth;
-pub mod cache_policy;
-pub mod compression;
-pub mod config;
-pub mod content_security_policy;
-pub mod dashboard;
-pub mod database;
-pub mod healthcheck;
-pub mod shutdown;
-pub mod static_files;
-pub mod templates;
 pub mod transactions;
 pub mod validation;
 
@@ -34,7 +27,7 @@ pub const PAGE_SIZE_LIMITS: (i64, i64) = (10, 100);
 
 #[derive(Clone)]
 pub struct AppState {
-    pub configuration: config::Configuration,
+    pub configuration: core::Configuration,
     pub cookie_jar_key: Key,
     pub database: PgPool,
     pub password_hasher: Arc<dyn PasswordHasher>,
@@ -49,11 +42,11 @@ impl FromRef<AppState> for Key {
 pub fn router(state: AppState) -> Router {
     Router::new()
         // healthcheck
-        .merge(healthcheck::router())
+        .merge(presentation::healthcheck::router())
         // auth router
         .merge(auth::router())
         // dashboard
-        .merge(dashboard::router())
+        .merge(presentation::dashboard::router())
         // assets
         .merge(assets::router())
         // acounts
@@ -61,7 +54,7 @@ pub fn router(state: AppState) -> Router {
         // transactions
         .merge(transactions::router())
         // static files
-        .merge(static_files::router())
+        .merge(presentation::static_files::router())
         // auth middlewares
         .layer(middleware::from_fn_with_state(
             state.clone(),

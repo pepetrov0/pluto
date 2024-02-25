@@ -11,7 +11,7 @@ use crate::{
         ownership::AccountOwnershipReadonlyRepository,
     },
     auth::principal::AuthPrincipal,
-    database::WriteRepository,
+    core::database::WriteRepository,
     domain::{self, csrf_tokens},
     transactions::component::TransactionWriteRepository,
     AppState, DATE_TIME_FORMAT,

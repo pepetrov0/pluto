@@ -1,6 +1,4 @@
-
-
-use crate::database::ReadonlyDatabaseRepository;
+use crate::core::database::ReadonlyDatabaseRepository;
 
 use super::{repository::UserReadonlyRepository, User, UserWithPassword};
 

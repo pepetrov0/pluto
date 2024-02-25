@@ -5,7 +5,7 @@ use serde::Deserialize;
 
 use crate::{
     auth::principal::AuthPrincipal,
-    database::WriteRepository,
+    core::database::WriteRepository,
     domain::{self, assets::AssetType, csrf_tokens},
     AppState,
 };

@@ -10,9 +10,9 @@ use itertools::Itertools;
 use crate::{
     accounts::component::Account,
     auth::principal::AuthPrincipal,
-    database::ReadonlyRepository,
+    core::database::ReadonlyRepository,
+    core::web::templates::HtmlTemplate,
     domain::{self, users::User},
-    templates::HtmlTemplate,
     AppState,
 };
 

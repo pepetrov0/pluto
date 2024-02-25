@@ -7,7 +7,7 @@ use crate::{
         principal::NoAuthPrincipal, session::SessionWriteRepository,
         session_providers::cookie::SetCookieSession,
     },
-    database::WriteRepository,
+    core::database::WriteRepository,
     domain, validation, AppState,
 };
 

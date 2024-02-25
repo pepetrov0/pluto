@@ -3,7 +3,7 @@
 use askama::Template;
 use axum::extract::Query;
 
-use crate::{auth::principal::NoAuthPrincipal, templates::HtmlTemplate};
+use crate::{auth::principal::NoAuthPrincipal, core::web::templates::HtmlTemplate};
 
 use super::error::LoginError;
 

@@ -1,9 +1,9 @@
 //! Implements account ownership
 
 use axum::async_trait;
-use sqlx::{FromRow};
+use sqlx::FromRow;
 
-use crate::database::{ReadonlyDatabaseRepository, WriteDatabaseRepository};
+use crate::core::database::{ReadonlyDatabaseRepository, WriteDatabaseRepository};
 
 /// Represents an account ownership
 #[derive(Debug, Clone, FromRow)]

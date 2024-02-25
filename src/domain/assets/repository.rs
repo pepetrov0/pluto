@@ -1,6 +1,6 @@
 use axum::async_trait;
 
-use crate::database::{ReadonlyDatabaseRepository, WriteDatabaseRepository};
+use crate::core::database::{ReadonlyDatabaseRepository, WriteDatabaseRepository};
 
 use super::data::{Asset, AssetType};
 

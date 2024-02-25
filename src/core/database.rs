@@ -1,11 +1,10 @@
 //! Implements a database connection
 
+use crate::core::Configuration;
 use std::{fmt::Debug, time::Duration};
 
 use axum::async_trait;
 use sqlx::{pool::PoolConnection, postgres::PgPoolOptions, Acquire, PgPool, Pool, Transaction};
-
-use crate::config::Configuration;
 
 #[async_trait]
 pub trait DatabaseRepository: Debug + Send {

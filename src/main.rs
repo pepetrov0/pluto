@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use argon2::Argon2;
 use axum_extra::extract::cookie::Key;
-use pluto::{config::Configuration, database, shutdown};
+use pluto::{core::database, core::Configuration};
 
 #[tokio::main]
 async fn main() {
@@ -48,7 +48,7 @@ async fn main() {
     // serve on listener
     tracing::info!("listening on :46963");
     axum::serve(listener, router)
-        .with_graceful_shutdown(shutdown::signal())
+        .with_graceful_shutdown(pluto::core::shutdown::signal())
         .await
         .unwrap();
 

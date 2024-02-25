@@ -1,4 +1,4 @@
-use crate::database::WriteDatabaseRepository;
+use crate::core::database::WriteDatabaseRepository;
 
 use super::{repository::AssetWriteRepository, Asset, AssetType};
 

@@ -6,7 +6,7 @@ use axum::{
 };
 
 use crate::{
-    database::ReadonlyRepository,
+    core::database::ReadonlyRepository,
     domain::{self, users::User},
     AppState,
 };

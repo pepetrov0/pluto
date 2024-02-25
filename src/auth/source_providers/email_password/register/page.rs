@@ -5,9 +5,9 @@ use axum::extract::{Query, State};
 
 use crate::{
     auth::principal::NoAuthPrincipal,
-    database::ReadonlyRepository,
+    core::database::ReadonlyRepository,
+    core::web::templates::HtmlTemplate,
     domain::{self, assets::Asset},
-    templates::HtmlTemplate,
     AppState,
 };
 

@@ -1,6 +1,4 @@
-
-
-use crate::{database::WriteDatabaseRepository, domain::users::User};
+use crate::{core::database::WriteDatabaseRepository, domain::users::User};
 
 use super::{repository::CsrfTokenRepository, CsrfToken};
 

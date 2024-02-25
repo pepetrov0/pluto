@@ -1,7 +1,7 @@
 use chrono_tz::Tz;
 
 use crate::{
-    accounts::component::Account, database::WriteDatabaseRepository, domain::assets::Asset,
+    accounts::component::Account, core::database::WriteDatabaseRepository, domain::assets::Asset,
     validation,
 };
 

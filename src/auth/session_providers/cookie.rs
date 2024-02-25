@@ -14,7 +14,7 @@ use axum_extra::extract::{
 
 use crate::{
     auth::session::{Session, SessionReadonlyRepository},
-    database::ReadonlyRepository,
+    core::database::ReadonlyRepository,
     AppState,
 };
 

@@ -6,7 +6,7 @@ use serde::Deserialize;
 use crate::{
     accounts::{component::AccountWriteRepository, ownership::AccountOwnershipWriteRepository},
     auth::principal::AuthPrincipal,
-    database::WriteRepository,
+    core::database::WriteRepository,
     domain::csrf_tokens,
     AppState,
 };

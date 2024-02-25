@@ -1,10 +1,10 @@
 //! Implements a session component
 
 use axum::{async_trait, extract::FromRequestParts, http::request::Parts, Extension};
-use sqlx::{prelude::FromRow};
+use sqlx::prelude::FromRow;
 
 use crate::{
-    database::{ReadonlyDatabaseRepository, WriteDatabaseRepository},
+    core::database::{ReadonlyDatabaseRepository, WriteDatabaseRepository},
     AppState,
 };
 

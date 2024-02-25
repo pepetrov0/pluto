@@ -2,7 +2,7 @@
 
 use axum::{extract::State, routing, Json, Router};
 
-use crate::{config::Configuration, AppState};
+use crate::{core::Configuration, AppState};
 
 #[derive(serde::Serialize)]
 struct Ping {

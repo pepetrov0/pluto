@@ -5,9 +5,9 @@ use axum::extract::{Query, State};
 
 use crate::{
     auth::principal::AuthPrincipal,
-    database::WriteRepository,
+    core::database::WriteRepository,
+    core::web::templates::HtmlTemplate,
     domain::csrf_tokens::{self, CsrfToken},
-    templates::HtmlTemplate,
     AppState,
 };
 

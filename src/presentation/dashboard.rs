@@ -3,7 +3,7 @@
 use askama::Template;
 use axum::{routing, Router};
 
-use crate::{auth::principal::AuthPrincipal, templates::HtmlTemplate, AppState};
+use crate::{auth::principal::AuthPrincipal, core::web::templates::HtmlTemplate, AppState};
 
 #[derive(Template, Debug, Default)]
 #[template(path = "dashboard.html")]

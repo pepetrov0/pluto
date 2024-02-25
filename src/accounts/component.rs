@@ -1,9 +1,9 @@
 //! Implements account component
 
 use axum::async_trait;
-use sqlx::{prelude::FromRow};
+use sqlx::prelude::FromRow;
 
-use crate::database::{ReadonlyDatabaseRepository, WriteDatabaseRepository};
+use crate::core::database::{ReadonlyDatabaseRepository, WriteDatabaseRepository};
 
 /// Represents an account
 #[derive(Debug, Clone, FromRow)]

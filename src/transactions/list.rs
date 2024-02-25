@@ -14,10 +14,9 @@ use crate::{
         component::AccountReadonlyRepository, ownership::AccountOwnershipReadonlyRepository,
     },
     auth::principal::AuthPrincipal,
-    database::ReadonlyRepository,
-    domain,
-    templates::HtmlTemplate,
-    AppState, DEFAULT_PAGE_SIZE, PAGE_SIZE_LIMITS,
+    core::database::ReadonlyRepository,
+    core::web::templates::HtmlTemplate,
+    domain, AppState, DEFAULT_PAGE_SIZE, PAGE_SIZE_LIMITS,
 };
 
 use super::{component::TransactionReadonlyRepository, models::ResolvedTransaction};

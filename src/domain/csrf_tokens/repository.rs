@@ -1,7 +1,6 @@
 use axum::async_trait;
 
-
-use crate::database::WriteDatabaseRepository;
+use crate::core::database::WriteDatabaseRepository;
 
 use super::CsrfToken;
 

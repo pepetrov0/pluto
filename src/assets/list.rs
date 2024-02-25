@@ -8,9 +8,13 @@ use axum::{
 
 use crate::{
     auth::principal::AuthPrincipal,
-    database::ReadonlyRepository,
-    domain::{self, assets::{Asset, AssetType}, users::User},
-    templates::HtmlTemplate,
+    core::database::ReadonlyRepository,
+    core::web::templates::HtmlTemplate,
+    domain::{
+        self,
+        assets::{Asset, AssetType},
+        users::User,
+    },
     AppState,
 };
 

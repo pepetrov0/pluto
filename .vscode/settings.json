@@ -9,5 +9,6 @@
       "database": "local",
       "username": "local"
     }
-  ]
+  ],
+  "rust-analyzer.linkedProjects": ["./Cargo.toml"]
 }

@@ -2,7 +2,7 @@
 
 use axum::{extract::State, response::Redirect, routing, Router};
 
-use crate::{database::WriteRepository, AppState};
+use crate::{core::database::WriteRepository, AppState};
 
 use super::{
     session::{Session, SessionWriteRepository},
