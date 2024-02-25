@@ -8,7 +8,7 @@
 <div class="flex flex-col gap-2 mx-auto w-full max-w-screen-md px-2 py-4">
   <h1 class="heading-1">New account</h1>
   <hr class="border-t-2 border-dashed py-1" />
-  {% if assets.is_none() || csrf_token.is_none() %}
+  {% if csrf_token.is_none() %}
   <section class="card bg-danger text-danger-contrast">
     Something went wrong while loading this page. Please try again later.
   </section>

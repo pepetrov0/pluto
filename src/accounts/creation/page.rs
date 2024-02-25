@@ -2,7 +2,6 @@ use askama::Template;
 use axum::extract::{Query, State};
 
 use crate::{
-    assets::component::{Asset, AssetReadonlyRepository},
     auth::principal::AuthPrincipal,
     database::WriteRepository,
     domain::csrf_tokens::{self, CsrfToken},
@@ -22,7 +21,6 @@ pub struct NewAccountQuery {
 pub struct NewAccountPage {
     pub csrf_token: Option<CsrfToken>,
     pub error: Option<AccountCreationError>,
-    pub assets: Option<Vec<Asset>>,
 }
 
 pub async fn handler(
@@ -39,13 +37,9 @@ pub async fn handler(
         .await
         .ok();
 
-    // fetch currencies
-    let currencies = repository.list_assets().await;
-
     let page = HtmlTemplate(NewAccountPage {
         csrf_token,
         error: query.error,
-        assets: currencies,
     });
 
     repository

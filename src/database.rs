@@ -8,39 +8,36 @@ use sqlx::{pool::PoolConnection, postgres::PgPoolOptions, Acquire, PgPool, Pool,
 use crate::config::Configuration;
 
 #[async_trait]
-pub trait DatabaseRepository<DB: sqlx::Database>: Debug + Send {
-    async fn acquire(&mut self) -> Option<&mut <DB as sqlx::Database>::Connection>;
+pub trait DatabaseRepository: Debug + Send {
+    async fn acquire(&mut self) -> Option<&mut <sqlx::Postgres as sqlx::Database>::Connection>;
 }
 
-pub trait ReadonlyDatabaseRepository<DB: sqlx::Database>: DatabaseRepository<DB> {}
+pub trait ReadonlyDatabaseRepository: DatabaseRepository {}
 
-pub trait WriteDatabaseRepository<DB: sqlx::Database>:
-    DatabaseRepository<DB> + ReadonlyDatabaseRepository<DB>
-{
-}
+pub trait WriteDatabaseRepository: DatabaseRepository + ReadonlyDatabaseRepository {}
 
 #[derive(Debug)]
-pub struct ReadonlyRepository<DB: sqlx::Database>(PoolConnection<DB>);
+pub struct ReadonlyRepository(PoolConnection<sqlx::Postgres>);
 
-impl<DB: sqlx::Database> ReadonlyRepository<DB> {
-    pub async fn from_pool(pool: &Pool<DB>) -> Option<Self> {
+impl ReadonlyRepository {
+    pub async fn from_pool(pool: &Pool<sqlx::Postgres>) -> Option<Self> {
         pool.acquire().await.ok().map(Self)
     }
 }
 
-impl<DB: sqlx::Database> ReadonlyDatabaseRepository<DB> for ReadonlyRepository<DB> {}
+impl ReadonlyDatabaseRepository for ReadonlyRepository {}
 #[async_trait]
-impl<DB: sqlx::Database> DatabaseRepository<DB> for ReadonlyRepository<DB> {
-    async fn acquire(&mut self) -> Option<&mut <DB as sqlx::Database>::Connection> {
+impl DatabaseRepository for ReadonlyRepository {
+    async fn acquire(&mut self) -> Option<&mut <sqlx::Postgres as sqlx::Database>::Connection> {
         self.0.acquire().await.ok()
     }
 }
 
 #[derive(Debug)]
-pub struct WriteRepository<DB: sqlx::Database>(Transaction<'static, DB>);
+pub struct WriteRepository(Transaction<'static, sqlx::Postgres>);
 
-impl<DB: sqlx::Database> WriteRepository<DB> {
-    pub async fn from_pool(pool: &Pool<DB>) -> Option<Self> {
+impl WriteRepository {
+    pub async fn from_pool(pool: &Pool<sqlx::Postgres>) -> Option<Self> {
         pool.begin().await.ok().map(Self)
     }
 
@@ -49,11 +46,11 @@ impl<DB: sqlx::Database> WriteRepository<DB> {
     }
 }
 
-impl<DB: sqlx::Database> ReadonlyDatabaseRepository<DB> for WriteRepository<DB> {}
-impl<DB: sqlx::Database> WriteDatabaseRepository<DB> for WriteRepository<DB> {}
+impl ReadonlyDatabaseRepository for WriteRepository {}
+impl WriteDatabaseRepository for WriteRepository {}
 #[async_trait]
-impl<DB: sqlx::Database> DatabaseRepository<DB> for WriteRepository<DB> {
-    async fn acquire(&mut self) -> Option<&mut <DB as sqlx::Database>::Connection> {
+impl DatabaseRepository for WriteRepository {
+    async fn acquire(&mut self) -> Option<&mut <sqlx::Postgres as sqlx::Database>::Connection> {
         self.0.acquire().await.ok()
     }
 }

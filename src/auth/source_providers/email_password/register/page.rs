@@ -4,9 +4,9 @@ use askama::Template;
 use axum::extract::{Query, State};
 
 use crate::{
-    assets::component::{Asset, AssetReadonlyRepository},
     auth::principal::NoAuthPrincipal,
     database::ReadonlyRepository,
+    domain::{self, assets::Asset},
     templates::HtmlTemplate,
     AppState,
 };
@@ -46,7 +46,7 @@ pub async fn handler(
         .iter()
         .map(|v| v.name().to_owned())
         .collect();
-    let assets = repository.list_assets().await;
+    let assets = domain::assets::list(&mut repository).await;
 
     let page = HtmlTemplate(RegisterPage {
         error: query.error,

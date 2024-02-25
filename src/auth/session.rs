@@ -1,7 +1,7 @@
 //! Implements a session component
 
 use axum::{async_trait, extract::FromRequestParts, http::request::Parts, Extension};
-use sqlx::{prelude::FromRow, Postgres};
+use sqlx::{prelude::FromRow};
 
 use crate::{
     database::{ReadonlyDatabaseRepository, WriteDatabaseRepository},
@@ -37,7 +37,7 @@ pub trait SessionWriteRepository {
 #[async_trait]
 impl<T> SessionReadonlyRepository for T
 where
-    T: ReadonlyDatabaseRepository<Postgres> + Send + std::fmt::Debug,
+    T: ReadonlyDatabaseRepository + Send + std::fmt::Debug,
 {
     #[tracing::instrument]
     async fn find_session(&mut self, id: &str) -> Option<Session> {
@@ -53,7 +53,7 @@ where
 #[async_trait]
 impl<T> SessionWriteRepository for T
 where
-    T: WriteDatabaseRepository<Postgres> + Send + std::fmt::Debug,
+    T: WriteDatabaseRepository + Send + std::fmt::Debug,
 {
     #[tracing::instrument]
     async fn create_session(&mut self, user: String) -> Option<Session> {

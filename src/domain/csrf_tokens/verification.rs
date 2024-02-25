@@ -1,4 +1,4 @@
-use sqlx::Postgres;
+
 
 use crate::{database::WriteDatabaseRepository, domain::users::User};
 
@@ -6,7 +6,7 @@ use super::repository::CsrfTokenRepository;
 
 pub async fn verify<R>(repository: &mut R, id: &str, user: &User, usage: &str) -> bool
 where
-    R: WriteDatabaseRepository<Postgres>,
+    R: WriteDatabaseRepository,
 {
     repository
         .consume_csrf_token(id)

@@ -4,10 +4,9 @@ use axum::{extract::State, response::Redirect, Form};
 use serde::Deserialize;
 
 use crate::{
-    assets::component::{AssetReadonlyRepository, AssetType, AssetWriteRepository},
     auth::principal::AuthPrincipal,
     database::WriteRepository,
-    domain::csrf_tokens,
+    domain::{self, assets::AssetType, csrf_tokens},
     AppState,
 };
 
@@ -56,42 +55,16 @@ pub async fn handler(
         return Err(AssetCreationError::InvalidCsrf);
     }
 
-    // validate label
-    if details.label.is_empty() || details.label.len() > 200 {
-        return Err(AssetCreationError::InvalidLabel);
-    }
-
-    // validate label
-    if details.ticker.is_empty() || details.ticker.len() > 8 {
-        return Err(AssetCreationError::InvalidTicker);
-    }
-
-    // validate symbol
-    if let Some(symbol) = &details.symbol {
-        if symbol.len() > 8 {
-            return Err(AssetCreationError::InvalidSymbol);
-        }
-    }
-
-    // validate precision
-    if details.precision < 0 || details.precision > 4 {
-        return Err(AssetCreationError::InvalidPrecision);
-    }
-
-    if repository.find_asset(&details.ticker).await.is_some() {
-        return Err(AssetCreationError::AlreadyExists);
-    }
-
-    repository
-        .create_asset(
-            details.ticker,
-            details.symbol,
-            details.label,
-            details.precision,
-            details.atype,
-        )
-        .await
-        .ok_or(AssetCreationError::Unknown)?;
+    domain::assets::create(
+        &mut repository,
+        &details.ticker,
+        details.symbol.as_deref(),
+        &details.label,
+        details.precision,
+        details.atype,
+    )
+    .await
+    .map_err(AssetCreationError::from)?;
 
     repository
         .commit()

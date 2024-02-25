@@ -7,11 +7,12 @@ use axum::{
 };
 
 use crate::{
-    auth::principal::AuthPrincipal, database::ReadonlyRepository, domain::users::User,
-    templates::HtmlTemplate, AppState,
+    auth::principal::AuthPrincipal,
+    database::ReadonlyRepository,
+    domain::{self, assets::{Asset, AssetType}, users::User},
+    templates::HtmlTemplate,
+    AppState,
 };
-
-use super::component::{Asset, AssetReadonlyRepository, AssetType};
 
 #[derive(serde::Deserialize)]
 pub struct AssetsListQuery {
@@ -33,7 +34,7 @@ async fn handler(
     State(state): State<AppState>,
 ) -> HtmlTemplate<AssetsListPage> {
     let assets = match ReadonlyRepository::from_pool(&state.database).await {
-        Some(mut repository) => repository.list_assets().await,
+        Some(mut repository) => domain::assets::list(&mut repository).await,
         None => None,
     };
 

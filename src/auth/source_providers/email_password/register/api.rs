@@ -5,7 +5,6 @@ use chrono_tz::Tz;
 
 use crate::{
     accounts::{component::AccountWriteRepository, ownership::AccountOwnershipWriteRepository},
-    assets::component::AssetReadonlyRepository,
     auth::{
         principal::NoAuthPrincipal, session::SessionWriteRepository,
         session_providers::cookie::SetCookieSession,
@@ -59,10 +58,10 @@ pub async fn handler(
     };
 
     // find asset
-    let favorite_asset = repository
-        .find_asset(&details.favorite_asset)
-        .await
-        .ok_or(RegistrationError::InvalidFavoriteAsset)?;
+    let favorite_asset =
+        domain::assets::find_by_id_or_ticker(&mut repository, &details.favorite_asset)
+            .await
+            .ok_or(RegistrationError::InvalidFavoriteAsset)?;
 
     // parse timezone
     let timezone = Tz::from_str_insensitive(&details.timezone).unwrap_or_default();

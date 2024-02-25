@@ -3,8 +3,6 @@
 use crate::AppState;
 use axum::Router;
 
-pub mod component;
-
 mod creation;
 mod list;
 

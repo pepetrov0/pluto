@@ -1,6 +1,6 @@
 use axum::async_trait;
 use chrono_tz::Tz;
-use sqlx::Postgres;
+
 
 use crate::database::{ReadonlyDatabaseRepository, WriteDatabaseRepository};
 
@@ -39,7 +39,7 @@ pub trait UserWriteRepository {
 #[async_trait]
 impl<T> UserReadonlyRepository for T
 where
-    T: ReadonlyDatabaseRepository<Postgres> + Send + std::fmt::Debug,
+    T: ReadonlyDatabaseRepository + Send + std::fmt::Debug,
 {
     #[tracing::instrument]
     async fn find_user(&mut self, id_or_email: &str) -> Option<User> {
@@ -94,7 +94,7 @@ where
 #[async_trait]
 impl<T> UserWriteRepository for T
 where
-    T: WriteDatabaseRepository<Postgres> + Send + std::fmt::Debug,
+    T: WriteDatabaseRepository + Send + std::fmt::Debug,
 {
     #[tracing::instrument]
     async fn create_user(

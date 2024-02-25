@@ -10,7 +10,6 @@ use crate::{
         component::{AccountReadonlyRepository, AccountWriteRepository},
         ownership::AccountOwnershipReadonlyRepository,
     },
-    assets::component::AssetReadonlyRepository,
     auth::principal::AuthPrincipal,
     database::WriteRepository,
     domain::{self, csrf_tokens},
@@ -151,10 +150,12 @@ pub async fn handler(
         .or(details.asset)
         .or(Some(credit_asset.clone()))
         .ok_or(TransactionCreationError::MissingDebitAsset)?;
-    let assets = repository
-        .list_assets_by_ids(vec![credit_asset.clone(), debit_asset.clone()])
-        .await
-        .ok_or(TransactionCreationError::Unknown)?;
+    let assets = domain::assets::list_by_ids_or_tickers(
+        &mut repository,
+        &[credit_asset.clone(), debit_asset.clone()],
+    )
+    .await
+    .ok_or(TransactionCreationError::Unknown)?;
     let credit_asset = assets
         .iter()
         .find(|&v| v.id == credit_asset)

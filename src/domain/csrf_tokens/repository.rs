@@ -1,5 +1,5 @@
 use axum::async_trait;
-use sqlx::Postgres;
+
 
 use crate::database::WriteDatabaseRepository;
 
@@ -18,7 +18,7 @@ pub trait CsrfTokenRepository {
 #[async_trait]
 impl<T> CsrfTokenRepository for T
 where
-    T: WriteDatabaseRepository<Postgres> + Send + std::fmt::Debug,
+    T: WriteDatabaseRepository + Send + std::fmt::Debug,
 {
     /// Find and remove a CSRF token
     async fn consume_csrf_token(&mut self, id: &str) -> Option<CsrfToken> {

@@ -1,4 +1,4 @@
-use sqlx::Postgres;
+
 
 use crate::{database::WriteDatabaseRepository, domain::users::User};
 
@@ -14,7 +14,7 @@ pub async fn create<R>(
     usage: &str,
 ) -> Result<CsrfToken, CsrfTokenCreationError>
 where
-    R: WriteDatabaseRepository<Postgres>,
+    R: WriteDatabaseRepository,
 {
     repository
         .create_csrf_token(&user.id, usage)

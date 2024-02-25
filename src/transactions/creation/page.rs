@@ -13,13 +13,10 @@ use crate::{
         component::{Account, AccountReadonlyRepository},
         ownership::AccountOwnershipReadonlyRepository,
     },
-    assets::component::{Asset, AssetReadonlyRepository},
     auth::principal::AuthPrincipal,
     database::WriteRepository,
     domain::{
-        self,
-        csrf_tokens::{self, CsrfToken},
-        users::User,
+        self, assets::Asset, csrf_tokens::{self, CsrfToken}, users::User
     },
     templates::HtmlTemplate,
     AppState, DATE_TIME_FORMAT,
@@ -141,7 +138,7 @@ pub async fn handler(
         .collect();
 
     // assets
-    let assets = repository.list_assets().await.ok_or_else(construct_error)?;
+    let assets = domain::assets::list(&mut repository).await.ok_or_else(construct_error)?;
 
     // preset
     let preset = NewTransactionPreset {

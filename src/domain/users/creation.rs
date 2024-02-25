@@ -1,8 +1,7 @@
 use chrono_tz::Tz;
-use sqlx::Postgres;
 
 use crate::{
-    accounts::component::Account, assets::component::Asset, database::WriteDatabaseRepository,
+    accounts::component::Account, database::WriteDatabaseRepository, domain::assets::Asset,
     validation,
 };
 
@@ -23,7 +22,7 @@ pub async fn create<R>(
     favorite_account: &Account,
 ) -> Result<User, AccountCreationError>
 where
-    R: WriteDatabaseRepository<Postgres>,
+    R: WriteDatabaseRepository,
 {
     // validate email
     if !validation::is_email(email) {

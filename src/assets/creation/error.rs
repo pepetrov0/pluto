@@ -2,6 +2,8 @@
 
 use axum::response::{IntoResponse, Redirect};
 
+use crate::domain;
+
 /// Represents an asset creation error
 #[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -37,6 +39,20 @@ impl IntoResponse for AssetCreationError {
                 Redirect::to("/new-asset?error=already-exists").into_response()
             }
             AssetCreationError::Unknown => Redirect::to("/new-asset?error=unknown").into_response(),
+        }
+    }
+}
+
+
+impl From<domain::assets::AssetCreationError> for AssetCreationError {
+    fn from(value: domain::assets::AssetCreationError) -> Self {
+        match value {
+            domain::assets::AssetCreationError::Unknown => Self::Unknown,
+            domain::assets::AssetCreationError::InvalidLabel => Self::InvalidLabel,
+            domain::assets::AssetCreationError::InvalidTicker => Self::InvalidTicker,
+            domain::assets::AssetCreationError::InvalidSymbol => Self::InvalidSymbol,
+            domain::assets::AssetCreationError::InvalidPrecision => Self::InvalidPrecision,
+            domain::assets::AssetCreationError::AlreadyExists => Self::AlreadyExists,
         }
     }
 }

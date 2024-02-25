@@ -1,7 +1,7 @@
 //! Implements account ownership
 
 use axum::async_trait;
-use sqlx::{FromRow, Postgres};
+use sqlx::{FromRow};
 
 use crate::database::{ReadonlyDatabaseRepository, WriteDatabaseRepository};
 
@@ -46,7 +46,7 @@ pub trait AccountOwnershipWriteRepository {
 #[async_trait]
 impl<T> AccountOwnershipReadonlyRepository for T
 where
-    T: ReadonlyDatabaseRepository<Postgres> + Send + std::fmt::Debug,
+    T: ReadonlyDatabaseRepository + Send + std::fmt::Debug,
 {
     #[tracing::instrument]
     async fn list_account_ownerships(&mut self) -> Option<Vec<AccountOwnership>> {
@@ -95,7 +95,7 @@ where
 #[async_trait]
 impl<T> AccountOwnershipWriteRepository for T
 where
-    T: WriteDatabaseRepository<Postgres> + Send + std::fmt::Debug,
+    T: WriteDatabaseRepository + Send + std::fmt::Debug,
 {
     #[tracing::instrument]
     async fn create_account_ownership(

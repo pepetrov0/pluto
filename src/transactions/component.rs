@@ -2,7 +2,7 @@
 
 use axum::async_trait;
 use chrono::NaiveDateTime;
-use sqlx::{prelude::FromRow, Postgres};
+use sqlx::{prelude::FromRow};
 
 use crate::database::{ReadonlyDatabaseRepository, WriteDatabaseRepository};
 
@@ -68,7 +68,7 @@ pub trait TransactionWriteRepository {
 #[async_trait]
 impl<T> TransactionReadonlyRepository for T
 where
-    T: ReadonlyDatabaseRepository<Postgres> + Send + std::fmt::Debug,
+    T: ReadonlyDatabaseRepository + Send + std::fmt::Debug,
 {
     #[tracing::instrument]
     async fn count_settled_transactions(&mut self, accounts: &[String]) -> Option<i64> {
@@ -127,7 +127,7 @@ where
 #[async_trait]
 impl<T> TransactionWriteRepository for T
 where
-    T: WriteDatabaseRepository<Postgres> + Send + std::fmt::Debug,
+    T: WriteDatabaseRepository + Send + std::fmt::Debug,
 {
     #[tracing::instrument]
     async fn create_transaction(

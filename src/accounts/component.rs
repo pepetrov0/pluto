@@ -1,7 +1,7 @@
 //! Implements account component
 
 use axum::async_trait;
-use sqlx::{prelude::FromRow, Postgres};
+use sqlx::{prelude::FromRow};
 
 use crate::database::{ReadonlyDatabaseRepository, WriteDatabaseRepository};
 
@@ -32,7 +32,7 @@ pub trait AccountWriteRepository {
 #[async_trait]
 impl<T> AccountReadonlyRepository for T
 where
-    T: ReadonlyDatabaseRepository<Postgres> + Send + std::fmt::Debug,
+    T: ReadonlyDatabaseRepository + Send + std::fmt::Debug,
 {
     #[tracing::instrument]
     async fn list_accounts(&mut self) -> Option<Vec<Account>> {
@@ -63,7 +63,7 @@ where
 #[async_trait]
 impl<T> AccountWriteRepository for T
 where
-    T: WriteDatabaseRepository<Postgres> + Send + std::fmt::Debug,
+    T: WriteDatabaseRepository + Send + std::fmt::Debug,
 {
     #[tracing::instrument]
     async fn create_account(&mut self, name: &str) -> Option<Account> {

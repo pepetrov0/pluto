@@ -13,7 +13,6 @@ use crate::{
     accounts::{
         component::AccountReadonlyRepository, ownership::AccountOwnershipReadonlyRepository,
     },
-    assets::component::AssetReadonlyRepository,
     auth::principal::AuthPrincipal,
     database::ReadonlyRepository,
     domain,
@@ -96,8 +95,7 @@ async fn handler(
         .iter()
         .flat_map(|v| [v.credit_asset.clone(), v.debit_asset.clone()])
         .collect();
-    let assets = repository
-        .list_assets_by_ids(assets)
+    let assets = domain::assets::list_by_ids_or_tickers(&mut repository, &assets)
         .await
         .ok_or_else(construct_error)?;
 
