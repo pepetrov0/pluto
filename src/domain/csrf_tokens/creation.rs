@@ -1,4 +1,7 @@
-use crate::{core::database::WriteDatabaseRepository, domain::users::User};
+use crate::{
+    core::database::{RepositoryError, WriteDatabaseRepository},
+    domain::users::User,
+};
 
 use super::{repository::CsrfTokenRepository, CsrfToken};
 
@@ -17,5 +20,11 @@ where
     repository
         .create_csrf_token(&user.id, usage)
         .await
-        .ok_or(CsrfTokenCreationError::Unknown)
+        .map_err(CsrfTokenCreationError::from)
+}
+
+impl From<RepositoryError> for CsrfTokenCreationError {
+    fn from(_: RepositoryError) -> Self {
+        Self::Unknown
+    }
 }

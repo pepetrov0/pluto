@@ -39,6 +39,7 @@ pub async fn handler(
         super::CSRF_TOKEN_USAGE,
     )
     .await
+    .unwrap_or(false)
     {
         return Err(AccountCreationError::InvalidCsrf);
     }

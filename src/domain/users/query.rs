@@ -6,10 +6,7 @@ pub enum UserQueryError {
     Unknown,
 }
 
-pub async fn find<R>(
-    repository: &mut R,
-    id_or_email: &str,
-) -> Result<Option<User>, UserQueryError>
+pub async fn find<R>(repository: &mut R, id_or_email: &str) -> Result<Option<User>, UserQueryError>
 where
     R: UserReadonlyRepository,
 {
