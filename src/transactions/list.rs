@@ -1,5 +1,3 @@
-//! Implements the list page for transactions
-
 use askama::Template;
 use axum::{
     extract::{Query, State},
@@ -119,7 +117,7 @@ async fn handler(
     let users = ownerships.iter().map(|v| v.usr.clone()).collect_vec();
     let users = domain::users::list_by_ids_or_emails(&mut repository, &users)
         .await
-        .ok_or_else(construct_error)?;
+        .map_err(|_| construct_error())?;
 
     //  transactions
     let unsettled_transactions: Vec<_> = unsettled_transactions

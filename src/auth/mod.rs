@@ -1,5 +1,3 @@
-//! Implements authentication/authorization
-
 use axum::Router;
 
 use crate::AppState;

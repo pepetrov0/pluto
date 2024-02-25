@@ -1,5 +1,3 @@
-//! Implements a database connection
-
 use crate::core::Configuration;
 use std::{fmt::Debug, time::Duration};
 
@@ -8,7 +6,9 @@ use sqlx::{pool::PoolConnection, postgres::PgPoolOptions, Acquire, PgPool, Pool,
 
 #[async_trait]
 pub trait DatabaseRepository: Debug + Send {
-    async fn acquire(&mut self) -> Option<&mut <sqlx::Postgres as sqlx::Database>::Connection>;
+    async fn acquire(
+        &mut self,
+    ) -> RepositoryResult<&mut <sqlx::Postgres as sqlx::Database>::Connection>;
 }
 
 pub trait ReadonlyDatabaseRepository: DatabaseRepository {}
@@ -27,8 +27,10 @@ impl ReadonlyRepository {
 impl ReadonlyDatabaseRepository for ReadonlyRepository {}
 #[async_trait]
 impl DatabaseRepository for ReadonlyRepository {
-    async fn acquire(&mut self) -> Option<&mut <sqlx::Postgres as sqlx::Database>::Connection> {
-        self.0.acquire().await.ok()
+    async fn acquire(
+        &mut self,
+    ) -> RepositoryResult<&mut <sqlx::Postgres as sqlx::Database>::Connection> {
+        self.0.acquire().await.into_repository_result()
     }
 }
 
@@ -49,12 +51,34 @@ impl ReadonlyDatabaseRepository for WriteRepository {}
 impl WriteDatabaseRepository for WriteRepository {}
 #[async_trait]
 impl DatabaseRepository for WriteRepository {
-    async fn acquire(&mut self) -> Option<&mut <sqlx::Postgres as sqlx::Database>::Connection> {
-        self.0.acquire().await.ok()
+    async fn acquire(
+        &mut self,
+    ) -> RepositoryResult<&mut <sqlx::Postgres as sqlx::Database>::Connection> {
+        self.0.acquire().await.into_repository_result()
     }
 }
 
-/// Connects to a postgres database
+#[derive(Debug)]
+pub struct RepositoryError(pub sqlx::Error);
+
+pub type RepositoryResult<T> = Result<T, RepositoryError>;
+
+pub trait IntoRepositoryResult<T> {
+    fn into_repository_result(self) -> RepositoryResult<T>;
+}
+
+impl<T> IntoRepositoryResult<T> for Result<T, sqlx::Error> {
+    fn into_repository_result(self) -> RepositoryResult<T> {
+        self.map_err(RepositoryError)
+    }
+}
+
+impl std::fmt::Display for RepositoryError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self.0)
+    }
+}
+
 pub async fn connect_to_postgres(cfg: &Configuration) -> Result<PgPool, sqlx::Error> {
     // connect to database
     let pool = PgPoolOptions::new()

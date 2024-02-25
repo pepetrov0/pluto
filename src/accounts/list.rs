@@ -1,5 +1,3 @@
-//! Implements accounts list page
-
 use askama::Template;
 use axum::{
     extract::{Query, State},
@@ -74,7 +72,7 @@ async fn handler(
     let users = ownerships.iter().cloned().map(|v| v.usr).collect_vec();
     let users = domain::users::list_by_ids_or_emails(&mut repository, &users)
         .await
-        .ok_or_else(construct_error)?;
+        .map_err(|_| construct_error())?;
 
     // aggregate all data
     let accounts_owned = accounts_owned

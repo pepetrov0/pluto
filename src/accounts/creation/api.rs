@@ -1,5 +1,3 @@
-//! Implements the account creation API
-
 use axum::{extract::State, response::Redirect, Form};
 use serde::Deserialize;
 

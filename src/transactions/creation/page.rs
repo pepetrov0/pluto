@@ -1,5 +1,3 @@
-//! Implements transaction creation page
-
 use std::collections::HashSet;
 
 use askama::Template;
@@ -135,7 +133,7 @@ pub async fn handler(
     // other users
     let other_users = domain::users::list(&mut repository)
         .await
-        .ok_or_else(construct_error)?
+        .map_err(|_| construct_error())?
         .into_iter()
         .filter(|v| v.id != user.id)
         .collect();

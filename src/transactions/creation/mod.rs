@@ -1,5 +1,3 @@
-//! Implements transaction creation page and API
-
 use axum::{routing, Router};
 
 use crate::AppState;

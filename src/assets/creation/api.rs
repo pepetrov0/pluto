@@ -1,5 +1,3 @@
-//! Implements asset creation API
-
 use axum::{extract::State, response::Redirect, Form};
 use serde::Deserialize;
 

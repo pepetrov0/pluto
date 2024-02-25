@@ -1,5 +1,3 @@
-//! Implements the API relevant for user registration
-
 use axum::{extract::State, response::Redirect, Form};
 
 use crate::{
@@ -34,6 +32,8 @@ pub async fn handler(
 
     let user = domain::users::find_with_password(&mut repository, &details.email)
         .await
+        .ok()
+        .flatten()
         .ok_or(LoginError::InvalidCredentials)?;
 
     let hash = match user.password {

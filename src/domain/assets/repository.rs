@@ -4,26 +4,20 @@ use crate::core::database::{ReadonlyDatabaseRepository, WriteDatabaseRepository}
 
 use super::data::{Asset, AssetType};
 
-/// An asset readonly repository
 #[async_trait]
 pub trait AssetReadonlyRepository {
-    /// lists all assets
     async fn list_assets(&mut self) -> Option<Vec<Asset>>;
 
-    /// lists all assets filtered by id
     async fn list_assets_by_ids_or_tickers(
         &mut self,
         ids_or_tickers: &[String],
     ) -> Option<Vec<Asset>>;
 
-    /// find an asset by id or ticker
     async fn find_asset(&mut self, id_or_ticker: &str) -> Option<Asset>;
 }
 
-/// An asset write repository
 #[async_trait]
 pub trait AssetWriteRepository {
-    /// create an asset
     async fn create_asset(
         &mut self,
         ticker: &str,
@@ -44,7 +38,7 @@ where
         sqlx::query_as::<_, Asset>(
             "select id, ticker, symbol, label, precision, atype from assets order by label",
         )
-        .fetch_all(self.acquire().await?)
+        .fetch_all(self.acquire().await.ok()?)
         .await
         .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
@@ -63,7 +57,7 @@ where
             "select id, ticker, symbol, label, precision, atype from assets where id=ANY($1) or ticker=ANY($1) order by label",
         )
         .bind(ids_or_tickers)
-        .fetch_all(self.acquire().await?)
+        .fetch_all(self.acquire().await.ok()?)
         .await
         .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
@@ -75,7 +69,7 @@ where
             "select id, ticker, symbol, label, precision, atype from assets where id=$1 or ticker=$1",
         )
         .bind(id_or_ticker)
-        .fetch_one(self.acquire().await?)
+        .fetch_one(self.acquire().await.ok()?)
         .await
         .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
@@ -105,7 +99,7 @@ where
         .bind(label)
         .bind(precision)
         .bind(atype)
-        .fetch_one(self.acquire().await?)
+        .fetch_one(self.acquire().await.ok()?)
         .await
         .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()

@@ -1,5 +1,3 @@
-//! Implements the assets feature
-
 use crate::AppState;
 use axum::Router;
 

@@ -1,31 +1,23 @@
-//! Implements account component
-
 use axum::async_trait;
 use sqlx::prelude::FromRow;
 
 use crate::core::database::{ReadonlyDatabaseRepository, WriteDatabaseRepository};
 
-/// Represents an account
 #[derive(Debug, Clone, FromRow)]
 pub struct Account {
     pub id: String,
     pub name: String,
 }
 
-/// Represents an account readonly repository
 #[async_trait]
 pub trait AccountReadonlyRepository {
-    /// List all accounts
     async fn list_accounts(&mut self) -> Option<Vec<Account>>;
 
-    /// List all accounts by IDs
     async fn list_accounts_by_ids(&mut self, ids: Vec<String>) -> Option<Vec<Account>>;
 }
 
-/// Represents an account write repository
 #[async_trait]
 pub trait AccountWriteRepository {
-    /// Creates an account
     async fn create_account(&mut self, name: &str) -> Option<Account>;
 }
 
@@ -37,7 +29,7 @@ where
     #[tracing::instrument]
     async fn list_accounts(&mut self) -> Option<Vec<Account>> {
         sqlx::query_as::<_, Account>("select id, name from accounts order by name")
-            .fetch_all(self.acquire().await?)
+            .fetch_all(self.acquire().await.ok()?)
             .await
             .map_err(|v| tracing::warn!("{:#?}", v))
             .ok()
@@ -53,7 +45,7 @@ where
             "select id, name from accounts where id = ANY($1) order by name",
         )
         .bind(&ids[..])
-        .fetch_all(self.acquire().await?)
+        .fetch_all(self.acquire().await.ok()?)
         .await
         .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()
@@ -72,7 +64,7 @@ where
         )
         .bind(nanoid::nanoid!())
         .bind(name)
-        .fetch_one(self.acquire().await?)
+        .fetch_one(self.acquire().await.ok()?)
         .await
         .map_err(|v| tracing::warn!("{:#?}", v))
         .ok()

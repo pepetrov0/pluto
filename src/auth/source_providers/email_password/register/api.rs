@@ -1,5 +1,3 @@
-//! Implements the API relevant for user registration
-
 use axum::{extract::State, response::Redirect, Form};
 use chrono_tz::Tz;
 

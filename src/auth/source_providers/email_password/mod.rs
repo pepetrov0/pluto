@@ -1,5 +1,3 @@
-//! Enables local authorization and authentication
-
 use axum::Router;
 
 use crate::AppState;

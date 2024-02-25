@@ -1,8 +1,6 @@
-//! Implements error enums relevant to user registration
-
 use axum::response::{IntoResponse, Redirect};
 
-use crate::domain::users::AccountCreationError;
+use crate::domain::users::UserCreationError;
 
 #[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -15,12 +13,12 @@ pub enum RegistrationError {
     Unknown,
 }
 
-impl From<AccountCreationError> for RegistrationError {
-    fn from(err: AccountCreationError) -> Self {
+impl From<UserCreationError> for RegistrationError {
+    fn from(err: UserCreationError) -> Self {
         match err {
-            AccountCreationError::InvalidEmail => RegistrationError::InvalidEmail,
-            AccountCreationError::EmailTaken => RegistrationError::EmailTaken,
-            AccountCreationError::Unknown => RegistrationError::Unknown,
+            UserCreationError::InvalidEmail => RegistrationError::InvalidEmail,
+            UserCreationError::EmailTaken => RegistrationError::EmailTaken,
+            UserCreationError::Unknown => RegistrationError::Unknown,
         }
     }
 }

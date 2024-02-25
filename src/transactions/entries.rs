@@ -1,9 +1,6 @@
-//! Implements the entries component
-
 use chrono::NaiveDateTime;
 use sqlx::prelude::FromRow;
 
-/// Represents an entry
 #[derive(Debug, Clone, FromRow)]
 pub struct Entry {
     pub id: String,

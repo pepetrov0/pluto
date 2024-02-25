@@ -1,5 +1,3 @@
-//! Implements asset creation
-
 use axum::{routing, Router};
 
 use crate::AppState;

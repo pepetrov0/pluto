@@ -1,10 +1,7 @@
-//! Implements rendering of askama templates
-
 use askama::Template;
 use axum::{http::StatusCode, response::IntoResponse};
 use axum_extra::{headers::ContentType, TypedHeader};
 
-/// Represents a HTML template
 pub struct HtmlTemplate<T: Template>(pub T);
 
 impl<T: Template> IntoResponse for HtmlTemplate<T> {

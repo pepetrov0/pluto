@@ -1,30 +1,28 @@
 use axum::async_trait;
 use chrono_tz::Tz;
 
-use crate::core::database::{ReadonlyDatabaseRepository, WriteDatabaseRepository};
+use crate::core::database::{
+    IntoRepositoryResult, ReadonlyDatabaseRepository, RepositoryResult, WriteDatabaseRepository,
+};
 
 use super::{User, UserWithPassword};
 
-/// A user readonly repository
 #[async_trait]
 pub trait UserReadonlyRepository {
-    /// Finds a user by id or by email
-    async fn find_user(&mut self, id_or_email: &str) -> Option<User>;
+    async fn find_user(&mut self, id_or_email: &str) -> RepositoryResult<Option<User>>;
 
-    /// Retrieve a user bundled with their password
-    async fn find_user_with_password(&mut self, id_or_email: &str) -> Option<UserWithPassword>;
+    async fn find_user_with_password(
+        &mut self,
+        id_or_email: &str,
+    ) -> RepositoryResult<Option<UserWithPassword>>;
 
-    /// Lists all users
-    async fn list_users(&mut self) -> Option<Vec<User>>;
+    async fn list_users(&mut self) -> RepositoryResult<Vec<User>>;
 
-    /// Lists all users by IDs
-    async fn list_users_by_ids_or_emails(&mut self, ids: &[String]) -> Option<Vec<User>>;
+    async fn list_users_by_ids_or_emails(&mut self, ids: &[String]) -> RepositoryResult<Vec<User>>;
 }
 
-/// A user write repository
 #[async_trait]
 pub trait UserWriteRepository {
-    /// Creates a user
     async fn create_user(
         &mut self,
         email: &str,
@@ -32,7 +30,7 @@ pub trait UserWriteRepository {
         timezone: Tz,
         favorite_asset: &str,
         favorite_account: &str,
-    ) -> Option<User>;
+    ) -> RepositoryResult<User>;
 }
 
 #[async_trait]
@@ -40,43 +38,46 @@ impl<T> UserReadonlyRepository for T
 where
     T: ReadonlyDatabaseRepository + Send + std::fmt::Debug,
 {
-    #[tracing::instrument]
-    async fn find_user(&mut self, id_or_email: &str) -> Option<User> {
+    #[tracing::instrument(err)]
+    async fn find_user(&mut self, id_or_email: &str) -> RepositoryResult<Option<User>> {
         sqlx::query_as::<_, User>("select id, email, timezone, favorite_asset, favorite_account from users where id=$1 or email=$1")
             .bind(id_or_email)
-            .fetch_one(self.acquire().await?)
+            .fetch_optional(self.acquire().await?)
             .await
-            .map_err(|v| tracing::warn!("{:#?}", v))
-            .ok()
+            .into_repository_result()
     }
 
-    #[tracing::instrument]
-    async fn find_user_with_password(&mut self, id_or_email: &str) -> Option<UserWithPassword> {
+    #[tracing::instrument(err)]
+    async fn find_user_with_password(
+        &mut self,
+        id_or_email: &str,
+    ) -> RepositoryResult<Option<UserWithPassword>> {
         sqlx::query_as::<_, UserWithPassword>(
             "select id, email, password, timezone, favorite_asset, favorite_account from users where id=$1 or email=$1",
         )
         .bind(id_or_email)
-        .fetch_one(self.acquire().await?)
+        .fetch_optional(self.acquire().await?)
         .await
-        .map_err(|v| tracing::warn!("{:#?}", v))
-        .ok()
+        .into_repository_result()
     }
 
-    #[tracing::instrument]
-    async fn list_users(&mut self) -> Option<Vec<User>> {
+    #[tracing::instrument(err)]
+    async fn list_users(&mut self) -> RepositoryResult<Vec<User>> {
         sqlx::query_as::<_, User>(
             "select id, email, timezone, favorite_asset, favorite_account from users",
         )
         .fetch_all(self.acquire().await?)
         .await
-        .map_err(|v| tracing::warn!("{:#?}", v))
-        .ok()
+        .into_repository_result()
     }
 
-    #[tracing::instrument]
-    async fn list_users_by_ids_or_emails(&mut self, ids_or_emails: &[String]) -> Option<Vec<User>> {
+    #[tracing::instrument(err)]
+    async fn list_users_by_ids_or_emails(
+        &mut self,
+        ids_or_emails: &[String],
+    ) -> RepositoryResult<Vec<User>> {
         if ids_or_emails.is_empty() {
-            return Some(vec![]);
+            return Ok(vec![]);
         }
 
         sqlx::query_as::<_, User>(
@@ -85,8 +86,7 @@ where
         .bind(ids_or_emails)
         .fetch_all(self.acquire().await?)
         .await
-        .map_err(|v| tracing::warn!("{:#?}", v))
-        .ok()
+        .into_repository_result()
     }
 }
 
@@ -95,7 +95,7 @@ impl<T> UserWriteRepository for T
 where
     T: WriteDatabaseRepository + Send + std::fmt::Debug,
 {
-    #[tracing::instrument]
+    #[tracing::instrument(err)]
     async fn create_user(
         &mut self,
         email: &str,
@@ -103,7 +103,7 @@ where
         timezone: Tz,
         favorite_asset: &str,
         favorite_account: &str,
-    ) -> Option<User> {
+    ) -> RepositoryResult<User> {
         sqlx::query_as::<_, User>(
             "insert into users (id, email, password, timezone, favorite_asset, favorite_account) values ($1, $2, $3, $4, $5, $6) returning id, email, timezone, favorite_asset, favorite_account",
         )
@@ -115,7 +115,6 @@ where
         .bind(favorite_account)
         .fetch_one(self.acquire().await?)
         .await
-        .map_err(|v| tracing::warn!("{:#?}", v))
-        .ok()
+        .into_repository_result()
     }
 }

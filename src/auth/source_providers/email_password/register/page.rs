@@ -1,5 +1,3 @@
-//! Implements the registration page
-
 use askama::Template;
 use axum::extract::{Query, State};
 

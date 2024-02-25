@@ -1,5 +1,3 @@
-//! Implements asset creation page
-
 use askama::Template;
 use axum::extract::{Query, State};
 

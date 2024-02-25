@@ -1,5 +1,3 @@
-//! Implements user registration into local database
-
 use axum::{routing, Router};
 
 use crate::AppState;

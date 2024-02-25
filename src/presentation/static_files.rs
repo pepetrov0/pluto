@@ -1,5 +1,3 @@
-//! Implements serving of static files
-
 use axum::{
     http::{StatusCode, Uri},
     response::{IntoResponse, Response},

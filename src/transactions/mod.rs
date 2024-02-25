@@ -1,5 +1,3 @@
-//! Implements transactions
-
 use axum::Router;
 
 use crate::AppState;

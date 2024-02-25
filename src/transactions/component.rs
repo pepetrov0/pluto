@@ -1,12 +1,9 @@
-//! Implements transaction component
-
 use axum::async_trait;
 use chrono::NaiveDateTime;
 use sqlx::prelude::FromRow;
 
 use crate::core::database::{ReadonlyDatabaseRepository, WriteDatabaseRepository};
 
-/// Represents a transaction
 #[derive(Debug, Clone, FromRow)]
 pub struct Transaction {
     pub id: String,
@@ -26,10 +23,8 @@ pub struct Transaction {
 // Represents a transaction readonly repository
 #[async_trait]
 pub trait TransactionReadonlyRepository {
-    /// Count of transactions
     async fn count_settled_transactions(&mut self, accounts: &[String]) -> Option<i64>;
 
-    /// List settled transactions by page
     async fn list_settled_transactions(
         &mut self,
         page_offset: i64,
@@ -37,7 +32,6 @@ pub trait TransactionReadonlyRepository {
         accounts: &[String],
     ) -> Option<Vec<Transaction>>;
 
-    /// List unsettled transactions by page
     async fn list_unsettled_transactions(
         &mut self,
         accounts: &[String],
@@ -47,7 +41,6 @@ pub trait TransactionReadonlyRepository {
 // Represents a transaction write repository
 #[async_trait]
 pub trait TransactionWriteRepository {
-    /// Creates a transaction
     #[allow(clippy::too_many_arguments)]
     async fn create_transaction(
         &mut self,
@@ -78,7 +71,7 @@ where
 
         sqlx::query_as::<_, (i64,)>(include_str!("sql/count-settled.pg.sql"))
             .bind(accounts)
-            .fetch_one(self.acquire().await?)
+            .fetch_one(self.acquire().await.ok()?)
             .await
             .map_err(|v| tracing::warn!("{:#?}", v))
             .ok()
@@ -100,7 +93,7 @@ where
             .bind(page_offset)
             .bind(page_size)
             .bind(accounts)
-            .fetch_all(self.acquire().await?)
+            .fetch_all(self.acquire().await.ok()?)
             .await
             .map_err(|v| tracing::warn!("{:#?}", v))
             .ok()
@@ -117,7 +110,7 @@ where
 
         sqlx::query_as::<_, Transaction>(include_str!("sql/list-unsettled.pg.sql"))
             .bind(accounts)
-            .fetch_all(self.acquire().await?)
+            .fetch_all(self.acquire().await.ok()?)
             .await
             .map_err(|v| tracing::warn!("{:#?}", v))
             .ok()
@@ -157,7 +150,7 @@ where
             .bind(debit_amount)
             .bind(credit_settled)
             .bind(debit_settled)
-            .fetch_one(self.acquire().await?)
+            .fetch_one(self.acquire().await.ok()?)
             .await
             .map_err(|v| tracing::warn!("{:#?}", v))
             .ok()

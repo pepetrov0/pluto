@@ -1,5 +1,3 @@
-//! Implements a cookie session provider
-
 use axum::{
     body::Body,
     extract::{Request, State},
@@ -20,15 +18,12 @@ use crate::{
 
 const DEFAULT_SESSION_COOKIE_NAME: &str = "x-pluto-session";
 
-/// An extension to set a session cookie
 #[derive(Debug, Clone)]
 pub struct SetCookieSession(pub Session);
 
-/// An extension to remove session cookie
 #[derive(Debug, Clone)]
 pub struct RemoveCookieSession;
 
-/// Cookie session extraction middleware
 pub async fn middleware(
     State(state): State<AppState>,
     mut jar: PrivateCookieJar<Key>,

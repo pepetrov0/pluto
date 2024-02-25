@@ -1,5 +1,3 @@
-//! Implements the accounts feature
-
 use axum::Router;
 
 use crate::AppState;

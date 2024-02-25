@@ -1,5 +1,3 @@
-//! Implements the dashboard page
-
 use askama::Template;
 use axum::{routing, Router};
 

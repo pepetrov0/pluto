@@ -1,5 +1,3 @@
-//! Implements a healthcheck endpoint
-
 use axum::{extract::State, routing, Json, Router};
 
 use crate::{core::Configuration, AppState};

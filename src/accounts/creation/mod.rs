@@ -1,5 +1,3 @@
-//! Implements account creation feature
-
 use axum::{routing, Router};
 
 use crate::AppState;

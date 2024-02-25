@@ -1,8 +1,5 @@
-//! Implements errors related to account creation
-
 use axum::response::{IntoResponse, Redirect};
 
-/// Represents an account creation error
 #[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum AccountCreationError {

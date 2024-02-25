@@ -1,10 +1,7 @@
-//! Implements errors related to asset creation
-
 use axum::response::{IntoResponse, Redirect};
 
 use crate::domain;
 
-/// Represents an asset creation error
 #[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum AssetCreationError {

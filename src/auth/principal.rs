@@ -1,5 +1,3 @@
-//! Implements extraction of auth principal in axum handlers
-
 use axum::{
     async_trait, extract::FromRequestParts, http::request::Parts, response::Redirect,
     RequestPartsExt,
@@ -13,10 +11,8 @@ use crate::{
 
 use super::session::Session;
 
-/// Guard for redirecting authenticated user away from protected handlers
 pub struct NoAuthPrincipal;
 
-/// Represent an authentication/authorization principal
 #[derive(Debug)]
 pub struct AuthPrincipal(pub User);
 
@@ -56,6 +52,8 @@ impl FromRequestParts<AppState> for AuthPrincipal {
 
         domain::users::find(&mut repository, &user)
             .await
+            .ok()
+            .flatten()
             .map(AuthPrincipal)
             .ok_or_else(|| Redirect::to("/login"))
     }

@@ -1,5 +1,3 @@
-//! Implements transaction creation API
-
 use axum::{extract::State, response::Redirect, Form};
 use chrono::{NaiveDateTime, TimeZone};
 use chrono_tz::Tz;
@@ -196,7 +194,7 @@ pub async fn handler(
         ],
     )
     .await
-    .ok_or(TransactionCreationError::Unknown)?;
+    .map_err(|_| TransactionCreationError::Unknown)?;
 
     // accounts
     let accounts = users
