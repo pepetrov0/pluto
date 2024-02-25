@@ -59,6 +59,7 @@ pub async fn handler(
     let favorite_asset =
         domain::assets::find_by_id_or_ticker(&mut repository, &details.favorite_asset)
             .await
+            .map_err(|_| RegistrationError::Unknown)?
             .ok_or(RegistrationError::InvalidFavoriteAsset)?;
 
     // parse timezone

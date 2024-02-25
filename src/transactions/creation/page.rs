@@ -141,7 +141,7 @@ pub async fn handler(
     // assets
     let assets = domain::assets::list(&mut repository)
         .await
-        .ok_or_else(construct_error)?;
+        .map_err(|_| construct_error())?;
 
     // preset
     let preset = NewTransactionPreset {

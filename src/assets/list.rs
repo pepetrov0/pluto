@@ -36,7 +36,7 @@ async fn handler(
     State(state): State<AppState>,
 ) -> HtmlTemplate<AssetsListPage> {
     let assets = match ReadonlyRepository::from_pool(&state.database).await {
-        Some(mut repository) => domain::assets::list(&mut repository).await,
+        Some(mut repository) => domain::assets::list(&mut repository).await.ok(),
         None => None,
     };
 

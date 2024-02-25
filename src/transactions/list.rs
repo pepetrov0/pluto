@@ -94,7 +94,7 @@ async fn handler(
         .collect();
     let assets = domain::assets::list_by_ids_or_tickers(&mut repository, &assets)
         .await
-        .ok_or_else(construct_error)?;
+        .map_err(|_| construct_error())?;
 
     // accounts
     let accounts = all_transactions

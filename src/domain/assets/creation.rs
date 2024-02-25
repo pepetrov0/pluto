@@ -1,6 +1,6 @@
-use crate::core::database::WriteDatabaseRepository;
+use crate::core::database::{RepositoryError, WriteDatabaseRepository};
 
-use super::{repository::AssetWriteRepository, Asset, AssetType};
+use super::{repository::AssetWriteRepository, Asset, AssetQueryError, AssetType};
 
 pub enum AssetCreationError {
     Unknown,
@@ -46,6 +46,7 @@ where
 
     if super::find_by_id_or_ticker(repository, ticker)
         .await
+        .map_err(AssetCreationError::from)?
         .is_some()
     {
         return Err(AssetCreationError::AlreadyExists);
@@ -54,6 +55,20 @@ where
     let asset = repository
         .create_asset(ticker, symbol, label, precision, atype)
         .await
-        .ok_or(AssetCreationError::Unknown)?;
+        .map_err(AssetCreationError::from)?;
     Ok(asset)
+}
+
+impl From<AssetQueryError> for AssetCreationError {
+    fn from(value: AssetQueryError) -> Self {
+        match value {
+            AssetQueryError::Unknown => Self::Unknown,
+        }
+    }
+}
+
+impl From<RepositoryError> for AssetCreationError {
+    fn from(value: RepositoryError) -> Self {
+        Self::Unknown
+    }
 }

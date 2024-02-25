@@ -44,12 +44,14 @@ pub async fn handler(
         .iter()
         .map(|v| v.name().to_owned())
         .collect();
-    let assets = domain::assets::list(&mut repository).await;
+    let assets = domain::assets::list(&mut repository)
+        .await
+        .map_err(|_| construct_error())?;
 
     let page = HtmlTemplate(RegisterPage {
         error: query.error,
         timezones,
-        assets,
+        assets: Some(assets),
     });
     Ok(page)
 }

@@ -154,7 +154,7 @@ pub async fn handler(
         &[credit_asset.clone(), debit_asset.clone()],
     )
     .await
-    .ok_or(TransactionCreationError::Unknown)?;
+    .map_err(|_| TransactionCreationError::Unknown)?;
     let credit_asset = assets
         .iter()
         .find(|&v| v.id == credit_asset)
