@@ -8,13 +8,9 @@ use either::Either;
 use itertools::Itertools;
 
 use crate::{
-    accounts::{
-        component::AccountReadonlyRepository, ownership::AccountOwnershipReadonlyRepository,
-    },
-    auth::principal::AuthPrincipal,
-    core::database::ReadonlyRepository,
-    core::web::templates::HtmlTemplate,
-    domain, AppState, DEFAULT_PAGE_SIZE, PAGE_SIZE_LIMITS,
+    accounts::ownership::AccountOwnershipReadonlyRepository, auth::principal::AuthPrincipal,
+    core::database::ReadonlyRepository, core::web::templates::HtmlTemplate, domain, AppState,
+    DEFAULT_PAGE_SIZE, PAGE_SIZE_LIMITS,
 };
 
 use super::{component::TransactionReadonlyRepository, models::ResolvedTransaction};
@@ -100,11 +96,10 @@ async fn handler(
     let accounts = all_transactions
         .iter()
         .flat_map(|v| [v.credit_account.clone(), v.debit_account.clone()])
-        .collect();
-    let accounts = repository
-        .list_accounts_by_ids(accounts)
+        .collect_vec();
+    let accounts = domain::accounts::list_by_ids(&mut repository, &accounts)
         .await
-        .ok_or_else(construct_error)?;
+        .map_err(|_| construct_error())?;
 
     // account ownerships
     let ownerships = accounts.iter().map(|v| v.id.clone()).collect();

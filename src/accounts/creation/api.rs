@@ -2,10 +2,10 @@ use axum::{extract::State, response::Redirect, Form};
 use serde::Deserialize;
 
 use crate::{
-    accounts::{component::AccountWriteRepository, ownership::AccountOwnershipWriteRepository},
+    accounts::ownership::AccountOwnershipWriteRepository,
     auth::principal::AuthPrincipal,
     core::database::WriteRepository,
-    domain::csrf_tokens,
+    domain::{self, csrf_tokens},
     AppState,
 };
 
@@ -44,16 +44,10 @@ pub async fn handler(
         return Err(AccountCreationError::InvalidCsrf);
     }
 
-    // check for a missing name
-    if details.name.is_empty() || details.name.len() > 200 {
-        return Err(AccountCreationError::InvalidName);
-    }
-
     // create account and ownership
-    let account = repository
-        .create_account(&details.name)
+    let account = domain::accounts::create(&mut repository, &details.name)
         .await
-        .ok_or(AccountCreationError::Unknown)?;
+        .map_err(AccountCreationError::from)?;
     let _ = repository
         .create_account_ownership(&user.id, &account.id)
         .await
@@ -64,4 +58,13 @@ pub async fn handler(
         .await
         .ok_or(AccountCreationError::Unknown)?;
     Ok(Redirect::to("/accounts?created=true"))
+}
+
+impl From<domain::accounts::AccountCreationError> for AccountCreationError {
+    fn from(value: domain::accounts::AccountCreationError) -> Self {
+        match value {
+            domain::accounts::AccountCreationError::Unknown => Self::Unknown,
+            domain::accounts::AccountCreationError::InvalidName => Self::InvalidName,
+        }
+    }
 }

@@ -2,7 +2,6 @@ use axum::Router;
 
 use crate::AppState;
 
-pub mod component;
 mod creation;
 mod list;
 pub mod ownership;

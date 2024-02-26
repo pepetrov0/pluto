@@ -2,8 +2,8 @@ use chrono_tz::Tz;
 use either::Either;
 
 use crate::{
-    accounts::{component::Account, ownership::AccountOwnership},
-    domain::{assets::Asset, users::User},
+    accounts::ownership::AccountOwnership,
+    domain::{accounts::Account, assets::Asset, users::User},
     DATE_TIME_FORMAT, DATE_TIME_FORMAT_NICE,
 };
 

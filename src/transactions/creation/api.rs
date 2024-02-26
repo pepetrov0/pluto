@@ -1,16 +1,18 @@
 use axum::{extract::State, response::Redirect, Form};
 use chrono::{NaiveDateTime, TimeZone};
 use chrono_tz::Tz;
+use itertools::Itertools;
 use serde::Deserialize;
 
 use crate::{
-    accounts::{
-        component::{AccountReadonlyRepository, AccountWriteRepository},
-        ownership::AccountOwnershipReadonlyRepository,
-    },
+    accounts::ownership::AccountOwnershipReadonlyRepository,
     auth::principal::AuthPrincipal,
     core::database::WriteRepository,
-    domain::{self, csrf_tokens},
+    domain::{
+        self,
+        accounts::{AccountCreationError, AccountQueryError},
+        csrf_tokens,
+    },
     transactions::component::TransactionWriteRepository,
     AppState, DATE_TIME_FORMAT,
 };
@@ -208,16 +210,14 @@ pub async fn handler(
             ]
             .into_iter(),
         )
-        .collect();
-    let accounts = repository
-        .list_accounts_by_ids(accounts)
+        .collect_vec();
+    let accounts = domain::accounts::list_by_ids(&mut repository, &accounts)
         .await
-        .ok_or(TransactionCreationError::Unknown)?;
+        .map_err(TransactionCreationError::from)?;
     let credit_account = match details.create_credit_account {
-        true => repository
-            .create_account(&details.credit_account)
+        true => domain::accounts::create(&mut repository, &details.credit_account)
             .await
-            .ok_or(TransactionCreationError::Unknown)?,
+            .map_err(TransactionCreationError::from)?,
         false => {
             let account = users
                 .iter()
@@ -232,10 +232,9 @@ pub async fn handler(
         }
     };
     let debit_account = match details.create_debit_account {
-        true => repository
-            .create_account(&details.debit_account)
+        true => domain::accounts::create(&mut repository, &details.debit_account)
             .await
-            .ok_or(TransactionCreationError::Unknown)?,
+            .map_err(TransactionCreationError::from)?,
         false => {
             let account = users
                 .iter()
@@ -278,4 +277,21 @@ pub async fn handler(
         .ok_or(TransactionCreationError::Unknown)?;
 
     Ok(Redirect::to("/transactions?created=true"))
+}
+
+impl From<AccountQueryError> for TransactionCreationError {
+    fn from(value: AccountQueryError) -> Self {
+        match value {
+            AccountQueryError::Unknown => Self::Unknown,
+        }
+    }
+}
+
+impl From<AccountCreationError> for TransactionCreationError {
+    fn from(value: AccountCreationError) -> Self {
+        match value {
+            AccountCreationError::Unknown => Self::Unknown,
+            AccountCreationError::InvalidName => Self::Unknown,
+        }
+    }
 }

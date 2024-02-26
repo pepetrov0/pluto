@@ -6,15 +6,13 @@ use axum::{
 use itertools::Itertools;
 
 use crate::{
-    accounts::component::Account,
     auth::principal::AuthPrincipal,
-    core::database::ReadonlyRepository,
-    core::web::templates::HtmlTemplate,
-    domain::{self, users::User},
+    core::{database::ReadonlyRepository, web::templates::HtmlTemplate},
+    domain::{self, accounts::Account, users::User},
     AppState,
 };
 
-use super::{component::AccountReadonlyRepository, ownership::AccountOwnershipReadonlyRepository};
+use super::ownership::AccountOwnershipReadonlyRepository;
 
 type AccountBundle = (Account, Vec<User>);
 
@@ -55,11 +53,10 @@ async fn handler(
         .ok_or_else(construct_error)?;
 
     // fetch all accounts that are owned
-    let accounts_owned = ownerships.into_iter().map(|v| v.account).collect();
-    let accounts_owned = repository
-        .list_accounts_by_ids(accounts_owned)
+    let accounts_owned = ownerships.into_iter().map(|v| v.account).collect_vec();
+    let accounts_owned = domain::accounts::list_by_ids(&mut repository, &accounts_owned)
         .await
-        .ok_or_else(construct_error)?;
+        .map_err(|_| construct_error())?;
 
     // fetch all ownerships
     let ownerships = accounts_owned.iter().cloned().map(|v| v.id).collect();

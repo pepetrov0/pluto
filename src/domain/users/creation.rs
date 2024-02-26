@@ -1,9 +1,8 @@
 use chrono_tz::Tz;
 
 use crate::{
-    accounts::component::Account,
     core::database::{RepositoryError, WriteDatabaseRepository},
-    domain::assets::Asset,
+    domain::{accounts::Account, assets::Asset},
     validation,
 };
 

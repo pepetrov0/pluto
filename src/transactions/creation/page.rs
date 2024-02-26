@@ -7,18 +7,11 @@ use chrono_tz::Tz;
 use serde::Deserialize;
 
 use crate::{
-    accounts::{
-        component::{Account, AccountReadonlyRepository},
-        ownership::AccountOwnershipReadonlyRepository,
-    },
+    accounts::ownership::AccountOwnershipReadonlyRepository,
     auth::principal::AuthPrincipal,
-    core::database::WriteRepository,
-    core::web::templates::HtmlTemplate,
+    core::{database::WriteRepository, web::templates::HtmlTemplate},
     domain::{
-        self,
-        assets::Asset,
-        csrf_tokens::{self, CsrfToken},
-        users::User,
+        self, accounts::Account, assets::Asset, csrf_tokens::{self, CsrfToken}, users::User
     },
     AppState, DATE_TIME_FORMAT,
 };
@@ -99,10 +92,9 @@ pub async fn handler(
         .ok();
 
     // accounts
-    let accounts = repository
-        .list_accounts()
+    let accounts = domain::accounts::list(&mut repository)
         .await
-        .ok_or_else(construct_error)?;
+        .map_err(|_| construct_error())?;
 
     // accounts ownerships
     let ownerships = repository

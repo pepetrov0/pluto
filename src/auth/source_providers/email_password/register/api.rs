@@ -2,10 +2,10 @@ use axum::{extract::State, response::Redirect, Form};
 use chrono_tz::Tz;
 
 use crate::{
-    accounts::{component::AccountWriteRepository, ownership::AccountOwnershipWriteRepository},
+    accounts::ownership::AccountOwnershipWriteRepository,
     auth::{principal::NoAuthPrincipal, session_providers::cookie::SetCookieSession},
     core::database::WriteRepository,
-    domain::{self, sessions::SessionCreationError},
+    domain::{self, accounts::AccountCreationError, sessions::SessionCreationError},
     validation, AppState,
 };
 
@@ -64,10 +64,9 @@ pub async fn handler(
     let timezone = Tz::from_str_insensitive(&details.timezone).unwrap_or_default();
 
     // create default account
-    let favorite_account = repository
-        .create_account(DEFAULT_ACCOUNT_NAME)
+    let favorite_account = domain::accounts::create(&mut repository, DEFAULT_ACCOUNT_NAME)
         .await
-        .ok_or(RegistrationError::Unknown)?;
+        .map_err(RegistrationError::from)?;
 
     // attempt creating a user
     let user = domain::users::create(
@@ -103,6 +102,15 @@ impl From<SessionCreationError> for RegistrationError {
     fn from(value: SessionCreationError) -> Self {
         match value {
             SessionCreationError::Unknown => Self::Unknown,
+        }
+    }
+}
+
+impl From<AccountCreationError> for RegistrationError {
+    fn from(value: AccountCreationError) -> Self {
+        match value {
+            AccountCreationError::Unknown => Self::Unknown,
+            AccountCreationError::InvalidName => Self::Unknown,
         }
     }
 }
