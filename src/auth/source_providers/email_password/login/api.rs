@@ -4,7 +4,7 @@ use crate::{
     auth::{principal::NoAuthPrincipal, session_providers::cookie::SetCookieSession},
     core::database::WriteRepository,
     domain::{self, sessions::SessionCreationError},
-    validation, AppState,
+    AppState,
 };
 
 use super::error::LoginError;
@@ -23,10 +23,6 @@ pub async fn handler(
     let mut repository = WriteRepository::from_pool(&state.database)
         .await
         .ok_or(LoginError::Unknown)?;
-
-    if !validation::is_email(&details.email) {
-        return Err(LoginError::InvalidCredentials);
-    }
 
     let user = domain::users::find_with_password(&mut repository, &details.email)
         .await

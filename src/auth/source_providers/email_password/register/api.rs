@@ -6,7 +6,7 @@ use crate::{
     auth::{principal::NoAuthPrincipal, session_providers::cookie::SetCookieSession},
     core::database::WriteRepository,
     domain::{self, accounts::AccountCreationError, sessions::SessionCreationError},
-    validation, AppState,
+    AppState,
 };
 
 use super::error::RegistrationError;
@@ -36,11 +36,6 @@ pub async fn handler(
         email: details.email.trim().to_owned(),
         ..details
     };
-
-    // validate email
-    if !validation::is_email(&details.email) {
-        return Err(RegistrationError::InvalidEmail);
-    }
 
     // validate matching passwords
     if details.password != details.confirm_password {
@@ -114,3 +109,4 @@ impl From<AccountCreationError> for RegistrationError {
         }
     }
 }
+

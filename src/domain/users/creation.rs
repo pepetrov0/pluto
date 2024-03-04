@@ -2,8 +2,7 @@ use chrono_tz::Tz;
 
 use crate::{
     core::database::{RepositoryError, WriteDatabaseRepository},
-    domain::{accounts::Account, assets::Asset},
-    validation,
+    domain::{accounts::Account, assets::Asset, validation},
 };
 
 use super::{repository::UserWriteRepository, User, UserQueryError};

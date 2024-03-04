@@ -16,7 +16,6 @@ pub mod accounts;
 pub mod assets;
 pub mod auth;
 pub mod transactions;
-pub mod validation;
 
 pub const BUILD_ID: &str = env!("PLUTO_BUILD_ID");
 
