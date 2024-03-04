@@ -4,27 +4,11 @@ use either::Either;
 use crate::{
     accounts::ownership::AccountOwnership,
     domain::{accounts::Account, assets::Asset, users::User},
-    DATE_TIME_FORMAT, DATE_TIME_FORMAT_NICE,
 };
 
-use super::component::Transaction;
+use super::ResolvedTransaction;
 
-#[derive(Debug)]
-pub struct ResolvedTransaction {
-    pub note: String,
-    pub credit: Either<Account, Vec<User>>,
-    pub debit: Either<Account, Vec<User>>,
-    pub credit_asset: Asset,
-    pub debit_asset: Asset,
-    pub credit_amount: f64,
-    pub debit_amount: f64,
-    pub credit_stamp: String,
-    pub debit_stamp: String,
-    pub credit_stamp_nice: String,
-    pub debit_stamp_nice: String,
-}
-
-impl Transaction {
+impl crate::domain::transactions::Transaction {
     pub fn into_resolved(
         self,
         tz: &Tz,
@@ -106,10 +90,6 @@ impl Transaction {
         // stamps
         let credit_stamp = self.credit_stamp.and_utc().with_timezone(tz);
         let debit_stamp = self.debit_stamp.and_utc().with_timezone(tz);
-        let credit_stamp_nice = credit_stamp.format(DATE_TIME_FORMAT_NICE).to_string();
-        let debit_stamp_nice = debit_stamp.format(DATE_TIME_FORMAT_NICE).to_string();
-        let credit_stamp = credit_stamp.format(DATE_TIME_FORMAT).to_string();
-        let debit_stamp = debit_stamp.format(DATE_TIME_FORMAT).to_string();
 
         let t = ResolvedTransaction {
             note: self.note,
@@ -121,8 +101,6 @@ impl Transaction {
             debit_amount,
             credit_stamp,
             debit_stamp,
-            credit_stamp_nice,
-            debit_stamp_nice,
         };
 
         Some(t)

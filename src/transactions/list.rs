@@ -9,11 +9,11 @@ use itertools::Itertools;
 
 use crate::{
     accounts::ownership::AccountOwnershipReadonlyRepository, auth::principal::AuthPrincipal,
-    core::database::ReadonlyRepository, core::web::templates::HtmlTemplate, domain, AppState,
+    core::{database::ReadonlyRepository, web::templates::HtmlTemplate}, domain::{self, transactions::ResolvedTransaction}, AppState,
     DEFAULT_PAGE_SIZE, PAGE_SIZE_LIMITS,
 };
 
-use super::{component::TransactionReadonlyRepository, models::ResolvedTransaction};
+use crate::presentation::core::filters;
 
 #[derive(serde::Deserialize)]
 pub struct AccountsListQuery {
@@ -55,10 +55,10 @@ async fn handler(
         .collect();
 
     // number of transactions
-    let number_of_transactions = repository
-        .count_settled_transactions(&owned_accounts)
-        .await
-        .ok_or_else(construct_error)?;
+    let number_of_transactions =
+        domain::transactions::count_settled(&mut repository, &owned_accounts)
+            .await
+            .map_err(|_| construct_error())?;
 
     // page params
     let page_size = query
@@ -69,14 +69,18 @@ async fn handler(
     let page_offset = (query.page - 1).clamp(0, num_pages - 1) * page_size;
 
     // transactions
-    let unsettled_transactions = repository
-        .list_unsettled_transactions(&owned_accounts)
-        .await
-        .ok_or_else(construct_error)?;
-    let settled_transactions = repository
-        .list_settled_transactions(page_offset, page_size, &owned_accounts)
-        .await
-        .ok_or_else(construct_error)?;
+    let unsettled_transactions =
+        domain::transactions::list_unsettled(&mut repository, &owned_accounts)
+            .await
+            .map_err(|_| construct_error())?;
+    let settled_transactions = domain::transactions::list_settled(
+        &mut repository,
+        &owned_accounts,
+        page_offset,
+        page_size,
+    )
+    .await
+    .map_err(|_| construct_error())?;
     let all_transactions: Vec<_> = unsettled_transactions
         .iter()
         .chain(settled_transactions.iter())

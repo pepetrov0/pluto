@@ -13,7 +13,6 @@ use crate::{
         accounts::{AccountCreationError, AccountQueryError},
         csrf_tokens,
     },
-    transactions::component::TransactionWriteRepository,
     AppState, DATE_TIME_FORMAT,
 };
 
@@ -254,22 +253,22 @@ pub async fn handler(
         return Err(TransactionCreationError::MatchingAccounts);
     }
 
-    repository
-        .create_transaction(
-            details.note,
-            credit_account.id,
-            debit_account.id,
-            credit_asset.id,
-            debit_asset.id,
-            timestamp,
-            timestamp,
-            credit_amount,
-            debit_amount,
-            credit_account_owned_by_self && !debit_account_owned_by_self || !credit_account_owned,
-            debit_account_owned_by_self && !credit_account_owned_by_self || !debit_account_owned,
-        )
-        .await
-        .ok_or(TransactionCreationError::Unknown)?;
+    domain::transactions::create(
+        &mut repository,
+        &details.note,
+        &credit_account,
+        &debit_account,
+        &credit_asset,
+        &debit_asset,
+        timestamp,
+        timestamp,
+        credit_amount,
+        debit_amount,
+        credit_account_owned_by_self && !debit_account_owned_by_self || !credit_account_owned,
+        debit_account_owned_by_self && !credit_account_owned_by_self || !debit_account_owned,
+    )
+    .await
+    .map_err(TransactionCreationError::from)?;
 
     repository
         .commit()

@@ -95,8 +95,8 @@
       </span>
       <span>Time:</span>
     </strong>
-    <time datetime="{{ transaction.credit_stamp }}" class="sm:col-start-2 sm:row-start-4">
-      {{ transaction.credit_stamp_nice }}
+    <time datetime="{{ transaction.credit_stamp|datetime }}" class="sm:col-start-2 sm:row-start-4">
+      {{ transaction.credit_stamp|datetime_nice }}
     </time>
     <!-- == divider == -->
     <div class="hidden sm:block icon-lg col-start-3 row-start-2 row-span-3 self-center mx-2">
@@ -149,8 +149,8 @@
       </span>
       <span>Time:</span>
     </strong>
-    <time datetime="{{ transaction.debit_stamp }}" class="sm:col-start-5 sm:row-start-4">
-      {{ transaction.debit_stamp_nice }}
+    <time datetime="{{ transaction.debit_stamp|datetime }}" class="sm:col-start-5 sm:row-start-4">
+      {{ transaction.debit_stamp|datetime_nice }}
     </time>
     <!-- actions -->
     <div class="flex gap-1 pt-4 col-span-2 sm:col-span-5 items-center justify-end">

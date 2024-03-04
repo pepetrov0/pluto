@@ -1,5 +1,7 @@
 use axum::response::{IntoResponse, Redirect};
 
+use crate::domain;
+
 #[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum TransactionCreationError {
@@ -18,6 +20,16 @@ pub enum TransactionCreationError {
     InvalidDebitAmount,
     InvalidCsrf,
     Unknown,
+}
+
+impl From<domain::transactions::TransactionCreationError> for TransactionCreationError {
+    fn from(value: domain::transactions::TransactionCreationError) -> Self {
+        match value {
+            domain::transactions::TransactionCreationError::Unknown => {
+                TransactionCreationError::Unknown
+            }
+        }
+    }
 }
 
 impl IntoResponse for TransactionCreationError {

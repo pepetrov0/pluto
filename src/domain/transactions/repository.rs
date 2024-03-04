@@ -1,26 +1,10 @@
 use axum::async_trait;
 use chrono::NaiveDateTime;
-use sqlx::prelude::FromRow;
 
 use crate::core::database::{ReadonlyDatabaseRepository, WriteDatabaseRepository};
 
-#[derive(Debug, Clone, FromRow)]
-pub struct Transaction {
-    pub id: String,
-    pub note: String,
-    pub credit_account: String,
-    pub debit_account: String,
-    pub credit_asset: String,
-    pub debit_asset: String,
-    pub credit_stamp: NaiveDateTime,
-    pub debit_stamp: NaiveDateTime,
-    pub credit_amount: i64,
-    pub debit_amount: i64,
-    pub credit_settled: bool,
-    pub debit_settled: bool,
-}
+use super::Transaction;
 
-// Represents a transaction readonly repository
 #[async_trait]
 pub trait TransactionReadonlyRepository {
     async fn count_settled_transactions(&mut self, accounts: &[String]) -> Option<i64>;
@@ -38,17 +22,16 @@ pub trait TransactionReadonlyRepository {
     ) -> Option<Vec<Transaction>>;
 }
 
-// Represents a transaction write repository
 #[async_trait]
 pub trait TransactionWriteRepository {
     #[allow(clippy::too_many_arguments)]
     async fn create_transaction(
         &mut self,
-        note: String,
-        credit_account: String,
-        debit_account: String,
-        credit_asset: String,
-        debit_asset: String,
+        note: &str,
+        credit_account: &str,
+        debit_account: &str,
+        credit_asset: &str,
+        debit_asset: &str,
         credit_stamp: NaiveDateTime,
         debit_stamp: NaiveDateTime,
         credit_amount: i64,
@@ -125,11 +108,11 @@ where
     #[tracing::instrument]
     async fn create_transaction(
         &mut self,
-        note: String,
-        credit_account: String,
-        debit_account: String,
-        credit_asset: String,
-        debit_asset: String,
+        note: &str,
+        credit_account: &str,
+        debit_account: &str,
+        credit_asset: &str,
+        debit_asset: &str,
         credit_stamp: NaiveDateTime,
         debit_stamp: NaiveDateTime,
         credit_amount: i64,
