@@ -27,7 +27,7 @@ pub struct RemoveCookieSession;
 pub async fn middleware(
     State(state): State<AppState>,
     mut jar: PrivateCookieJar<Key>,
-    session: Option<Extension<Session>>,
+    session: Option<Session>,
     mut req: Request<Body>,
     next: Next,
 ) -> Response {
@@ -42,11 +42,14 @@ pub async fn middleware(
         if let Some(cookie) = jar.get(&session_cookie_name) {
             let session = cookie.value();
             let session = match ReadonlyRepository::from_pool(&state.database).await {
-                Some(mut repository) => domain::sessions::find(&mut repository, session).await.ok(),
+                Some(mut repository) => domain::sessions::find(&mut repository, session)
+                    .await
+                    .ok()
+                    .flatten(),
                 None => None,
             };
             if let Some(session) = session {
-                req.extensions_mut().insert(session);
+                req.extensions_mut().insert::<Session>(session);
             }
         }
     }

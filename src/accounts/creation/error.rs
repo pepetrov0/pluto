@@ -1,11 +1,21 @@
 use axum::response::{IntoResponse, Redirect};
 
+use crate::domain::accounts_ownerships::AccountOwnershipCreationError;
+
 #[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum AccountCreationError {
     InvalidName,
     InvalidCsrf,
     Unknown,
+}
+
+impl From<AccountOwnershipCreationError> for AccountCreationError {
+    fn from(value: AccountOwnershipCreationError) -> Self {
+        match value {
+            AccountOwnershipCreationError::Unknown => Self::Unknown,
+        }
+    }
 }
 
 impl IntoResponse for AccountCreationError {

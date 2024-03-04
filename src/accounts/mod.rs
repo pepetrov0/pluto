@@ -4,7 +4,6 @@ use crate::AppState;
 
 mod creation;
 mod list;
-pub mod ownership;
 
 pub fn router() -> Router<AppState> {
     Router::new()

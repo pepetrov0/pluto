@@ -1,25 +1,25 @@
 use axum::async_trait;
 use chrono::NaiveDateTime;
 
-use crate::core::database::{ReadonlyDatabaseRepository, WriteDatabaseRepository};
+use crate::core::database::{ReadonlyDatabaseRepository, RepositoryError, RepositoryResult, WriteDatabaseRepository};
 
 use super::Transaction;
 
 #[async_trait]
 pub trait TransactionReadonlyRepository {
-    async fn count_settled_transactions(&mut self, accounts: &[String]) -> Option<i64>;
+    async fn count_settled_transactions(&mut self, accounts: &[String]) -> RepositoryResult<i64>;
 
     async fn list_settled_transactions(
         &mut self,
         page_offset: i64,
         page_size: i64,
         accounts: &[String],
-    ) -> Option<Vec<Transaction>>;
+    ) -> RepositoryResult<Vec<Transaction>>;
 
     async fn list_unsettled_transactions(
         &mut self,
         accounts: &[String],
-    ) -> Option<Vec<Transaction>>;
+    ) -> RepositoryResult<Vec<Transaction>>;
 }
 
 #[async_trait]
@@ -38,7 +38,7 @@ pub trait TransactionWriteRepository {
         debit_amount: i64,
         credit_settled: bool,
         debit_settled: bool,
-    ) -> Option<Transaction>;
+    ) -> RepositoryResult<Transaction>;
 }
 
 #[async_trait]
@@ -46,57 +46,54 @@ impl<T> TransactionReadonlyRepository for T
 where
     T: ReadonlyDatabaseRepository + Send + std::fmt::Debug,
 {
-    #[tracing::instrument]
-    async fn count_settled_transactions(&mut self, accounts: &[String]) -> Option<i64> {
+    #[tracing::instrument(err)]
+    async fn count_settled_transactions(&mut self, accounts: &[String]) -> RepositoryResult<i64> {
         if accounts.is_empty() {
-            return Some(0);
+            return Ok(0);
         }
 
         sqlx::query_as::<_, (i64,)>(include_str!("sql/count-settled.pg.sql"))
             .bind(accounts)
-            .fetch_one(self.acquire().await.ok()?)
+            .fetch_one(self.acquire().await?)
             .await
-            .map_err(|v| tracing::warn!("{:#?}", v))
-            .ok()
             .map(|(v,)| v)
+            .map_err(RepositoryError)
     }
 
-    #[tracing::instrument]
+    #[tracing::instrument(err)]
     async fn list_settled_transactions(
         &mut self,
         page_offset: i64,
         page_size: i64,
         accounts: &[String],
-    ) -> Option<Vec<Transaction>> {
+    ) -> RepositoryResult<Vec<Transaction>> {
         if accounts.is_empty() {
-            return Some(vec![]);
+            return Ok(vec![]);
         }
 
         sqlx::query_as::<_, Transaction>(include_str!("sql/list-settled.pg.sql"))
             .bind(page_offset)
             .bind(page_size)
             .bind(accounts)
-            .fetch_all(self.acquire().await.ok()?)
+            .fetch_all(self.acquire().await?)
             .await
-            .map_err(|v| tracing::warn!("{:#?}", v))
-            .ok()
+            .map_err(RepositoryError)
     }
 
-    #[tracing::instrument]
+    #[tracing::instrument(err)]
     async fn list_unsettled_transactions(
         &mut self,
         accounts: &[String],
-    ) -> Option<Vec<Transaction>> {
+    ) -> RepositoryResult<Vec<Transaction>> {
         if accounts.is_empty() {
-            return Some(vec![]);
+            return Ok(vec![]);
         }
 
         sqlx::query_as::<_, Transaction>(include_str!("sql/list-unsettled.pg.sql"))
             .bind(accounts)
-            .fetch_all(self.acquire().await.ok()?)
+            .fetch_all(self.acquire().await?)
             .await
-            .map_err(|v| tracing::warn!("{:#?}", v))
-            .ok()
+            .map_err(RepositoryError)
     }
 }
 
@@ -105,7 +102,7 @@ impl<T> TransactionWriteRepository for T
 where
     T: WriteDatabaseRepository + Send + std::fmt::Debug,
 {
-    #[tracing::instrument]
+    #[tracing::instrument(err)]
     async fn create_transaction(
         &mut self,
         note: &str,
@@ -119,7 +116,7 @@ where
         debit_amount: i64,
         credit_settled: bool,
         debit_settled: bool,
-    ) -> Option<Transaction> {
+    ) -> RepositoryResult<Transaction> {
         sqlx::query_as::<_, Transaction>(include_str!("sql/create.pg.sql"))
             .bind(nanoid::nanoid!())
             .bind(note)
@@ -133,9 +130,8 @@ where
             .bind(debit_amount)
             .bind(credit_settled)
             .bind(debit_settled)
-            .fetch_one(self.acquire().await.ok()?)
+            .fetch_one(self.acquire().await?)
             .await
-            .map_err(|v| tracing::warn!("{:#?}", v))
-            .ok()
+            .map_err(RepositoryError)
     }
 }

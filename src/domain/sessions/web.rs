@@ -10,7 +10,7 @@ impl FromRequestParts<AppState> for Session {
         parts: &mut Parts,
         state: &AppState,
     ) -> Result<Self, Self::Rejection> {
-        Extension::from_request_parts(parts, state)
+        Extension::<Session>::from_request_parts(parts, state)
             .await
             .map(|v| v.0)
     }

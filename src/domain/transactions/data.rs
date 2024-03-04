@@ -1,7 +1,7 @@
 use chrono::{DateTime, NaiveDateTime};
 use chrono_tz::Tz;
-use sqlx::FromRow;
 use either::Either;
+use sqlx::FromRow;
 
 use crate::domain::{accounts::Account, assets::Asset, users::User};
 

@@ -12,8 +12,6 @@ use crate::{
     AppState,
 };
 
-use super::ownership::AccountOwnershipReadonlyRepository;
-
 type AccountBundle = (Account, Vec<User>);
 
 #[derive(serde::Deserialize)]
@@ -47,10 +45,10 @@ async fn handler(
         .ok_or_else(construct_error)?;
 
     // fetch all account ownerships
-    let ownerships = repository
-        .list_account_ownerships_by_user_or_account(&user.id)
-        .await
-        .ok_or_else(construct_error)?;
+    let ownerships =
+        domain::accounts_ownerships::list_by_user_or_account(&mut repository, &user.id)
+            .await
+            .map_err(|_| construct_error())?;
 
     // fetch all accounts that are owned
     let accounts_owned = ownerships.into_iter().map(|v| v.account).collect_vec();
@@ -59,11 +57,11 @@ async fn handler(
         .map_err(|_| construct_error())?;
 
     // fetch all ownerships
-    let ownerships = accounts_owned.iter().cloned().map(|v| v.id).collect();
-    let ownerships = repository
-        .list_account_ownerships_by_users_or_accounts(ownerships)
-        .await
-        .ok_or_else(construct_error)?;
+    let ownerships = accounts_owned.iter().cloned().map(|v| v.id).collect_vec();
+    let ownerships =
+        domain::accounts_ownerships::list_by_users_or_accounts(&mut repository, &ownerships)
+            .await
+            .map_err(|_| construct_error())?;
 
     // fetch all users
     let users = ownerships.iter().cloned().map(|v| v.usr).collect_vec();

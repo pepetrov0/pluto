@@ -1,5 +1,5 @@
 use crate::{
-    core::database::ReadonlyDatabaseRepository,
+    core::database::{ReadonlyDatabaseRepository, RepositoryError},
     domain::transactions::repository::TransactionReadonlyRepository,
 };
 
@@ -19,7 +19,7 @@ where
     repository
         .count_settled_transactions(accounts)
         .await
-        .ok_or(TransactionQueryError::Unknown)
+        .map_err(TransactionQueryError::from)
 }
 
 pub async fn list_settled<R>(
@@ -34,7 +34,7 @@ where
     repository
         .list_settled_transactions(page_offset, page_size, accounts)
         .await
-        .ok_or(TransactionQueryError::Unknown)
+        .map_err(TransactionQueryError::from)
 }
 
 pub async fn list_unsettled<R>(
@@ -47,5 +47,11 @@ where
     repository
         .list_unsettled_transactions(accounts)
         .await
-        .ok_or(TransactionQueryError::Unknown)
+        .map_err(TransactionQueryError::from)
+}
+
+impl From<RepositoryError> for TransactionQueryError {
+    fn from(_: RepositoryError) -> Self {
+        Self::Unknown
+    }
 }

@@ -1,6 +1,5 @@
 // core
 mod data;
-mod into_resolved;
 mod repository;
 
 // features

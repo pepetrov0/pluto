@@ -1,6 +1,6 @@
 use axum::response::{IntoResponse, Redirect};
 
-use crate::domain::users::UserCreationError;
+use crate::domain::{accounts_ownerships::AccountOwnershipCreationError, users::UserCreationError};
 
 #[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -19,6 +19,14 @@ impl From<UserCreationError> for RegistrationError {
             UserCreationError::InvalidEmail => RegistrationError::InvalidEmail,
             UserCreationError::EmailTaken => RegistrationError::EmailTaken,
             UserCreationError::Unknown => RegistrationError::Unknown,
+        }
+    }
+}
+
+impl From<AccountOwnershipCreationError> for RegistrationError {
+    fn from(err: AccountOwnershipCreationError) -> Self {
+        match err {
+            AccountOwnershipCreationError::Unknown => Self::Unknown,
         }
     }
 }

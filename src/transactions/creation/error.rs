@@ -32,6 +32,16 @@ impl From<domain::transactions::TransactionCreationError> for TransactionCreatio
     }
 }
 
+impl From<domain::accounts_ownerships::AccountOwnershipQueryError> for TransactionCreationError {
+    fn from(value: domain::accounts_ownerships::AccountOwnershipQueryError) -> Self {
+        match value {
+            domain::accounts_ownerships::AccountOwnershipQueryError::Unknown => {
+                TransactionCreationError::Unknown
+            }
+        }
+    }
+}
+
 impl IntoResponse for TransactionCreationError {
     fn into_response(self) -> axum::response::Response {
         match self {

@@ -2,7 +2,6 @@ use axum::{extract::State, response::Redirect, Form};
 use serde::Deserialize;
 
 use crate::{
-    accounts::ownership::AccountOwnershipWriteRepository,
     auth::principal::AuthPrincipal,
     core::database::WriteRepository,
     domain::{self, csrf_tokens},
@@ -48,10 +47,9 @@ pub async fn handler(
     let account = domain::accounts::create(&mut repository, &details.name)
         .await
         .map_err(AccountCreationError::from)?;
-    let _ = repository
-        .create_account_ownership(&user.id, &account.id)
+    let _ = domain::accounts_ownerships::create(&mut repository, &user, &account)
         .await
-        .ok_or(AccountCreationError::Unknown)?;
+        .map_err(AccountCreationError::from)?;
 
     repository
         .commit()

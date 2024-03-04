@@ -1,7 +1,7 @@
 use chrono::NaiveDateTime;
 
 use crate::{
-    core::database::WriteDatabaseRepository,
+    core::database::{RepositoryError, WriteDatabaseRepository},
     domain::{accounts::Account, assets::Asset},
 };
 
@@ -11,6 +11,7 @@ pub enum TransactionCreationError {
     Unknown,
 }
 
+#[allow(clippy::too_many_arguments)]
 pub async fn create<R>(
     repository: &mut R,
     note: &str,
@@ -43,5 +44,11 @@ where
             debit_settled,
         )
         .await
-        .ok_or(TransactionCreationError::Unknown)
+        .map_err(TransactionCreationError::from)
+}
+
+impl From<RepositoryError> for TransactionCreationError {
+    fn from(_: RepositoryError) -> Self {
+        Self::Unknown
+    }
 }

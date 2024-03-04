@@ -1,9 +1,8 @@
 use chrono_tz::Tz;
 use either::Either;
 
-use crate::{
-    accounts::ownership::AccountOwnership,
-    domain::{accounts::Account, assets::Asset, users::User},
+use crate::domain::{
+    accounts::Account, accounts_ownerships::AccountOwnership, assets::Asset, users::User,
 };
 
 use super::ResolvedTransaction;

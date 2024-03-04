@@ -2,7 +2,6 @@ use axum::{extract::State, response::Redirect, Form};
 use chrono_tz::Tz;
 
 use crate::{
-    accounts::ownership::AccountOwnershipWriteRepository,
     auth::{principal::NoAuthPrincipal, session_providers::cookie::SetCookieSession},
     core::database::WriteRepository,
     domain::{self, accounts::AccountCreationError, sessions::SessionCreationError},
@@ -76,10 +75,9 @@ pub async fn handler(
     .map_err(RegistrationError::from)?;
 
     // create ownership to default account
-    repository
-        .create_account_ownership(&user.id, &favorite_account.id)
+    domain::accounts_ownerships::create(&mut repository, &user, &favorite_account)
         .await
-        .ok_or(RegistrationError::Unknown)?;
+        .map_err(RegistrationError::from)?;
 
     // create a session
     let session = domain::sessions::create(&mut repository, &user)
@@ -109,4 +107,3 @@ impl From<AccountCreationError> for RegistrationError {
         }
     }
 }
-

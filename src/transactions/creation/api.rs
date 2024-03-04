@@ -5,7 +5,6 @@ use itertools::Itertools;
 use serde::Deserialize;
 
 use crate::{
-    accounts::ownership::AccountOwnershipReadonlyRepository,
     auth::principal::AuthPrincipal,
     core::database::WriteRepository,
     domain::{
@@ -101,13 +100,15 @@ pub async fn handler(
         .naive_utc();
 
     // account ownerships
-    let ownerships = repository
-        .list_account_ownerships_by_users_or_accounts(vec![
+    let ownerships = domain::accounts_ownerships::list_by_users_or_accounts(
+        &mut repository,
+        &[
             details.debit_account.clone(),
             details.credit_account.clone(),
-        ])
-        .await
-        .ok_or(TransactionCreationError::Unknown)?;
+        ],
+    )
+    .await
+    .map_err(TransactionCreationError::from)?;
 
     // credit and debit ownership
     let credit_account_owned_by_self = !details.create_credit_account

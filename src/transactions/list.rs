@@ -8,9 +8,10 @@ use either::Either;
 use itertools::Itertools;
 
 use crate::{
-    accounts::ownership::AccountOwnershipReadonlyRepository, auth::principal::AuthPrincipal,
-    core::{database::ReadonlyRepository, web::templates::HtmlTemplate}, domain::{self, transactions::ResolvedTransaction}, AppState,
-    DEFAULT_PAGE_SIZE, PAGE_SIZE_LIMITS,
+    auth::principal::AuthPrincipal,
+    core::{database::ReadonlyRepository, web::templates::HtmlTemplate},
+    domain::{self, transactions::ResolvedTransaction},
+    AppState, DEFAULT_PAGE_SIZE, PAGE_SIZE_LIMITS,
 };
 
 use crate::presentation::core::filters;
@@ -46,13 +47,13 @@ async fn handler(
     let tz = Tz::from_str_insensitive(&user.timezone).map_err(|_| construct_error())?;
 
     // all owned accounts for the user
-    let owned_accounts: Vec<_> = repository
-        .list_account_ownerships_by_user_or_account(&user.id)
-        .await
-        .ok_or_else(construct_error)?
-        .into_iter()
-        .map(|v| v.account)
-        .collect();
+    let owned_accounts: Vec<_> =
+        domain::accounts_ownerships::list_by_user_or_account(&mut repository, &user.id)
+            .await
+            .map_err(|_| construct_error())?
+            .into_iter()
+            .map(|v| v.account)
+            .collect();
 
     // number of transactions
     let number_of_transactions =
@@ -106,11 +107,11 @@ async fn handler(
         .map_err(|_| construct_error())?;
 
     // account ownerships
-    let ownerships = accounts.iter().map(|v| v.id.clone()).collect();
-    let ownerships = repository
-        .list_account_ownerships_by_users_or_accounts(ownerships)
-        .await
-        .ok_or_else(construct_error)?;
+    let ownerships = accounts.iter().map(|v| v.id.clone()).collect_vec();
+    let ownerships =
+        domain::accounts_ownerships::list_by_users_or_accounts(&mut repository, &ownerships)
+            .await
+            .map_err(|_| construct_error())?;
 
     // users
     let users = ownerships.iter().map(|v| v.usr.clone()).collect_vec();
