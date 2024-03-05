@@ -8,7 +8,10 @@ use serde::Deserialize;
 
 use crate::{
     auth::principal::AuthPrincipal,
-    core::{database::WriteRepository, web::templates::HtmlTemplate},
+    core::{
+        database::WriteRepository,
+        web::templates::{HtmlTemplate, IntoHtmlTemplate},
+    },
     domain::{
         self,
         accounts::Account,
@@ -16,6 +19,7 @@ use crate::{
         csrf_tokens::{self, CsrfToken},
         users::User,
     },
+    presentation::core::{IntoPage, Page},
     AppState, DATE_TIME_FORMAT,
 };
 
@@ -66,9 +70,9 @@ pub async fn handler(
     AuthPrincipal(user): AuthPrincipal,
     Query(query): Query<NewTransactionQuery>,
     State(state): State<AppState>,
-) -> Result<HtmlTemplate<NewTransactionPage>, HtmlTemplate<NewTransactionPage>> {
+) -> Result<HtmlTemplate<Page<NewTransactionPage>>, HtmlTemplate<Page<NewTransactionPage>>> {
     let construct_error = || {
-        HtmlTemplate(NewTransactionPage {
+        NewTransactionPage {
             csrf_token: None,
             own_accounts: None,
             other_accounts: None,
@@ -76,7 +80,9 @@ pub async fn handler(
             assets: None,
             preset: None,
             error: None,
-        })
+        }
+        .into_page("New transaction".to_string())
+        .into_html_template()
     };
     let mut repository = WriteRepository::from_pool(&state.database)
         .await
@@ -159,6 +165,8 @@ pub async fn handler(
         assets: Some(assets),
         preset: Some(preset),
         error: query.error,
-    };
-    Ok(HtmlTemplate(page))
+    }
+    .into_page("New transaction".to_string())
+    .into_html_template();
+    Ok(page)
 }

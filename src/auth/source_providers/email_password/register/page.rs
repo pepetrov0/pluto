@@ -3,9 +3,12 @@ use axum::extract::{Query, State};
 
 use crate::{
     auth::principal::NoAuthPrincipal,
-    core::database::ReadonlyRepository,
-    core::web::templates::HtmlTemplate,
+    core::{
+        database::ReadonlyRepository,
+        web::templates::{HtmlTemplate, IntoHtmlTemplate},
+    },
     domain::{self, assets::Asset},
+    presentation::core::{BlankPage, IntoPage},
     AppState,
 };
 
@@ -28,13 +31,15 @@ pub async fn handler(
     _: NoAuthPrincipal,
     Query(query): Query<RegisterQuery>,
     State(state): State<AppState>,
-) -> Result<HtmlTemplate<RegisterPage>, HtmlTemplate<RegisterPage>> {
+) -> Result<HtmlTemplate<BlankPage<RegisterPage>>, HtmlTemplate<BlankPage<RegisterPage>>> {
     let construct_error = || {
-        HtmlTemplate(RegisterPage {
+        RegisterPage {
             error: query.error,
             timezones: vec![],
             assets: None,
-        })
+        }
+        .into_blank_page("Sign up".to_string())
+        .into_html_template()
     };
     let mut repository = ReadonlyRepository::from_pool(&state.database)
         .await
@@ -48,11 +53,13 @@ pub async fn handler(
         .await
         .map_err(|_| construct_error())?;
 
-    let page = HtmlTemplate(RegisterPage {
+    let page = RegisterPage {
         error: query.error,
         timezones,
         assets: Some(assets),
-    });
+    }
+    .into_blank_page("Sign up".to_string())
+    .into_html_template();
     Ok(page)
 }
 

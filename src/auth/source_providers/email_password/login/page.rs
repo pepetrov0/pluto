@@ -1,7 +1,11 @@
 use askama::Template;
 use axum::extract::Query;
 
-use crate::{auth::principal::NoAuthPrincipal, core::web::templates::HtmlTemplate};
+use crate::{
+    auth::principal::NoAuthPrincipal,
+    core::web::templates::{HtmlTemplate, IntoHtmlTemplate},
+    presentation::core::{IntoPage, BlankPage},
+};
 
 use super::error::LoginError;
 
@@ -19,6 +23,8 @@ pub struct LoginPage {
 pub async fn handler(
     _: NoAuthPrincipal,
     Query(query): Query<LoginQuery>,
-) -> HtmlTemplate<LoginPage> {
-    HtmlTemplate(LoginPage { error: query.error })
+) -> HtmlTemplate<BlankPage<LoginPage>> {
+    LoginPage { error: query.error }
+        .into_blank_page("Sign in".to_string())
+        .into_html_template()
 }

@@ -4,6 +4,12 @@ use axum_extra::{headers::ContentType, TypedHeader};
 
 pub struct HtmlTemplate<T: Template>(pub T);
 
+pub trait IntoHtmlTemplate {
+    fn into_html_template(self) -> HtmlTemplate<Self>
+    where
+        Self: Template + Sized;
+}
+
 impl<T: Template> IntoResponse for HtmlTemplate<T> {
     fn into_response(self) -> axum::response::Response {
         let mut html = match self.0.render().ok() {
@@ -24,5 +30,13 @@ impl<T: Template> IntoResponse for HtmlTemplate<T> {
         };
 
         (TypedHeader(ContentType::html()), html).into_response()
+    }
+}
+
+impl<T> IntoHtmlTemplate for T where T: Template + Sized {
+    fn into_html_template(self) -> HtmlTemplate<Self>
+    where
+        Self: Template + Sized {
+        HtmlTemplate(self)
     }
 }

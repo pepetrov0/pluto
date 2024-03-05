@@ -6,13 +6,16 @@ use axum::{
 
 use crate::{
     auth::principal::AuthPrincipal,
-    core::database::ReadonlyRepository,
-    core::web::templates::HtmlTemplate,
+    core::{
+        database::ReadonlyRepository,
+        web::templates::{HtmlTemplate, IntoHtmlTemplate},
+    },
     domain::{
         self,
         assets::{Asset, AssetType},
         users::User,
     },
+    presentation::core::{IntoPage, Page},
     AppState,
 };
 
@@ -34,7 +37,7 @@ async fn handler(
     AuthPrincipal(user): AuthPrincipal,
     Query(query): Query<AssetsListQuery>,
     State(state): State<AppState>,
-) -> HtmlTemplate<AssetsListPage> {
+) -> HtmlTemplate<Page<AssetsListPage>> {
     let assets = match ReadonlyRepository::from_pool(&state.database).await {
         Some(mut repository) => domain::assets::list(&mut repository).await.ok(),
         None => None,
@@ -49,7 +52,7 @@ async fn handler(
         }),
         principal: user,
     };
-    HtmlTemplate(page)
+    page.into_page("Assets".to_string()).into_html_template()
 }
 
 pub fn router() -> Router<AppState> {

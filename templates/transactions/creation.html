@@ -1,12 +1,5 @@
-{% extends "page-with-nav.html" %}
-
 {% import "partials/asset-list.html" as asset_list %}
 
-{% block head %}
-<title>New transaction</title>
-{% endblock %}
-
-{% block content %}
 <div class="flex flex-col gap-2 mx-auto w-full max-w-screen-md px-2 py-4">
   <h1 class="heading-1">New transaction</h1>
   <hr class="border-t-2 border-dashed py-1" />
@@ -213,7 +206,6 @@
   {% endif %} <!-- if let Some(own_accounts) = own_accounts -->
   {% endif %} <!-- if let Some(csrf_token) = csrf_token -->
 </div>
-{% endblock %}
 
 <!-- macro to construct account options -->
 {% macro account_options(preset) %}

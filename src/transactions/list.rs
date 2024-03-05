@@ -9,8 +9,12 @@ use itertools::Itertools;
 
 use crate::{
     auth::principal::AuthPrincipal,
-    core::{database::ReadonlyRepository, web::templates::HtmlTemplate},
+    core::{
+        database::ReadonlyRepository,
+        web::templates::{HtmlTemplate, IntoHtmlTemplate},
+    },
     domain::{self, transactions::ResolvedTransaction},
+    presentation::core::{IntoPage, Page},
     AppState, DEFAULT_PAGE_SIZE, PAGE_SIZE_LIMITS,
 };
 
@@ -38,8 +42,12 @@ async fn handler(
     AuthPrincipal(user): AuthPrincipal,
     Query(query): Query<AccountsListQuery>,
     State(state): State<AppState>,
-) -> Result<HtmlTemplate<TransactionsList>, HtmlTemplate<TransactionsList>> {
-    let construct_error = || HtmlTemplate(TransactionsList::default());
+) -> Result<HtmlTemplate<Page<TransactionsList>>, HtmlTemplate<Page<TransactionsList>>> {
+    let construct_error = || {
+        TransactionsList::default()
+            .into_page("Transactions".to_string())
+            .into_html_template()
+    };
     let mut repository = ReadonlyRepository::from_pool(&state.database)
         .await
         .ok_or_else(construct_error)?;
@@ -133,8 +141,10 @@ async fn handler(
         created: query.created,
         unsettled_transactions: Some(unsettled_transactions),
         settled_transactions: Some(settled_transactions),
-    };
-    Ok(HtmlTemplate(page))
+    }
+    .into_page("Transactions".to_string())
+    .into_html_template();
+    Ok(page)
 }
 
 pub fn router() -> Router<AppState> {

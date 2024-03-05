@@ -7,8 +7,12 @@ use itertools::Itertools;
 
 use crate::{
     auth::principal::AuthPrincipal,
-    core::{database::ReadonlyRepository, web::templates::HtmlTemplate},
+    core::{
+        database::ReadonlyRepository,
+        web::templates::{HtmlTemplate, IntoHtmlTemplate},
+    },
     domain::{self, accounts::Account, users::User},
+    presentation::core::{IntoPage, Page},
     AppState,
 };
 
@@ -32,13 +36,15 @@ async fn handler(
     AuthPrincipal(user): AuthPrincipal,
     Query(query): Query<AccountsListQuery>,
     State(state): State<AppState>,
-) -> Result<HtmlTemplate<AccountsListPage>, HtmlTemplate<AccountsListPage>> {
+) -> Result<HtmlTemplate<Page<AccountsListPage>>, HtmlTemplate<Page<AccountsListPage>>> {
     let construct_error = || {
-        HtmlTemplate(AccountsListPage {
+        AccountsListPage {
             created: query.created,
             accounts: None,
             principal: user.clone(),
-        })
+        }
+        .into_page("Accounts".to_string())
+        .into_html_template()
     };
     let mut repository = ReadonlyRepository::from_pool(&state.database)
         .await
@@ -87,8 +93,10 @@ async fn handler(
         created: query.created,
         accounts: Some(accounts_owned),
         principal: user,
-    };
-    Ok(HtmlTemplate(page))
+    }
+    .into_page("Accounts".to_string())
+    .into_html_template();
+    Ok(page)
 }
 
 pub fn router() -> Router<AppState> {
