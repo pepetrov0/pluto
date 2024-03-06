@@ -9,12 +9,9 @@ use itertools::Itertools;
 
 use crate::{
     auth::principal::AuthPrincipal,
-    core::{
-        database::ReadonlyRepository,
-        web::templates::{HtmlTemplate, IntoHtmlTemplate},
-    },
+    core::database::ReadonlyRepository,
     domain::{self, transactions::ResolvedTransaction},
-    presentation::core::{IntoPage, Page},
+    presentation::core::{HtmlTemplate, IntoHtmlTemplate, IntoPage, Page},
     AppState, DEFAULT_PAGE_SIZE, PAGE_SIZE_LIMITS,
 };
 

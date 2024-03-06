@@ -1,13 +1,9 @@
 use askama::Template;
 use axum::{routing, Router};
 
-use crate::{
-    auth::principal::AuthPrincipal,
-    core::web::templates::{HtmlTemplate, IntoHtmlTemplate},
-    AppState,
-};
+use crate::{auth::principal::AuthPrincipal, AppState};
 
-use super::core::{IntoPage, Page};
+use super::core::{HtmlTemplate, IntoHtmlTemplate, IntoPage, Page};
 
 #[derive(Template, Debug, Default)]
 #[template(path = "dashboard.html")]

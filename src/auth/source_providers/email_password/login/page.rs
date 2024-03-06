@@ -3,8 +3,7 @@ use axum::extract::Query;
 
 use crate::{
     auth::principal::NoAuthPrincipal,
-    core::web::templates::{HtmlTemplate, IntoHtmlTemplate},
-    presentation::core::{IntoPage, BlankPage},
+    presentation::core::{BlankPage, HtmlTemplate, IntoHtmlTemplate, IntoPage},
 };
 
 use super::error::LoginError;

@@ -3,12 +3,9 @@ use axum::extract::{Query, State};
 
 use crate::{
     auth::principal::NoAuthPrincipal,
-    core::{
-        database::ReadonlyRepository,
-        web::templates::{HtmlTemplate, IntoHtmlTemplate},
-    },
+    core::database::ReadonlyRepository,
     domain::{self, assets::Asset},
-    presentation::core::{BlankPage, IntoPage},
+    presentation::core::{BlankPage, HtmlTemplate, IntoHtmlTemplate, IntoPage},
     AppState,
 };
 

@@ -4,8 +4,8 @@ use axum::extract::{Query, State};
 use crate::{
     auth::principal::AuthPrincipal,
     core::database::WriteRepository,
-    core::web::templates::HtmlTemplate,
     domain::csrf_tokens::{self, CsrfToken},
+    presentation::core::{HtmlTemplate, IntoHtmlTemplate, IntoPage, Page},
     AppState,
 };
 
@@ -27,24 +27,31 @@ pub async fn handler(
     AuthPrincipal(user): AuthPrincipal,
     Query(query): Query<NewAccountQuery>,
     State(state): State<AppState>,
-) -> Result<HtmlTemplate<NewAccountPage>, HtmlTemplate<NewAccountPage>> {
+) -> Result<HtmlTemplate<Page<NewAccountPage>>, HtmlTemplate<Page<NewAccountPage>>> {
     let mut repository = WriteRepository::from_pool(&state.database)
         .await
-        .ok_or_else(|| HtmlTemplate(NewAccountPage::default()))?;
+        .ok_or_else(|| {
+            NewAccountPage::default()
+                .into_page("New account".to_string())
+                .into_html_template()
+        })?;
 
     // create csrf token
     let csrf_token = csrf_tokens::create(&mut repository, &user, super::CSRF_TOKEN_USAGE)
         .await
         .ok();
 
-    let page = HtmlTemplate(NewAccountPage {
+    let page = NewAccountPage {
         csrf_token,
         error: query.error,
-    });
+    };
 
-    repository
-        .commit()
-        .await
-        .ok_or_else(|| HtmlTemplate(NewAccountPage::default()))?;
-    Ok(page)
+    repository.commit().await.ok_or_else(|| {
+        NewAccountPage::default()
+            .into_page("New account".to_string())
+            .into_html_template()
+    })?;
+    Ok(page
+        .into_page("New account".to_string())
+        .into_html_template())
 }

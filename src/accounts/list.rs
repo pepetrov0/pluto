@@ -7,12 +7,9 @@ use itertools::Itertools;
 
 use crate::{
     auth::principal::AuthPrincipal,
-    core::{
-        database::ReadonlyRepository,
-        web::templates::{HtmlTemplate, IntoHtmlTemplate},
-    },
+    core::database::ReadonlyRepository,
     domain::{self, accounts::Account, users::User},
-    presentation::core::{IntoPage, Page},
+    presentation::core::{HtmlTemplate, IntoHtmlTemplate, IntoPage, Page},
     AppState,
 };
 
