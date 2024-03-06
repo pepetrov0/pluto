@@ -3,11 +3,11 @@
     <form method="POST" action="/login" class="flex flex-col gap-4 card">
         <div class="flex flex-col gap-1">
             <label for="email" class="label">Email:</label>
-            <input id="email" name="email" type="email" placeholder="Email.." class="input" required />
+            <input id="email" name="email" type="text" placeholder="Email.." class="input" />
         </div>
         <div class="flex flex-col gap-1">
             <label for="password" class="label">Password:</label>
-            <input id="password" name="password" type="password" placeholder="Password.." class="input" required />
+            <input id="password" name="password" type="password" placeholder="Password.." class="input" />
         </div>
         <button type="submit" class="button button-lg">Sign in</button>
         <span class="text-center">Don't have an account? <a class="link" href="/register">Sign up now.</a></span>

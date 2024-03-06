@@ -11,7 +11,9 @@ use super::error::LoginError;
 
 #[derive(serde::Deserialize)]
 pub struct RegisterForm {
+    #[serde(default)]
     pub email: String,
+    #[serde(default)]
     pub password: String,
 }
 

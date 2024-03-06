@@ -49,7 +49,7 @@ async fn handler(
         }),
         principal: user,
     };
-    page.into_page("Assets".to_string()).into_html_template()
+    page.into_page("Currencies & Assets".to_string()).into_html_template()
 }
 
 pub fn router() -> Router<AppState> {
