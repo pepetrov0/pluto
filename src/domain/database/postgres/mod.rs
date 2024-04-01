@@ -16,12 +16,14 @@ impl super::Database for PgDatabase {
             .max_connections(super::MAX_POOL_CONNECTIONS)
             // Sets the maximum idle connection lifetime.
             // As the constant in super is defined in terms of minutes, we have
-            // to multiple here by 60 to get seconds
+            // to multiple here by 60 to get seconds.
             .idle_timeout(Duration::from_secs(super::MAX_POOL_IDLE_LIFETIME * 60))
             // Sets the maximum connection lifetime.
             // As the constant in super is defined in terms of minutes, we have
-            // to multiple here by 60 to get seconds
-            .max_lifetime(Duration::from_secs(super::MAX_POOL_CONNECTION_LIFETIME * 60))
+            // to multiple here by 60 to get seconds.
+            .max_lifetime(Duration::from_secs(
+                super::MAX_POOL_CONNECTION_LIFETIME * 60,
+            ))
             .connect(url)
             .await
             .ok()

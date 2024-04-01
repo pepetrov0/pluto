@@ -1,5 +1,5 @@
-//! This module contains the interface to connect and communicate with a 
-//! database. 
+//! This module contains the interface to connect and communicate with a
+//! database.
 
 use async_trait::async_trait;
 
@@ -14,8 +14,8 @@ const MAX_POOL_CONNECTIONS: u32 = 8;
 const MAX_POOL_IDLE_LIFETIME: u64 = 1;
 
 /// A maximum lifetime of a database pool connection in minutes.
-/// Used to forcefully close connections after 5 minutes to allow the 
-/// database engine to cleanup resources associated for the connection.
+/// Used to forcefully close connections after 5 minutes to allow the
+/// database engine to cleanup resources associated to the connection.
 const MAX_POOL_CONNECTION_LIFETIME: u64 = 5;
 
 /// An alias for a boxed transaction.
@@ -29,12 +29,12 @@ pub trait Database: Sized {
     /// Connects to a database with the given URL.
     ///
     /// Keep in mind that the URL should provide the relevant database protocol!
-    /// (e.g. `postgresql://user:password@hostname:port/database`)
+    /// (e.g. `postgresql://user:password@hostname:port/database`).
     async fn connect(url: &str) -> Option<Self>;
 
     /// Begins a transaction and returns it boxed as optional.
     ///
-    /// Returns `None` in case of an error
+    /// Returns `None` in case of an error.
     async fn begin(&self) -> Option<BoxedTransaction>;
 
     /// Closes that database connection
