@@ -5,9 +5,10 @@
 - **Status:** Proposed / Accepted / Implemented / Obsolete
 - **Created:** date
 - **Last updated:** date
+
 ## Overview
 
-*If someone only reads this far, what do you want them to know?*
+_If someone only reads this far, what do you want them to know?_
 
 ## Goals and Non-Goals:
 
@@ -43,3 +44,4 @@ _Include: security, complexity, compatibility, latency, service immaturity, lack
 
 1. _RFC Created_
 2. _Update for major changes, including status changes._
+
