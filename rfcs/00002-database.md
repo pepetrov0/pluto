@@ -2,7 +2,7 @@
 
 - **Author(s):** <ppetrov@pbyte.xyz>
 - **Approver(s):** <ppetrov@pbyte.xyz>
-- **Status:** Accepted
+- **Status:** Implemented
 - **Created:** 2024-03-30
 - **Last updated:** 2024-03-30
 
