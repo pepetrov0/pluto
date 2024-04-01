@@ -15,16 +15,9 @@ collaboration, and accountability in decision-making.
 
 ## Goals and Non-Goals:
 
-### Goals:
-
 - Establish a formalized process for proposing and evaluating changes.
 - Encourage open communication and feedback among team members.
 - Streamline decision-making and improve project management.
-
-### Non-Goals:
-
-- Dictate specific technical solutions.
-- Address individual performance issues.
 
 ## Background & Motivation:
 
