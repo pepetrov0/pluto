@@ -25,8 +25,8 @@ As we embark on a new project, it's crucial to establish a solid infrastructure 
 
 The adoption of PostgreSQL for the new project involves the following steps:
 
-1. **Schema Design:** Design the database schema using PostgreSQL's relational capabilities, taking advantage of features such as constraints, indexes, and foreign keys to ensure data integrity and performance.
-2. **Application Integration:** Integrate PostgreSQL with the project's application stack. On the Rust side, SQLx will be used as the database driver to interact with PostgreSQL. SQLx provides asynchronous, type-safe database access, which aligns well with Rust's strengths. All database-related logic will be encapsulated within the database module of the domain section, ensuring clear separation of concerns and maintainability.
+- **Schema Design:** Design the database schema using PostgreSQL's relational capabilities, taking advantage of features such as constraints, indexes, and foreign keys to ensure data integrity and performance.
+- **Application Integration:** Integrate PostgreSQL with the project's application stack. On the Rust side, SQLx will be used as the database driver to interact with PostgreSQL. SQLx provides asynchronous, type-safe database access, which aligns well with Rust's strengths. All database-related logic will be encapsulated within the database module of the domain section, ensuring clear separation of concerns and maintainability.
 
 ## Alternatives Considered/Prior Art:
 

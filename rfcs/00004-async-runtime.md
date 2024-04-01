@@ -34,10 +34,10 @@ Tokio has emerged as one of the leading async runtimes for Rust, offering a comp
 
 The design entails integrating Tokio into our project as the primary async runtime. This involves:
 
-1. Incorporating Tokio's core runtime loop into our application structure.
-2. Refactoring existing synchronous code to utilize Tokio's asynchronous APIs where applicable.
-3. Leveraging Tokio's executor for scheduling asynchronous tasks and managing concurrency.
-4. Adapting our application architecture to fit within the Tokio framework, including handling async I/O operations, managing task lifecycles, and orchestrating asynchronous workflows.
+- Incorporating Tokio's core runtime loop into our application structure.
+- Refactoring existing synchronous code to utilize Tokio's asynchronous APIs where applicable.
+- Leveraging Tokio's executor for scheduling asynchronous tasks and managing concurrency.
+- Adapting our application architecture to fit within the Tokio framework, including handling async I/O operations, managing task lifecycles, and orchestrating asynchronous workflows.
 
 ## Dependencies:
 
@@ -47,8 +47,8 @@ The adoption of Tokio introduces a dependency on its core runtime and associated
 
 ### Alternatives Considered:
 
-1. **Async-std:** Another popular async runtime for Rust, offering similar features and performance characteristics as Tokio. However, Tokio's broader ecosystem and maturity make it a preferable choice for our project's requirements.
-2. **Custom Implementation:** Building a custom async runtime tailored to our specific needs. While providing flexibility and control, this approach requires significant development effort and ongoing maintenance, which may outweigh the benefits compared to adopting an existing solution like Tokio.
+- **Async-std:** Another popular async runtime for Rust, offering similar features and performance characteristics as Tokio. However, Tokio's broader ecosystem and maturity make it a preferable choice for our project's requirements.
+- **Custom Implementation:** Building a custom async runtime tailored to our specific needs. While providing flexibility and control, this approach requires significant development effort and ongoing maintenance, which may outweigh the benefits compared to adopting an existing solution like Tokio.
 
 ### Prior Art:
 
@@ -58,8 +58,8 @@ Several projects have successfully adopted Tokio as their async runtime, demonst
 
 ### Known Risks:
 
-1. **Learning Curve:** Adopting Tokio may require developers to familiarize themselves with its APIs and concurrency model, potentially leading to a learning curve.
-3. **Performance Overhead:** While Tokio is known for its performance, improper usage or misconfiguration may introduce performance overhead or latency issues.
+- **Learning Curve:** Adopting Tokio may require developers to familiarize themselves with its APIs and concurrency model, potentially leading to a learning curve.
+- **Performance Overhead:** While Tokio is known for its performance, improper usage or misconfiguration may introduce performance overhead or latency issues.
 
 ### Factors to Address:
 
