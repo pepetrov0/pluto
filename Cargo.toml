@@ -5,5 +5,8 @@ edition = "2021"
 
 [dependencies]
 tokio = { version = "1", features = ["full"] }
-sqlx = { version = "0", features = ["runtime-tokio", "postgres"] }
+sqlx = { version = "0", features = ["runtime-tokio", "postgres", "sqlite"] }
 async-trait = "0"
+axum = "0"
+tower = "0"
+axum-extra = "0"

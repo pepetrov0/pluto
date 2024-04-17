@@ -3,6 +3,5 @@
 #![deny(unused)]
 #![deny(missing_docs)]
 
-pub mod action;
+pub mod web;
 pub mod domain;
-pub mod responder;

@@ -1,18 +1,18 @@
 use std::time::Duration;
 
 use async_trait::async_trait;
-use sqlx::{postgres::PgPoolOptions, PgPool, Postgres, Transaction};
+use sqlx::{sqlite::SqlitePoolOptions, Sqlite, SqlitePool, Transaction};
 
-/// A PostgreSQL database interface wrapping a pool.
-pub struct PgDatabase(PgPool);
+/// A Sqlite database interface wrapping a pool.
+pub struct SqliteDatabase(SqlitePool);
 
-/// A PostgreSQL transaction.
-pub struct PgTransaction(Transaction<'static, Postgres>);
+/// A Sqlite transaction.
+pub struct SqliteTransaction(Transaction<'static, Sqlite>);
 
 #[async_trait]
-impl super::Database for PgDatabase {
+impl super::Database for SqliteDatabase {
     async fn connect(url: &str) -> Option<Self> {
-        PgPoolOptions::new()
+        SqlitePoolOptions::new()
             .max_connections(super::MAX_POOL_CONNECTIONS)
             // Sets the maximum idle connection lifetime.
             // As the constant in super is defined in terms of minutes, we have
@@ -31,7 +31,7 @@ impl super::Database for PgDatabase {
     }
 
     async fn begin(&self) -> Option<super::BoxedTransaction> {
-        Some(Box::new(PgTransaction(self.0.begin().await.ok()?)))
+        Some(Box::new(SqliteTransaction(self.0.begin().await.ok()?)))
     }
 
     async fn close(self) {
@@ -40,7 +40,7 @@ impl super::Database for PgDatabase {
 }
 
 #[async_trait]
-impl super::Transaction for PgTransaction {
+impl super::Transaction for SqliteTransaction {
     async fn commit(self) -> bool {
         self.0.commit().await.is_ok()
     }

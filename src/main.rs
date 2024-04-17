@@ -1,4 +1,9 @@
+use pluto::web;
+use tokio::net::TcpListener;
+
 #[tokio::main]
 async fn main() {
-    println!("Hello, world!");
+    let router = web::router();
+    let listener = TcpListener::bind("0.0.0.0:46963").await.unwrap();
+    axum::serve(listener, router).await.unwrap();
 }

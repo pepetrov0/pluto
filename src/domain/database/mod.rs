@@ -4,8 +4,10 @@
 use async_trait::async_trait;
 
 mod postgres;
+mod sqlite;
 
 pub use postgres::PgDatabase;
+pub use sqlite::SqliteDatabase;
 
 /// A maximum pool connection count.
 const MAX_POOL_CONNECTIONS: u32 = 8;
