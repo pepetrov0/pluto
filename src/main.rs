@@ -21,6 +21,9 @@ async fn main() {
     let listener = TcpListener::bind("0.0.0.0:46963").await.unwrap();
 
     tracing::info!("listening on 0.0.0.0:46963");
-    axum::serve(listener, router).await.unwrap();
+    axum::serve(listener, router)
+        .with_graceful_shutdown(pluto::domain::shutdown::signal())
+        .await
+        .unwrap();
     tracing::info!("shutting down..");
 }
