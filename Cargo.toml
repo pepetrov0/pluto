@@ -1,6 +1,6 @@
 [package]
 name = "pluto"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 
 [dependencies]
@@ -13,3 +13,5 @@ axum-extra = "0"
 serde = { version = "1", features = ["derive"] }
 dotenv = "0"
 config = "0"
+tracing = "0"
+tracing-subscriber = "0"
