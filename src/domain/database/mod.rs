@@ -5,9 +5,9 @@ use async_trait::async_trait;
 
 mod postgres;
 mod sqlite;
+mod any;
 
-pub use postgres::PgDatabase;
-pub use sqlite::SqliteDatabase;
+pub use any::*;
 
 /// A maximum pool connection count.
 const MAX_POOL_CONNECTIONS: u32 = 8;
@@ -20,24 +20,26 @@ const MAX_POOL_IDLE_LIFETIME: u64 = 1;
 /// database engine to cleanup resources associated to the connection.
 const MAX_POOL_CONNECTION_LIFETIME: u64 = 5;
 
-/// An alias for a boxed transaction.
-pub type BoxedTransaction = Box<dyn Transaction>;
-
 /// A trait implemented for all database types and is the base interface
 /// for all databases. Provides a way to connect to a database, to begin
 /// a transaction and to close the connection to the database.
 #[async_trait]
-pub trait Database: Sized {
+pub trait Database: Clone {
+    /// The transaction type associated for the database.
+    type Tx: Transaction;
+
     /// Connects to a database with the given URL.
     ///
     /// Keep in mind that the URL should provide the relevant database protocol!
     /// (e.g. `postgresql://user:password@hostname:port/database`).
-    async fn connect(url: &str) -> Option<Self>;
+    async fn connect(url: &str) -> Option<Self>
+    where
+        Self: Sized;
 
     /// Begins a transaction and returns it boxed as optional.
     ///
     /// Returns `None` in case of an error.
-    async fn begin(&self) -> Option<BoxedTransaction>;
+    async fn begin(&self) -> Option<Self::Tx>;
 
     /// Closes that database connection
     async fn close(self);
@@ -55,3 +57,4 @@ pub trait Transaction {
     /// Rolls back the transaction
     async fn rollback(self);
 }
+

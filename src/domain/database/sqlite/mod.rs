@@ -1,17 +1,34 @@
-use std::time::Duration;
+use std::{str::FromStr, time::Duration};
 
 use async_trait::async_trait;
-use sqlx::{sqlite::SqlitePoolOptions, Sqlite, SqlitePool, Transaction};
+use sqlx::{
+    sqlite::{SqliteConnectOptions, SqlitePoolOptions},
+    Sqlite, SqlitePool, Transaction,
+};
 
-/// A Sqlite database interface wrapping a pool.
+/// A SQLite database interface wrapping a pool.
+#[derive(Clone)]
 pub struct SqliteDatabase(SqlitePool);
 
-/// A Sqlite transaction.
+/// A SQLite transaction.
 pub struct SqliteTransaction(Transaction<'static, Sqlite>);
 
 #[async_trait]
 impl super::Database for SqliteDatabase {
-    async fn connect(url: &str) -> Option<Self> {
+    type Tx = SqliteTransaction;
+
+    #[tracing::instrument]
+    async fn connect(file: &str) -> Option<Self> {
+        tracing::info!("connecting to SQLite..");
+        let options = SqliteConnectOptions::from_str(file)
+            .map_err(|e| tracing::error!("error while parsing SQLite connection: {e:?}"))
+            .ok()?
+            .auto_vacuum(sqlx::sqlite::SqliteAutoVacuum::Incremental)
+            .create_if_missing(true)
+            .foreign_keys(true)
+            .journal_mode(sqlx::sqlite::SqliteJournalMode::Wal)
+            .optimize_on_close(true, None);
+
         SqlitePoolOptions::new()
             .max_connections(super::MAX_POOL_CONNECTIONS)
             // Sets the maximum idle connection lifetime.
@@ -24,17 +41,20 @@ impl super::Database for SqliteDatabase {
             .max_lifetime(Duration::from_secs(
                 super::MAX_POOL_CONNECTION_LIFETIME * 60,
             ))
-            .connect(url)
+            .connect_with(options)
             .await
+            .map_err(|e| tracing::error!("error while opening SQLite pool: {e:?}"))
             .ok()
             .map(Self)
     }
 
-    async fn begin(&self) -> Option<super::BoxedTransaction> {
-        Some(Box::new(SqliteTransaction(self.0.begin().await.ok()?)))
+    async fn begin(&self) -> Option<Self::Tx> {
+        Some(SqliteTransaction(self.0.begin().await.ok()?))
     }
 
+    #[tracing::instrument(skip(self))]
     async fn close(self) {
+        tracing::info!("closing SQLite database..");
         self.0.close().await;
     }
 }

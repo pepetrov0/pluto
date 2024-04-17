@@ -1,4 +1,10 @@
-use pluto::{domain::configuration::Configuration, web};
+use pluto::{
+    domain::{
+        configuration::Configuration,
+        database::{AnyDatabase, Database},
+    },
+    web,
+};
 use tokio::net::TcpListener;
 use tracing::Level;
 
@@ -16,7 +22,10 @@ async fn main() {
         .with_max_level(Level::INFO)
         .init();
 
-    let _config = Configuration::try_load().unwrap_or_default();
+    let config = Configuration::try_load().unwrap_or_default();
+    let database = AnyDatabase::connect_with_configuration(&config)
+        .await
+        .unwrap();
     let router = web::router();
     let listener = TcpListener::bind("0.0.0.0:46963").await.unwrap();
 
@@ -26,4 +35,5 @@ async fn main() {
         .await
         .unwrap();
     tracing::info!("shutting down..");
+    database.close().await;
 }
