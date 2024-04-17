@@ -5,3 +5,4 @@
 //! manipulating data as needed. It contains the business logic.
 
 pub mod database;
+pub mod configuration;
