@@ -17,9 +17,17 @@ pub struct User {
 #[async_trait]
 pub trait Users {
     /// Finds a user by identifier.
+    ///
+    /// _**NOTE:** The result of this function is `Option<Option<User>>`.
+    /// The first `Option` would be `None` in case of an error, the second `Option` 
+    /// would be `None` if no user was found._
     async fn find_user_by_id(&mut self, id: i32) -> Option<Option<User>>;
 
     /// Finds a user by email.
+    ///
+    /// _**NOTE:** The result of this function is `Option<Option<User>>`.
+    /// The first `Option` would be `None` in case of an error, the second `Option` 
+    /// would be `None` if no user was found._
     async fn find_user_by_email(&mut self, email: &str) -> Option<Option<User>>;
 
     /// Create a user.
