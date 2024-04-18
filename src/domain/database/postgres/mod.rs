@@ -17,7 +17,7 @@ impl super::Database for PgDatabase {
     #[tracing::instrument]
     async fn connect(url: &str) -> Option<Self> {
         tracing::info!("connecting to PostgreSQL..");
-        PgPoolOptions::new()
+        let pool = PgPoolOptions::new()
             .max_connections(super::MAX_POOL_CONNECTIONS)
             // Sets the maximum idle connection lifetime.
             // As the constant in super is defined in terms of minutes, we have
@@ -32,8 +32,13 @@ impl super::Database for PgDatabase {
             .connect(url)
             .await
             .map_err(|e| tracing::error!("error while opening PostgreSQL pool: {e:?}"))
-            .ok()
-            .map(Self)
+            .ok()?;
+
+        tracing::info!("running PostgreSQL migrations..");
+        sqlx::migrate!("migrations/pg").run(&pool).await.ok()?;
+
+        tracing::info!("PostgreSQL ready!");
+        Some(Self(pool))
     }
 
     async fn begin(&self) -> Option<Self::Tx> {

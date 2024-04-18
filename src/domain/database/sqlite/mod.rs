@@ -29,7 +29,7 @@ impl super::Database for SqliteDatabase {
             .journal_mode(sqlx::sqlite::SqliteJournalMode::Wal)
             .optimize_on_close(true, None);
 
-        SqlitePoolOptions::new()
+        let pool = SqlitePoolOptions::new()
             .max_connections(super::MAX_POOL_CONNECTIONS)
             // Sets the maximum idle connection lifetime.
             // As the constant in super is defined in terms of minutes, we have
@@ -44,8 +44,13 @@ impl super::Database for SqliteDatabase {
             .connect_with(options)
             .await
             .map_err(|e| tracing::error!("error while opening SQLite pool: {e:?}"))
-            .ok()
-            .map(Self)
+            .ok()?;
+
+        tracing::info!("running SQLite migrations..");
+        sqlx::migrate!("migrations/sqlite").run(&pool).await.ok()?;
+
+        tracing::info!("SQLite ready!");
+        Some(Self(pool))
     }
 
     async fn begin(&self) -> Option<Self::Tx> {
