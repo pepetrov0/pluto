@@ -3,6 +3,8 @@ use std::time::Duration;
 use async_trait::async_trait;
 use sqlx::{postgres::PgPoolOptions, PgPool, Postgres, Transaction};
 
+mod users;
+
 /// A PostgreSQL database interface wrapping a pool.
 #[derive(Clone)]
 pub struct PgDatabase(PgPool);
@@ -31,11 +33,15 @@ impl super::Database for PgDatabase {
             ))
             .connect(url)
             .await
-            .map_err(|e| tracing::error!("error while opening PostgreSQL pool: {e:?}"))
+            .map_err(|e| tracing::error!("error opening PostgreSQL pool: {e:?}"))
             .ok()?;
 
         tracing::info!("running PostgreSQL migrations..");
-        sqlx::migrate!("migrations/pg").run(&pool).await.ok()?;
+        sqlx::migrate!("migrations/pg")
+            .run(&pool)
+            .await
+            .map_err(|e| tracing::error!("error running PostgreSQL migrations: {e:?}"))
+            .ok()?;
 
         tracing::info!("PostgreSQL ready!");
         Some(Self(pool))

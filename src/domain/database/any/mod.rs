@@ -8,6 +8,8 @@ use super::{
     Database, Transaction,
 };
 
+mod users;
+
 /// A generic database interface for connecting to various databases.
 #[derive(Clone)]
 pub enum AnyDatabase {

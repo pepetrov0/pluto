@@ -6,6 +6,8 @@ use sqlx::{
     Sqlite, SqlitePool, Transaction,
 };
 
+mod users;
+
 /// A SQLite database interface wrapping a pool.
 #[derive(Clone)]
 pub struct SqliteDatabase(SqlitePool);
@@ -43,11 +45,15 @@ impl super::Database for SqliteDatabase {
             ))
             .connect_with(options)
             .await
-            .map_err(|e| tracing::error!("error while opening SQLite pool: {e:?}"))
+            .map_err(|e| tracing::error!("error opening SQLite pool: {e:?}"))
             .ok()?;
 
         tracing::info!("running SQLite migrations..");
-        sqlx::migrate!("migrations/sqlite").run(&pool).await.ok()?;
+        sqlx::migrate!("migrations/sqlite")
+            .run(&pool)
+            .await
+            .map_err(|e| tracing::error!("error running SQLite migrations: {e:?}"))
+            .ok()?;
 
         tracing::info!("SQLite ready!");
         Some(Self(pool))

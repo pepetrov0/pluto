@@ -3,9 +3,13 @@
 
 use async_trait::async_trait;
 
+// engines
 mod postgres;
 mod sqlite;
 mod any;
+
+// features
+pub mod users;
 
 pub use any::*;
 
@@ -49,7 +53,7 @@ pub trait Database: Clone {
 /// Provides basic transaction functionalities such as commiting and rolling
 /// a transction back.
 #[async_trait]
-pub trait Transaction {
+pub trait Transaction: users::Users {
     /// Commits the transaction.
     /// If any error occured, returns `false`.
     async fn commit(self) -> bool;
