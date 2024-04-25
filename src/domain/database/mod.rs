@@ -1,15 +1,17 @@
 //! This module contains the interface to connect and communicate with a
 //! database.
 
+#![allow(private_bounds)]
+
 use async_trait::async_trait;
 
 // engines
+mod any;
 mod postgres;
 mod sqlite;
-mod any;
 
 // features
-pub mod users;
+pub(in crate::domain) mod users;
 
 pub use any::*;
 
@@ -61,4 +63,3 @@ pub trait Transaction: users::Users {
     /// Rolls back the transaction
     async fn rollback(self);
 }
-
