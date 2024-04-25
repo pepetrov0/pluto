@@ -8,6 +8,6 @@ use tower_http::compression::CompressionLayer;
 pub fn router() -> Router {
     tracing::debug!("constructing router..");
     Router::new()
-        .route("/health", routing::get(()))
+        .route("/health", routing::any(()))
         .layer(CompressionLayer::new())
 }
