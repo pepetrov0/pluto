@@ -4,15 +4,16 @@ version = "0.0.0"
 edition = "2021"
 
 [dependencies]
-tokio = { version = "1", features = ["full"] }
-sqlx = { version = "0", features = ["runtime-tokio", "postgres", "sqlite"] }
+askama = "0"
 async-trait = "0"
 axum = "0"
+axum-extra = "0"
+config = "0"
+dotenv = "0"
+serde = { version = "1", features = ["derive"] }
+sqlx = { version = "0", features = ["runtime-tokio", "postgres", "sqlite"] }
+tokio = { version = "1", features = ["full"] }
 tower = "0"
 tower-http = { version = "0", features = ["compression-full"] }
-axum-extra = "0"
-serde = { version = "1", features = ["derive"] }
-dotenv = "0"
-config = "0"
 tracing = "0"
 tracing-subscriber = "0"

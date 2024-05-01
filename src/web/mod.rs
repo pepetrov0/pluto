@@ -3,6 +3,8 @@
 use axum::{routing, Router};
 use tower_http::compression::CompressionLayer;
 
+pub(in crate::web) mod core;
+
 /// Constructs the primary router to be used for serving the application.
 #[tracing::instrument]
 pub fn router() -> Router {
