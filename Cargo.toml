@@ -11,6 +11,7 @@ axum-extra = { version = "0", features = ["typed-header"] }
 config = "0"
 crockford = "1"
 dotenv = "0"
+maud = { version = "0", features = ["axum"] }
 mime_guess = "2"
 rust-embed = "8"
 serde = { version = "1", features = ["derive"] }
@@ -20,3 +21,6 @@ tower = "0"
 tower-http = { version = "0", features = ["compression-full"] }
 tracing = "0"
 tracing-subscriber = "0"
+
+[build-dependencies]
+reqwest = { version = "0", features = ["blocking"] }

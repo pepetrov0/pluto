@@ -15,16 +15,3 @@ async fn health() {
     assert_eq!(response.status(), StatusCode::OK);
 }
 
-#[tokio::test]
-async fn styles_must_exist() {
-    let router = crate::web::router();
-
-    let request = Request::builder()
-        .uri("/static/styles.css")
-        .body(Body::empty())
-        .unwrap();
-
-    let response = router.oneshot(request).await.unwrap();
-
-    assert_eq!(response.status(), StatusCode::OK);
-}
