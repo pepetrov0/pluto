@@ -9,6 +9,7 @@ async-trait = "0"
 axum = "0"
 axum-extra = { version = "0", features = ["typed-header"] }
 config = "0"
+crockford = "1"
 dotenv = "0"
 mime_guess = "2"
 rust-embed = "8"
