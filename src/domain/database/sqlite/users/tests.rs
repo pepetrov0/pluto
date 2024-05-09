@@ -9,7 +9,7 @@ async fn find_non_existent_user() {
     let mut transaction = database.begin().await.expect("begin transaction");
 
     assert!(transaction
-        .find_user_by_id(56)
+        .find_user_by_id(56.into())
         .await
         .expect("should not error")
         .is_none());

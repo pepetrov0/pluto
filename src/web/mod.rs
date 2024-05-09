@@ -19,4 +19,3 @@ pub fn router() -> Router {
         .layer(axum::middleware::from_fn(core::cache_control::layer))
         .layer(CompressionLayer::new())
 }
-

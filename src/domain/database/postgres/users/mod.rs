@@ -1,6 +1,9 @@
 use axum::async_trait;
 
-use crate::domain::database::users::{User, Users};
+use crate::domain::{
+    database::users::{User, Users},
+    identifier::Id,
+};
 
 use super::PgTransaction;
 
@@ -12,7 +15,7 @@ mod tests;
 impl Users for PgTransaction {
     /// Finds a user by identifier.
     #[tracing::instrument(skip(self))]
-    async fn find_user_by_id(&mut self, id: i32) -> Option<Option<User>> {
+    async fn find_user_by_id(&mut self, id: Id) -> Option<Option<User>> {
         sqlx::query_as(include_str!("find_user_by_id.sql"))
             .bind(id)
             .fetch_optional(&mut *self.0)

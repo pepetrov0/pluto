@@ -1,6 +1,9 @@
 use axum::async_trait;
 
-use crate::domain::database::users::{User, Users};
+use crate::domain::{
+    database::users::{User, Users},
+    identifier::Id,
+};
 
 use super::AnyTransaction;
 
@@ -9,7 +12,7 @@ use super::AnyTransaction;
 impl Users for AnyTransaction {
     /// Finds a user by identifier.
     #[tracing::instrument(skip(self))]
-    async fn find_user_by_id(&mut self, id: i32) -> Option<Option<User>> {
+    async fn find_user_by_id(&mut self, id: Id) -> Option<Option<User>> {
         match self {
             AnyTransaction::Sqlite(v) => v.find_user_by_id(id).await,
             AnyTransaction::Pg(v) => v.find_user_by_id(id).await,
