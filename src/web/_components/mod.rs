@@ -23,13 +23,13 @@ fn header(title: &str) -> Markup {
 
 /// A generic page component
 pub fn page(title: &str, content: Markup) -> Markup {
-    const BODY_STYLES: &str =
-        "min-w-dvw min-h-dvh max-w-dvw max-h-dvh bg-gray-200 dark:bg-gray-700";
+    const BODY_STYLES: &str = "bg-gray-200 text-black dark:bg-gray-700 dark:text-white";
+    const CONTENT_STYLES: &str = "bg-red-500 max-w-3xl mx-auto p-2";
 
     html! {
         (header(title))
         body .(BODY_STYLES) {
-            main {
+            main .(CONTENT_STYLES) {
                 (content)
             }
         }
