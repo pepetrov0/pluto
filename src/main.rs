@@ -26,7 +26,7 @@ async fn main() {
     let database = AnyDatabase::connect_with_configuration(&config)
         .await
         .unwrap();
-    let router = web::router();
+    let router = web::router(database.clone());
     let listener = TcpListener::bind("0.0.0.0:46963").await.unwrap();
 
     tracing::info!("listening on 0.0.0.0:46963");

@@ -3,6 +3,8 @@
 use axum::{routing, Router};
 use tower_http::compression::CompressionLayer;
 
+use crate::domain::database::AnyDatabase;
+
 mod components;
 mod core;
 
@@ -14,8 +16,8 @@ mod index;
 mod tests;
 
 /// Constructs the primary router to be used for serving the application.
-#[tracing::instrument]
-pub fn router() -> Router<()> {
+#[tracing::instrument(skip(database))]
+pub fn router(database: AnyDatabase) -> Router<()> {
     tracing::debug!("constructing router..");
     Router::new()
         .merge(index::router())
@@ -23,5 +25,5 @@ pub fn router() -> Router<()> {
         .merge(static_files::router())
         .layer(axum::middleware::from_fn(core::cache_control::layer))
         .layer(CompressionLayer::new())
-        .with_state(core::State {})
+        .with_state(core::State { database })
 }
