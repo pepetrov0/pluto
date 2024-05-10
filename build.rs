@@ -52,7 +52,7 @@ fn compile_tailwind_styles() {
     println!("cargo:rerun-if-changed={TAILWIND_EXECUTABLE_PATH}");
     println!("cargo:rerun-if-changed=target/styles.css");
 
-    fs::read_dir("src/web/components").unwrap().for_each(|v| {
+    fs::read_dir("src/web/_components").unwrap().for_each(|v| {
         println!(
             "cargo:rerun-if-changed={}",
             v.unwrap().path().to_string_lossy().to_string()

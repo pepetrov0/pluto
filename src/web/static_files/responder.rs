@@ -12,7 +12,7 @@ use axum_extra::{
 const CACHE_MAX_AGE: u64 = 31_536_000; // in seconds, equals ~1 year
 
 pub async fn invoke(path: &str) -> Response {
-    match super::Statics::get(path) {
+    match super::core::Statics::get(path) {
         Some(file) => {
             let content_type = ContentType::from_str(file.metadata.mimetype())
                 .unwrap_or_else(|_| ContentType::octet_stream());
