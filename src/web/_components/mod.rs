@@ -17,6 +17,7 @@ fn header(title: &str) -> Markup {
         link rel="manifest" href=(static_file_url("site.webmanifest"));
 
         style { (include_str!("../../../target/styles.css")) }
+        script src=(static_file_url("htmx.min.js")) {}
         title { (title) }
     }
 }

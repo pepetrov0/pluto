@@ -9,7 +9,6 @@ pub struct Statics;
 /// Returns the hash of a static file
 #[cached(key = "String", convert = r#"{ format!("{file}") }"#)]
 fn hash(file: &str) -> String {
-    tracing::trace!("computing hash.. {file}");
     match Statics::get(file) {
         Some(file) => hex::encode(file.metadata.sha256_hash()),
         None => {
