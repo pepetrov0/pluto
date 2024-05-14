@@ -23,15 +23,15 @@ pub trait Users {
     /// _**NOTE:** The result of this function is `Option<Option<User>>`.
     /// The first `Option` would be `None` in case of an error, the second `Option`
     /// would be `None` if no user was found._
-    async fn find_user_by_id(&mut self, id: Id) -> Option<Option<User>>;
+    async fn find_user_by_id(&mut self, id: Id) -> super::Result<Option<User>>;
 
     /// Finds a user by email.
     ///
     /// _**NOTE:** The result of this function is `Option<Option<User>>`.
     /// The first `Option` would be `None` in case of an error, the second `Option`
     /// would be `None` if no user was found._
-    async fn find_user_by_email(&mut self, email: &str) -> Option<Option<User>>;
+    async fn find_user_by_email(&mut self, email: &str) -> super::Result<Option<User>>;
 
     /// Create a user.
-    async fn create_user(&mut self, email: &str, password: Option<&str>) -> Option<User>;
+    async fn create_user(&mut self, email: &str, password: Option<&str>) -> super::Result<User>;
 }

@@ -8,6 +8,7 @@ use super::{
     Database, Transaction,
 };
 
+mod sessions;
 mod users;
 
 /// A generic database interface for connecting to various databases.
@@ -29,7 +30,7 @@ pub enum AnyTransaction {
 
 impl AnyDatabase {
     /// Creates a in-memory SQLite database
-    pub async fn in_memory() -> Option<Self> {
+    pub async fn in_memory() -> super::Result<Self> {
         SqliteDatabase::connect("sqlite::memory:")
             .await
             .map(Self::Sqlite)
@@ -37,7 +38,7 @@ impl AnyDatabase {
 
     /// Connects to the database provided by the configuration
     #[tracing::instrument]
-    pub async fn connect_with_configuration(config: &Configuration) -> Option<Self> {
+    pub async fn connect_with_configuration(config: &Configuration) -> super::Result<Self> {
         match config.database {
             Some(ref url) => Self::connect(url.as_str()).await,
             None => {
@@ -55,7 +56,7 @@ impl Database for AnyDatabase {
     type Tx = AnyTransaction;
 
     #[tracing::instrument]
-    async fn connect(url: &str) -> Option<Self> {
+    async fn connect(url: &str) -> super::Result<Self> {
         if url.starts_with("postgresql:") {
             return PgDatabase::connect(url).await.map(Self::Pg);
         }
@@ -64,10 +65,11 @@ impl Database for AnyDatabase {
             return SqliteDatabase::connect(url).await.map(Self::Sqlite);
         }
 
-        None
+        Err(super::Error::Message("unknown database".to_string()))
     }
 
-    async fn begin(&self) -> Option<Self::Tx> {
+    #[tracing::instrument(skip(self))]
+    async fn begin(&self) -> super::Result<Self::Tx> {
         match self {
             AnyDatabase::Sqlite(v) => v.begin().await.map(AnyTransaction::Sqlite),
             AnyDatabase::Pg(v) => v.begin().await.map(AnyTransaction::Pg),
@@ -85,13 +87,15 @@ impl Database for AnyDatabase {
 
 #[async_trait]
 impl Transaction for AnyTransaction {
-    async fn commit(self) -> bool {
+    #[tracing::instrument(skip(self))]
+    async fn commit(self) -> super::Result<()> {
         match self {
             AnyTransaction::Sqlite(v) => v.commit().await,
             AnyTransaction::Pg(v) => v.commit().await,
         }
     }
 
+    #[tracing::instrument(skip(self))]
     async fn rollback(self) {
         match self {
             AnyTransaction::Sqlite(v) => v.rollback().await,

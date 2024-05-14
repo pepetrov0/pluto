@@ -1,7 +1,10 @@
 use axum::async_trait;
 
 use crate::domain::{
-    database::users::{User, Users},
+    database::{
+        users::{User, Users},
+        Result,
+    },
     identifier::Id,
 };
 
@@ -12,7 +15,7 @@ use super::AnyTransaction;
 impl Users for AnyTransaction {
     /// Finds a user by identifier.
     #[tracing::instrument(skip(self))]
-    async fn find_user_by_id(&mut self, id: Id) -> Option<Option<User>> {
+    async fn find_user_by_id(&mut self, id: Id) -> Result<Option<User>> {
         match self {
             AnyTransaction::Sqlite(v) => v.find_user_by_id(id).await,
             AnyTransaction::Pg(v) => v.find_user_by_id(id).await,
@@ -21,7 +24,7 @@ impl Users for AnyTransaction {
 
     /// Finds a user by email.
     #[tracing::instrument(skip(self))]
-    async fn find_user_by_email(&mut self, email: &str) -> Option<Option<User>> {
+    async fn find_user_by_email(&mut self, email: &str) -> Result<Option<User>> {
         match self {
             AnyTransaction::Sqlite(v) => v.find_user_by_email(email).await,
             AnyTransaction::Pg(v) => v.find_user_by_email(email).await,
@@ -30,7 +33,7 @@ impl Users for AnyTransaction {
 
     /// Create a user.
     #[tracing::instrument(skip(self))]
-    async fn create_user(&mut self, email: &str, password: Option<&str>) -> Option<User> {
+    async fn create_user(&mut self, email: &str, password: Option<&str>) -> Result<User> {
         match self {
             AnyTransaction::Sqlite(v) => v.create_user(email, password).await,
             AnyTransaction::Pg(v) => v.create_user(email, password).await,

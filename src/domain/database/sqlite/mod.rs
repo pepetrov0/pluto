@@ -6,6 +6,7 @@ use sqlx::{
     Sqlite, SqlitePool, Transaction,
 };
 
+mod sessions;
 mod users;
 
 /// A SQLite database interface wrapping a pool.
@@ -19,12 +20,11 @@ pub struct SqliteTransaction(Transaction<'static, Sqlite>);
 impl super::Database for SqliteDatabase {
     type Tx = SqliteTransaction;
 
-    #[tracing::instrument]
-    async fn connect(file: &str) -> Option<Self> {
+    #[tracing::instrument(err)]
+    async fn connect(file: &str) -> super::Result<Self> {
         tracing::info!("connecting to SQLite..");
         let options = SqliteConnectOptions::from_str(file)
-            .map_err(|e| tracing::error!("error while parsing SQLite connection: {e:?}"))
-            .ok()?
+            .map_err(super::Error::from)?
             .auto_vacuum(sqlx::sqlite::SqliteAutoVacuum::Incremental)
             .create_if_missing(true)
             .foreign_keys(true)
@@ -45,22 +45,26 @@ impl super::Database for SqliteDatabase {
             ))
             .connect_with(options)
             .await
-            .map_err(|e| tracing::error!("error opening SQLite pool: {e:?}"))
-            .ok()?;
+            .map_err(super::Error::from)?;
 
         tracing::info!("running SQLite migrations..");
         sqlx::migrate!("migrations/sqlite")
             .run(&pool)
             .await
-            .map_err(|e| tracing::error!("error running SQLite migrations: {e:?}"))
-            .ok()?;
+            .map_err(super::Error::from)?;
 
         tracing::info!("SQLite ready!");
-        Some(Self(pool))
+        Ok(Self(pool))
     }
 
-    async fn begin(&self) -> Option<Self::Tx> {
-        Some(SqliteTransaction(self.0.begin().await.ok()?))
+    #[tracing::instrument(err, skip(self))]
+    async fn begin(&self) -> super::Result<Self::Tx> {
+        tracing::trace!("beginning transaction..");
+        self.0
+            .begin()
+            .await
+            .map(SqliteTransaction)
+            .map_err(super::Error::from)
     }
 
     #[tracing::instrument(skip(self))]
@@ -72,11 +76,15 @@ impl super::Database for SqliteDatabase {
 
 #[async_trait]
 impl super::Transaction for SqliteTransaction {
-    async fn commit(self) -> bool {
-        self.0.commit().await.is_ok()
+    #[tracing::instrument(err, skip(self))]
+    async fn commit(self) -> super::Result<()> {
+        tracing::trace!("committing transaction..");
+        self.0.commit().await.map_err(super::Error::from)
     }
 
+    #[tracing::instrument(skip(self))]
     async fn rollback(self) {
+        tracing::trace!("rolling transaction back..");
         let _ = self.0.rollback().await;
     }
 }

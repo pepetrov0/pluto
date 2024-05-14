@@ -3,6 +3,7 @@ use std::time::Duration;
 use async_trait::async_trait;
 use sqlx::{postgres::PgPoolOptions, PgPool, Postgres, Transaction};
 
+mod sessions;
 mod users;
 
 /// A PostgreSQL database interface wrapping a pool.
@@ -16,8 +17,8 @@ pub struct PgTransaction(Transaction<'static, Postgres>);
 impl super::Database for PgDatabase {
     type Tx = PgTransaction;
 
-    #[tracing::instrument]
-    async fn connect(url: &str) -> Option<Self> {
+    #[tracing::instrument(err)]
+    async fn connect(url: &str) -> super::Result<Self> {
         tracing::info!("connecting to PostgreSQL..");
         let pool = PgPoolOptions::new()
             .max_connections(super::MAX_POOL_CONNECTIONS)
@@ -33,22 +34,26 @@ impl super::Database for PgDatabase {
             ))
             .connect(url)
             .await
-            .map_err(|e| tracing::error!("error opening PostgreSQL pool: {e:?}"))
-            .ok()?;
+            .map_err(super::Error::from)?;
 
         tracing::info!("running PostgreSQL migrations..");
         sqlx::migrate!("migrations/pg")
             .run(&pool)
             .await
-            .map_err(|e| tracing::error!("error running PostgreSQL migrations: {e:?}"))
-            .ok()?;
+            .map_err(super::Error::from)?;
 
         tracing::info!("PostgreSQL ready!");
-        Some(Self(pool))
+        Ok(Self(pool))
     }
 
-    async fn begin(&self) -> Option<Self::Tx> {
-        Some(PgTransaction(self.0.begin().await.ok()?))
+    #[tracing::instrument(err, skip(self))]
+    async fn begin(&self) -> super::Result<Self::Tx> {
+        tracing::trace!("beginning transaction..");
+        self.0
+            .begin()
+            .await
+            .map(PgTransaction)
+            .map_err(super::Error::from)
     }
 
     #[tracing::instrument(skip(self))]
@@ -60,11 +65,15 @@ impl super::Database for PgDatabase {
 
 #[async_trait]
 impl super::Transaction for PgTransaction {
-    async fn commit(self) -> bool {
-        self.0.commit().await.is_ok()
+    #[tracing::instrument(err, skip(self))]
+    async fn commit(self) -> super::Result<()> {
+        tracing::trace!("committing transaction..");
+        self.0.commit().await.map_err(super::Error::from)
     }
 
+    #[tracing::instrument(skip(self))]
     async fn rollback(self) {
+        tracing::trace!("rolling transaction back..");
         let _ = self.0.rollback().await;
     }
 }
