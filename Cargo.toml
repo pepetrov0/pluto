@@ -9,6 +9,7 @@ async-trait = "0"
 axum = "0"
 axum-extra = { version = "0", features = ["typed-header"] }
 cached = "0"
+chrono = "0"
 config = "0"
 crockford = "1"
 dotenv = "0"
@@ -17,7 +18,7 @@ maud = { version = "0", features = ["axum"] }
 rust-embed = { version = "8", features = ["mime-guess"] }
 serde = { version = "1", features = ["derive"] }
 sha2 = "0"
-sqlx = { version = "0", features = ["runtime-tokio", "postgres", "sqlite"] }
+sqlx = { version = "0", features = ["runtime-tokio", "postgres", "sqlite", "chrono"] }
 tokio = { version = "1", features = ["full"] }
 tower = "0"
 tower-http = { version = "0", features = ["compression-full"] }
