@@ -1,0 +1,6 @@
+_version = 2
+
+[dashboard.title]
+  en = "Dashboard"
+  bg = "Табло"
+

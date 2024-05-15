@@ -1,4 +1,5 @@
 use maud::{html, Markup};
+use rust_i18n::t;
 
 use crate::web::_components::Icon;
 
@@ -36,7 +37,7 @@ fn header() -> Markup {
     }
 }
 
-fn item(icon: Icon, text: &str, url: &str) -> Markup {
+fn item(locale: &str, icon: Icon, text: &str, url: &str) -> Markup {
     const STYLES: &str = concat!(
         "flex flex-row z-50 ",
         "hover:cursor-pointer hover:bg-background-contrast hover:text-background hover:dark:bg-background-contrast-dark hover:dark:text-background-dark"
@@ -50,13 +51,13 @@ fn item(icon: Icon, text: &str, url: &str) -> Markup {
                 (icon)
             }
             div .(TEXT_STYLES) { 
-                span { (text) }
+                span { (t!(text, locale = locale)) }
             }
         }
     }
 }
 
-pub fn navigation() -> Markup {
+pub fn navigation(locale: &str) -> Markup {
     const STYLES: &str = concat!(
         "fixed left-0 top-0 h-dvh xl:w-full has-[#nav-toggle:checked]:w-full max-w-[min(16rem,90dvw)] overflow-y-auto ",
         "flex flex-col group/nav ",
@@ -66,7 +67,7 @@ pub fn navigation() -> Markup {
     html! {
         nav .(STYLES) {
             (header())
-            (item(Icon::Newspaper, "Dashboard", "/"))
+            (item(locale, Icon::Newspaper, "dashboard.title", "/"))
         }
     }
 }

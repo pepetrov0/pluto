@@ -4,10 +4,12 @@ use axum_extra::extract::cookie;
 use crate::domain::database::AnyDatabase;
 
 mod auth;
+mod locale;
 pub mod middleware;
 
 #[allow(unused)]
 pub use auth::*;
+pub use locale::*;
 
 /// State shared between all databases.
 #[derive(Clone)]

@@ -1,5 +1,7 @@
 use axum::response::Response;
 
-pub async fn invoke() -> Response {
-    super::responder::invoke()
+use crate::web::_core::Locale;
+
+pub async fn invoke(locale: Locale) -> Response {
+    super::responder::invoke(locale)
 }

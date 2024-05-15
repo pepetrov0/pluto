@@ -1,8 +1,9 @@
-use maud::{html, Markup, DOCTYPE};
 use crate::web::static_file_url;
+use maud::{html, Markup, DOCTYPE};
+use rust_i18n::t;
 
 /// The header for every document
-pub fn header(title: &str) -> Markup {
+pub fn header(locale: &str, title: &str) -> Markup {
     html! {
         (DOCTYPE)
 
@@ -17,6 +18,6 @@ pub fn header(title: &str) -> Markup {
 
         style { (include_str!("../../../target/styles.css")) }
         script src=(static_file_url("htmx.min.js")) {}
-        title { (title) }
+        title { (t!(title, locale = locale)) }
     }
 }

@@ -3,7 +3,12 @@ name = "pluto"
 version = "0.0.0"
 edition = "2021"
 
+[package.metadata.i18n]
+default-locale = "en"
+minify-key = true
+
 [dependencies]
+accept-language = "3"
 argon2 = "0"
 askama = "0"
 async-trait = "0"
@@ -14,6 +19,7 @@ chrono = "0"
 config = "0"
 crockford = "1"
 dotenv = "0"
+rust-i18n = "3"
 hex = "0"
 maud = { version = "0", features = ["axum"] }
 rust-embed = { version = "8", features = ["mime-guess"] }
