@@ -4,10 +4,11 @@ version = "0.0.0"
 edition = "2021"
 
 [dependencies]
+argon2 = "0"
 askama = "0"
 async-trait = "0"
 axum = "0"
-axum-extra = { version = "0", features = ["typed-header"] }
+axum-extra = { version = "0", features = ["typed-header", "cookie-private", "cookie-key-expansion"] }
 cached = "0"
 chrono = "0"
 config = "0"

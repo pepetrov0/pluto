@@ -2,6 +2,7 @@ use pluto::{
     domain::{
         configuration::Configuration,
         database::{AnyDatabase, Database},
+        keys,
     },
     web,
 };
@@ -12,7 +13,7 @@ use tracing::Level;
 async fn main() {
     #[cfg(debug_assertions)]
     tracing_subscriber::fmt()
-        .pretty()
+        .compact()
         .with_max_level(Level::TRACE)
         .init();
 
@@ -26,7 +27,7 @@ async fn main() {
     let database = AnyDatabase::connect_with_configuration(&config)
         .await
         .unwrap();
-    let router = web::router(database.clone());
+    let router = web::router(database.clone(), keys::cookie_key(&config));
     let listener = TcpListener::bind("0.0.0.0:46963").await.unwrap();
 
     tracing::info!("listening on 0.0.0.0:46963");

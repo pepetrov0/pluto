@@ -8,3 +8,4 @@ pub mod configuration;
 pub mod database;
 pub mod identifier;
 pub mod shutdown;
+pub mod keys;

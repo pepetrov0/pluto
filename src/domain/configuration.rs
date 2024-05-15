@@ -12,6 +12,8 @@ const ENV_SEPARATOR: &str = "__";
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[serde(default)]
 pub struct Configuration {
+    /// A secret used for key derivation.
+    pub secret: Option<String>,
     /// Options for configuring a database.
     pub database: Option<String>,
 }

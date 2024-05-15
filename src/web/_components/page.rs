@@ -8,7 +8,7 @@ pub fn page(title: &str, has_navigation: bool, content: Markup) -> Markup {
 
     html! {
         (super::header::header(title))
-        body .(BODY_STYLES) .(BODY_WITH_NAVIGATION_STYLES)[has_navigation] {
+        body hx-boost="true" .(BODY_STYLES) .(BODY_WITH_NAVIGATION_STYLES)[has_navigation] {
             @if has_navigation {
                 (super::navigation::navigation())
             }
