@@ -7,7 +7,6 @@ mod auth;
 mod locale;
 pub mod middleware;
 
-#[allow(unused)]
 pub use auth::*;
 pub use locale::*;
 

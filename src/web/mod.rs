@@ -21,13 +21,19 @@ mod tests;
 #[tracing::instrument(skip(database))]
 pub fn router(database: AnyDatabase, key: cookie::Key) -> Router<()> {
     tracing::debug!("constructing router..");
+    let state = _core::State { database, key };
+
+    // middleware
+    let auth_layer =
+        axum::middleware::from_fn_with_state(state.clone(), _core::middleware::auth_layer);
+    let cache_control_layer = axum::middleware::from_fn(_core::middleware::cache_control_layer);
+
     Router::new()
         .merge(index::router())
         .route("/health", routing::any(()))
         .merge(static_files::router())
-        .layer(axum::middleware::from_fn(
-            _core::middleware::cache_control_layer,
-        ))
+        .layer(auth_layer)
+        .layer(cache_control_layer)
         .layer(CompressionLayer::new())
-        .with_state(_core::State { database, key })
+        .with_state(state)
 }

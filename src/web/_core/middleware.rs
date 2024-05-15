@@ -1,12 +1,14 @@
 //! This module implements common middleware layers.
 
 use axum::{
-    extract::Request,
+    extract::{Request, State},
     http::header,
     middleware::Next,
     response::{IntoResponse, Response},
 };
 use axum_extra::{headers::CacheControl, TypedHeader};
+
+use super::Auth;
 
 /// A middleware layer that adds cache control header to all responses that do not have one.
 pub async fn cache_control_layer(req: Request, next: Next) -> Response {
@@ -16,4 +18,16 @@ pub async fn cache_control_layer(req: Request, next: Next) -> Response {
         true => response,
         false => (TypedHeader(CacheControl::new().with_no_store()), response).into_response(),
     }
+}
+
+pub async fn auth_layer(
+    State(state): State<super::State>,
+    mut req: Request,
+    next: Next,
+) -> Response {
+    if let Some(auth) = Auth::try_from_request(&state, &mut req).await {
+        req.extensions_mut().insert(auth);
+    }
+
+    next.run(req).await
 }

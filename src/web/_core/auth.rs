@@ -4,29 +4,62 @@ use std::convert::Infallible;
 
 use axum::{
     async_trait,
-    extract::FromRequestParts,
+    extract::{FromRequestParts, Request},
     http::request::Parts,
     response::{IntoResponse, IntoResponseParts, Redirect, Response, ResponseParts},
+    Extension, RequestExt,
 };
-use axum_extra::extract::{
-    cookie::{self, Cookie, SameSite},
-    PrivateCookieJar,
+use axum_extra::{
+    extract::{
+        cookie::{self, Cookie, SameSite},
+        PrivateCookieJar,
+    },
+    headers::UserAgent,
+    TypedHeader,
 };
 
-use crate::domain::identifier::Id;
+use crate::domain::{
+    database::Database,
+    identifier::Id,
+    sessions::find_session_by_id,
+    users::{find_user_by_id, User},
+};
 
 use super::State;
 
 const COOKIE_NAME: &str = "x-pluto-session";
 
 /// A authentication/authorization principal.
-pub struct Auth(pub Id);
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Auth(pub User);
 
 /// Creates a session.
+#[derive(Debug, Clone)]
 pub struct CreateAuth(pub cookie::Key, pub Id);
 
 /// Deletes a session.
+#[derive(Debug, Clone)]
 pub struct DeleteAuth(pub cookie::Key);
+
+impl Auth {
+    pub async fn try_from_request(state: &State, request: &mut Request) -> Option<Self> {
+        let jar: PrivateCookieJar = request.extract_parts_with_state(state).await.ok()?;
+        let session: Id = jar.get(COOKIE_NAME)?.value_trimmed().try_into().ok()?;
+        let agent: TypedHeader<UserAgent> = request.extract_parts().await.ok()?;
+
+        let mut transaction = state.database.begin().await.ok()?;
+        let session = find_session_by_id(&mut transaction, session)
+            .await
+            .ok()
+            // filter based on whether the agents match
+            .filter(|v| v.agent == agent.0.as_str())?;
+        let user = find_user_by_id(&mut transaction, session.user_id)
+            .await
+            .ok()?;
+
+        Some(Self(user))
+    }
+}
 
 #[async_trait]
 impl FromRequestParts<State> for Auth {
@@ -36,19 +69,10 @@ impl FromRequestParts<State> for Auth {
         parts: &mut Parts,
         state: &super::State,
     ) -> Result<Self, Self::Rejection> {
-        fn construct_error() -> Response {
-            Redirect::to("/login").into_response()
-        }
-
-        let jar: PrivateCookieJar = PrivateCookieJar::from_request_parts(parts, state)
+        Extension::<Auth>::from_request_parts(parts, state)
             .await
-            .map_err(|_| construct_error())?;
-        let session = jar.get(COOKIE_NAME).ok_or_else(construct_error)?;
-        let session = session
-            .value_trimmed()
-            .try_into()
-            .map_err(|_| construct_error())?;
-        Ok(Auth(session))
+            .map(|v| v.0)
+            .map_err(|_| Redirect::to("/login").into_response())
     }
 }
 
