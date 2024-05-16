@@ -9,10 +9,10 @@ use crate::domain::database::AnyDatabase;
 mod _components;
 mod _core;
 
-mod index;
-mod static_files;
+mod get_static_file;
+mod show_dashboard;
 
-pub use static_files::url as static_file_url;
+pub use get_static_file::url as static_file_url;
 
 #[cfg(test)]
 mod tests;
@@ -29,9 +29,9 @@ pub fn router(database: AnyDatabase, key: cookie::Key) -> Router<()> {
     let cache_control_layer = axum::middleware::from_fn(_core::middleware::cache_control_layer);
 
     Router::new()
-        .merge(index::router())
+        .merge(show_dashboard::router())
         .route("/health", routing::any(()))
-        .merge(static_files::router())
+        .merge(get_static_file::router())
         .layer(auth_layer)
         .layer(cache_control_layer)
         .layer(CompressionLayer::new())
