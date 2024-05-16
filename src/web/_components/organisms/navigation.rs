@@ -1,7 +1,7 @@
 use maud::{html, Markup};
 use rust_i18n::t;
 
-use crate::web::_components::Icon;
+use super::Icon;
 
 fn header() -> Markup {
     const STYLES: &str = "flex flex-row";
@@ -45,7 +45,8 @@ fn item(locale: &str, icon: Icon, text: &str, url: &str) -> Markup {
         "hover:cursor-pointer hover:bg-black hover:text-white hover:dark:bg-white hover:dark:text-black"
     );
     const ICON_STYLES: &str = "w-12 h-12 p-3";
-    const TEXT_STYLES: &str = "flex-grow items-center hidden xl:flex group-has-[#nav-toggle:checked]/nav:flex";
+    const TEXT_STYLES: &str =
+        "flex-grow items-center hidden xl:flex group-has-[#nav-toggle:checked]/nav:flex";
 
     html! {
         a .(STYLES) href=(url) {

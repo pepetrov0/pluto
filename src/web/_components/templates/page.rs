@@ -1,5 +1,7 @@
 use maud::{html, Markup, DOCTYPE};
 
+use crate::web::_components::{atoms, organisms};
+
 /// A generic page component
 pub fn page(locale: &str, title: &str, has_navigation: bool, content: Markup) -> Markup {
     const BODY_STYLES: &str = "bg-stone-200 text-black dark:bg-stone-900 dark:text-white";
@@ -9,12 +11,10 @@ pub fn page(locale: &str, title: &str, has_navigation: bool, content: Markup) ->
     html! {
         (DOCTYPE)
         html lang=(locale) {
-            head {
-                (super::header::header(locale, title))
-            }
+            (atoms::head(locale, title))
             body hx-boost="true" .(BODY_STYLES) .(BODY_WITH_NAVIGATION_STYLES)[has_navigation] {
                 @if has_navigation {
-                    (super::navigation::navigation(locale))
+                    (organisms::navigation(locale))
                 }
                 main .(CONTENT_STYLES) {
                     (content)
