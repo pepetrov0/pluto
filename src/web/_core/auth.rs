@@ -20,9 +20,9 @@ use axum_extra::{
 
 use crate::domain::{
     database::Database,
-    identifier::Id,
     sessions::find_session_by_id,
     users::{find_user_by_id, User},
+    Id,
 };
 
 use super::State;

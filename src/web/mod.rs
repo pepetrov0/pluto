@@ -13,7 +13,7 @@ mod get_static_file;
 mod show_dashboard;
 mod show_login;
 
-pub use get_static_file::url as static_file_url;
+use get_static_file::url as static_file_url;
 
 #[cfg(test)]
 mod tests;

@@ -4,10 +4,13 @@
 //! The domain can modify state, interacting with storage and/or
 //! manipulating data as needed. It contains the business logic.
 
-pub mod configuration;
+mod configuration;
 pub mod database;
-pub mod identifier;
+mod identifier;
 pub mod keys;
 pub mod sessions;
 pub mod shutdown;
 pub mod users;
+
+pub use configuration::Configuration;
+pub use identifier::Id;

@@ -1,5 +1,5 @@
 
-pub mod atoms;
-pub mod molecules;
+mod atoms;
+mod molecules;
 pub mod organisms;
 pub mod templates;

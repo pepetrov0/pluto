@@ -1,8 +1,7 @@
 use pluto::{
     domain::{
-        configuration::Configuration,
         database::{AnyDatabase, Database},
-        keys,
+        keys, Configuration,
     },
     web,
 };

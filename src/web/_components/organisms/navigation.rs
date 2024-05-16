@@ -1,7 +1,7 @@
 use maud::{html, Markup};
 use rust_i18n::t;
 
-use super::Icon;
+use crate::web::_components::atoms::Icon;
 
 fn header() -> Markup {
     const STYLES: &str = "flex flex-row";
