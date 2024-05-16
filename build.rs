@@ -1,24 +1,24 @@
 use std::{fs, path::PathBuf};
 
-fn run_if_dir_changed(path: PathBuf) {
+#[cfg(target_os = "windows")]
+const TAILWIND_EXECUTABLE_PATH: &str = "target/tailwindcss.exe";
+
+#[cfg(not(target_os = "windows"))]
+const TAILWIND_EXECUTABLE_PATH: &str = "target/tailwindcss";
+
+fn rerun_if_dir_changed(path: PathBuf) {
     match path.is_dir() {
         true => {
             path.read_dir()
                 .unwrap()
                 .flatten()
-                .for_each(|v| run_if_dir_changed(v.path()));
+                .for_each(|v| rerun_if_dir_changed(v.path()));
         }
         false => println!("cargo:rerun-if-changed={}", path.to_string_lossy()),
     }
 }
 
-fn compile_tailwind_styles() {
-    #[cfg(target_os = "windows")]
-    const TAILWIND_EXECUTABLE_PATH: &str = "target/tailwindcss.exe";
-
-    #[cfg(not(target_os = "windows"))]
-    const TAILWIND_EXECUTABLE_PATH: &str = "target/tailwindcss";
-
+fn check_and_download_tailwind() {
     #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
     const TAILWIND_EXECUTABLE_URL: &str = "https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.3/tailwindcss-linux-x64";
 
@@ -46,7 +46,9 @@ fn compile_tailwind_styles() {
             fs::set_permissions(TAILWIND_EXECUTABLE_PATH, perms).unwrap();
         }
     }
+}
 
+fn compile_tailwind_styles() {
     // compile styles
     #[cfg(not(debug_assertions))]
     const ARGS: [&str; 5] = ["-i", "src/styles.css", "-o", "static/styles.css", "-m"];
@@ -61,18 +63,17 @@ fn compile_tailwind_styles() {
         let stderr = String::from_utf8_lossy(&output.stderr);
         panic!("{}\n{}\n", stdout, stderr);
     }
-
-    // output rerun directives
-    println!("cargo:rerun-if-changed=tailwind.config.js");
-    println!("cargo:rerun-if-changed=src/styles.css");
-    println!("cargo:rerun-if-changed={TAILWIND_EXECUTABLE_PATH}");
-    println!("cargo:rerun-if-changed=static/styles.css");
-
-    run_if_dir_changed("src/web".into());
 }
 
 fn main() {
+    println!("cargo:rerun-if-changed=tailwind.config.js");
+    println!("cargo:rerun-if-changed=src/styles.css");
     println!("cargo:rerun-if-changed=build.rs");
-    run_if_dir_changed("locales".into());
+    println!("cargo:rerun-if-changed={TAILWIND_EXECUTABLE_PATH}");
+    rerun_if_dir_changed("src/web".into());
+    rerun_if_dir_changed("static".into());
+    rerun_if_dir_changed("locales".into());
+
+    check_and_download_tailwind();
     compile_tailwind_styles();
 }
