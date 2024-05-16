@@ -11,6 +11,7 @@ mod _core;
 
 mod get_static_file;
 mod show_dashboard;
+mod show_login;
 
 pub use get_static_file::url as static_file_url;
 
@@ -29,8 +30,9 @@ pub fn router(database: AnyDatabase, key: cookie::Key) -> Router<()> {
     let cache_control_layer = axum::middleware::from_fn(_core::middleware::cache_control_layer);
 
     Router::new()
-        .merge(show_dashboard::router())
         .route("/health", routing::any(()))
+        .merge(show_login::router())
+        .merge(show_dashboard::router())
         .merge(get_static_file::router())
         .layer(auth_layer)
         .layer(cache_control_layer)

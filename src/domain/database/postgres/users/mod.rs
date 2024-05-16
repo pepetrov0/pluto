@@ -1,7 +1,10 @@
 use axum::async_trait;
 
 use crate::domain::{
-    database::{users::{User, Users}, Error, Result},
+    database::{
+        users::{User, Users},
+        Error, Result,
+    },
     identifier::Id,
 };
 

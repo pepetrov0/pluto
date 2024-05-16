@@ -2,3 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  h1 {
+    @apply text-2xl font-bold;
+  }
+
+  h2 {
+    @apply text-xl font-bold;
+  }
+
+  h3 {
+    @apply text-lg font-bold;
+  }
+
+  a {
+    @apply transition-colors hover:bg-black hover:text-white hover:dark:bg-white hover:dark:text-black;
+    @apply px-1 underline;
+  }
+
+  [type="email"], 
+  [type="password"] {
+    @apply w-full focus:outline-0 focus:ring-0;
+    @apply shadow rounded border-2 bg-stone-100 border-stone-300 focus:border-black dark:bg-stone-700 dark:border-stone-500 dark:focus:border-white;
+    @apply placeholder:text-stone-400 dark:placeholder:text-stone-400;
+  }
+
+  [type="submit"] {
+    @apply w-full px-3 py-2;
+    @apply cursor-pointer shadow rounded bg-black text-white dark:bg-white dark:text-black;
+    @apply hover:outline hover:outline-2 hover:outline-offset-2 outline-black dark:outline-white;
+    @apply active:bg-stone-700 dark:active:bg-stone-300;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white text-black dark:bg-stone-800 dark:text-white;
+    @apply shadow rounded;
+    @apply p-4;
+  }
+}

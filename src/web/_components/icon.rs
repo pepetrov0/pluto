@@ -3,7 +3,7 @@ use maud::html;
 pub enum Icon {
     Menu,
     X,
-    Newspaper
+    Newspaper,
 }
 
 impl maud::Render for Icon {

@@ -7,7 +7,7 @@
 pub mod configuration;
 pub mod database;
 pub mod identifier;
-pub mod shutdown;
 pub mod keys;
-pub mod users;
 pub mod sessions;
+pub mod shutdown;
+pub mod users;

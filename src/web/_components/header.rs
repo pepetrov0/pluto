@@ -15,9 +15,9 @@ pub fn header(locale: &str, title: &str) -> Markup {
         link rel="icon" type="image/png" sizes="32x32" href=(static_file_url("favicon-32x32.png"));
         link rel="icon" type="image/png" sizes="16x16" href=(static_file_url("favicon-16x16.png"));
         link rel="manifest" href=(static_file_url("site.webmanifest"));
-
-        style { (include_str!("../../../target/styles.css")) }
+        link rel="stylesheet" href=(static_file_url("styles.css"));
         script src=(static_file_url("htmx.min.js")) {}
+
         title { (t!(title, locale = locale)) }
     }
 }

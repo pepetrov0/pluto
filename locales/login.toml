@@ -1,0 +1,25 @@
+_version = 2
+
+[login.title]
+  en = "Sign in"
+  bg = "Вписване"
+
+[login.email.placeholder]
+  en = "Email.."
+  bg = "Email.."
+
+[login.email.label]
+  en = "Email:"
+  bg = "Email:"
+
+[login.password.placeholder]
+  en = "Password.."
+  bg = "Парола.."
+
+[login.password.label]
+  en = "Password:"
+  bg = "Парола:"
+
+[login.new-here]
+  en = "New here? Sign up to get started!"
+  bg = "Нов тук? Регистрирайте се, за да започнете!"

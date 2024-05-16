@@ -1,5 +1,17 @@
 use std::{fs, path::PathBuf};
 
+fn run_if_dir_changed(path: PathBuf) {
+    match path.is_dir() {
+        true => {
+            path.read_dir()
+                .unwrap()
+                .flatten()
+                .for_each(|v| run_if_dir_changed(v.path()));
+        }
+        false => println!("cargo:rerun-if-changed={}", path.to_string_lossy()),
+    }
+}
+
 fn compile_tailwind_styles() {
     #[cfg(target_os = "windows")]
     const TAILWIND_EXECUTABLE_PATH: &str = "target/tailwindcss.exe";
@@ -36,8 +48,12 @@ fn compile_tailwind_styles() {
     }
 
     // compile styles
+    #[cfg(not(debug_assertions))]
+    const ARGS: [&str; 5] = ["-i", "src/styles.css", "-o", "static/styles.css", "-m"];
+    #[cfg(debug_assertions)]
+    const ARGS: [&str; 4] = ["-i", "src/styles.css", "-o", "static/styles.css"];
     let output = std::process::Command::new(TAILWIND_EXECUTABLE_PATH)
-        .args(["-i", "src/styles.css", "-o", "target/styles.css", "-m"])
+        .args(&ARGS)
         .output()
         .unwrap();
     if output.status.code().unwrap_or_default() != 0 {
@@ -50,17 +66,13 @@ fn compile_tailwind_styles() {
     println!("cargo:rerun-if-changed=tailwind.config.js");
     println!("cargo:rerun-if-changed=src/styles.css");
     println!("cargo:rerun-if-changed={TAILWIND_EXECUTABLE_PATH}");
-    println!("cargo:rerun-if-changed=target/styles.css");
+    println!("cargo:rerun-if-changed=static/styles.css");
 
-    fs::read_dir("src/web/_components").unwrap().for_each(|v| {
-        println!(
-            "cargo:rerun-if-changed={}",
-            v.unwrap().path().to_string_lossy().to_string()
-        );
-    })
+    run_if_dir_changed("src/web".into());
 }
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
+    run_if_dir_changed("locales".into());
     compile_tailwind_styles();
 }
