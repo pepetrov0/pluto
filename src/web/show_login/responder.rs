@@ -1,4 +1,4 @@
-use crate::web::_components::{organisms, templates};
+use crate::web::_components::pages;
 use axum::response::{IntoResponse, Redirect, Response};
 
 pub async fn invoke(locale: &str, is_authorized: bool) -> Response {
@@ -6,5 +6,5 @@ pub async fn invoke(locale: &str, is_authorized: bool) -> Response {
         return Redirect::to("/").into_response();
     }
 
-    templates::page(locale, "login.title", false, organisms::login_form(locale)).into_response()
+    pages::login(locale).into_response()
 }
