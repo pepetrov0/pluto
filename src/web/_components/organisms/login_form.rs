@@ -1,7 +1,7 @@
 use maud::{html, Markup};
 use rust_i18n::t;
 
-pub fn login(locale: &str) -> Markup {
+pub fn login_form(locale: &str) -> Markup {
     const STYLES: &str = "card mt-4 w-full max-w-md flex flex-col items-center gap-4";
     const FIELD_CONTAINER_STYLES: &str = "w-full flex flex-col gap-1";
     html! {
