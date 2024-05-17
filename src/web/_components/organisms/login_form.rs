@@ -4,6 +4,7 @@ use rust_i18n::t;
 pub fn login_form(locale: &str) -> Markup {
     const STYLES: &str = "card mt-4 w-full max-w-md flex flex-col items-center gap-4";
     const FIELD_CONTAINER_STYLES: &str = "w-full flex flex-col gap-1";
+
     html! {
         form .(STYLES) {
             h1 .mb-4 { (t!("login.title", locale = locale)) }
@@ -19,9 +20,10 @@ pub fn login_form(locale: &str) -> Markup {
             }
 
             input .mt-4 type="submit" value=(t!("login.title", locale = locale));
-        }
-        a href="/register" {
-            (t!("login.new-here", locale = locale))
+
+            a href="/register" {
+                (t!("login.new-here", locale = locale))
+            }
         }
     }
 }
