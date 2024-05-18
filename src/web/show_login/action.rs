@@ -1,7 +1,7 @@
 use axum::response::Response;
 
-use crate::web::_core::{Auth, Locale};
+use crate::web::_core::{Hx, Auth, Locale};
 
-pub async fn invoke(locale: Locale, auth: Option<Auth>) -> Response {
-    super::responder::invoke(locale.as_str(), auth.is_some()).await
+pub async fn invoke(locale: Locale, hx: Hx, auth: Option<Auth>) -> Response {
+    super::responder::invoke(locale.as_str(), hx, auth.is_some()).await
 }

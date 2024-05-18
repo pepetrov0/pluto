@@ -6,7 +6,7 @@ use axum::{
     async_trait,
     extract::{FromRequestParts, Request},
     http::request::Parts,
-    response::{IntoResponse, IntoResponseParts, Redirect, Response, ResponseParts},
+    response::{IntoResponse, IntoResponseParts, Response, ResponseParts},
     Extension, RequestExt,
 };
 use axum_extra::{
@@ -25,7 +25,7 @@ use crate::domain::{
     Id,
 };
 
-use super::State;
+use super::{Hx, Redirect, State};
 
 const COOKIE_NAME: &str = "x-pluto-session";
 
@@ -69,10 +69,12 @@ impl FromRequestParts<State> for Auth {
         parts: &mut Parts,
         state: &super::State,
     ) -> Result<Self, Self::Rejection> {
+        let hx = Hx::from_request_parts(parts, state).await.unwrap();
+
         Extension::<Auth>::from_request_parts(parts, state)
             .await
             .map(|v| v.0)
-            .map_err(|_| Redirect::to("/login").into_response())
+            .map_err(|_| Redirect::see_other(hx, "/login").into_response())
     }
 }
 

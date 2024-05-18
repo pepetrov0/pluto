@@ -9,7 +9,7 @@ pub fn register_form(locale: &str) -> Markup {
     const FIELD_CONTAINER_STYLES: &str = "w-full flex flex-col gap-1";
 
     html! {
-        form .(STYLES) {
+        form .(STYLES) method="POST" {
             h1 .mb-4 { (t!("register.title", locale = locale)) }
 
             div .(FIELD_CONTAINER_STYLES) {
