@@ -1,3 +1,6 @@
+//! This module provides the necessary implementation for the application
+//! to use PostgreSQL as it data source.
+
 use std::time::Duration;
 
 use async_trait::async_trait;

@@ -1,3 +1,6 @@
+//! This module provides the implementation for managing users within our
+//! SQLite data source.
+
 use axum::async_trait;
 
 use crate::domain::{

@@ -1,3 +1,6 @@
+//! This module provides the implementation for managing sessions within our
+//! PostgreSQL data source.
+
 use axum::async_trait;
 
 use crate::domain::{

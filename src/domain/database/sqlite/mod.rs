@@ -1,3 +1,6 @@
+//! This module implements the database layer interface for SQLite, thus
+//! allow the application to use SQLite as its data source.
+
 use std::{str::FromStr, time::Duration};
 
 use async_trait::async_trait;

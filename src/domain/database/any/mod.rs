@@ -1,3 +1,7 @@
+//! This module exists simply to wrap all of the other database layer implementations
+//! so that the service layer can work with a single implementation, instead of relying 
+//! on dynamic dispatch.
+
 use axum::async_trait;
 
 use crate::domain::configuration::Configuration;

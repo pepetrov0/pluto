@@ -1,6 +1,6 @@
 //! pluto is a personal finance management application
 //!
-//! --- STRUCTURE ---
+//! # STRUCTURE
 //! pluto follows Action-Domain-Response pattern where the domain logic is 
 //! separated from the the representation logic and thus the core is 
 //! separated into two modules: domain and web.

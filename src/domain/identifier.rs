@@ -4,7 +4,8 @@ use std::fmt::Display;
 
 use sqlx::prelude::Type;
 
-/// An identifier
+/// An identifier, which is a long integer at its core, but is serialized
+/// as crockford's base32 encoding for human-readability.
 #[derive(Debug, Type, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 #[sqlx(transparent)]
 pub struct Id(i64);

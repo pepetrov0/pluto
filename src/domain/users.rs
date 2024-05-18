@@ -1,4 +1,4 @@
-//! This module implements the service layer for managing users.
+//! This module implements the business logic for working with users.
 
 use super::{
     database::{self, users::Users, AnyTransaction},
