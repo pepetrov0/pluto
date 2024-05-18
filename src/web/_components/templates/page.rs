@@ -1,9 +1,11 @@
+//! A generic page template.
+
 use maud::{html, Markup, DOCTYPE};
 use rust_i18n::t;
 
 use crate::web::{_components::organisms, static_file_url};
 
-/// A generic page component
+/// Constructs a generic page.
 pub fn page(locale: &str, title: &str, has_navigation: bool, content: Markup) -> Markup {
     const BODY_STYLES: &str = "bg-stone-200 text-black dark:bg-stone-900 dark:text-white";
     const BODY_WITH_NAVIGATION_STYLES: &str = "pl-12";

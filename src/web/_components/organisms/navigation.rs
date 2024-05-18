@@ -1,8 +1,12 @@
+//! Implementation of the navigation of the application.
+
 use maud::{html, Markup};
 use rust_i18n::t;
 
 use crate::web::_components::atoms::Icon;
 
+/// Used internally to construct the header of the navigation,
+/// which contains the toggle button and the application title as link to the home page.
 fn header() -> Markup {
     const STYLES: &str = "flex flex-row";
 
@@ -38,6 +42,8 @@ fn header() -> Markup {
     }
 }
 
+/// An internal component which is a row in the navigation.
+/// Contains a link and an icon.
 fn item(locale: &str, icon: Icon, text: &str, url: &str) -> Markup {
     const STYLES: &str = concat!(
         "p-0 no-underline ",
@@ -60,6 +66,7 @@ fn item(locale: &str, icon: Icon, text: &str, url: &str) -> Markup {
     }
 }
 
+/// Constructs the navigation of the application.
 pub fn navigation(locale: &str) -> Markup {
     const STYLES: &str = concat!(
         "fixed left-0 top-0 h-dvh xl:w-full has-[#nav-toggle:checked]:w-full max-w-[min(16rem,90dvw)] overflow-y-auto ",

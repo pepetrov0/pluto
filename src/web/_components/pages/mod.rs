@@ -1,3 +1,4 @@
+//! Pages
 
 mod login;
 

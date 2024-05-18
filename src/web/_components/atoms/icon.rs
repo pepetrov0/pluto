@@ -1,5 +1,8 @@
+//! An icon.
+
 use maud::html;
 
+/// An enumeration of all possible icons in our application.
 pub enum Icon {
     Menu,
     X,

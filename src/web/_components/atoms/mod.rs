@@ -1,3 +1,4 @@
+//! Atoms
 
 mod icon;
 

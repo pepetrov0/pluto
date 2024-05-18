@@ -10,6 +10,8 @@ use axum::{
 
 use super::State;
 
+/// The default locale that is used if we do not support any of the languages
+/// prefered by the user.
 const DEFAULT_LOCALE: &str = "en";
 
 /// A structure to represent the prefered locale.

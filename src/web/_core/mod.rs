@@ -1,3 +1,5 @@
+//! This module implements the core concepts of our web module.
+
 use axum::extract::FromRef;
 use axum_extra::extract::cookie;
 
@@ -10,11 +12,13 @@ pub mod middleware;
 pub use auth::*;
 pub use locale::*;
 
-/// State shared between all databases.
+/// Shared state.
 #[derive(Clone)]
 #[allow(unused)]
 pub struct State {
+    /// The database.
     pub database: AnyDatabase,
+    /// The key for the private cookie jars.
     pub key: cookie::Key,
 }
 

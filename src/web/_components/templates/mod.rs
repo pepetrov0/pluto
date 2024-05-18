@@ -1,3 +1,4 @@
+//! Templates
 
 mod page;
 
