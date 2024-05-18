@@ -9,6 +9,8 @@ use crate::{
     web::_core::{GlobalState, Hx, Locale},
 };
 
+use super::responder;
+
 #[tracing::instrument(skip(state, args))]
 pub async fn invoke(
     State(state): State<GlobalState>,
@@ -17,33 +19,33 @@ pub async fn invoke(
     agent: TypedHeader<UserAgent>,
     Form(args): Form<super::Arguments>,
 ) -> Response {
-    use super::responder;
+    let respond = |r| responder::invoke(locale.clone(), hx, state.key.clone(), args.clone(), r);
 
     // first attempt creating a transaction
     let mut transaction = match state.database.begin().await {
         Ok(t) => t,
-        Err(_) => {
-            return responder::invoke(locale, hx, state.key, args, Err(RegistrationError::Failure))
-                .await
-        }
+        Err(_) => return respond(Err(RegistrationError::Failure)).await,
     };
 
     // then attempt registering the user
-    let result = registration::register_and_authenticate(
+    let (_, result) = match registration::register_and_authenticate(
         &mut transaction,
         &args.email,
         &args.password,
         &args.confirm_password,
         agent.0.as_str(),
     )
-    .await;
+    .await
+    {
+        Ok(r) => r,
+        Err(e) => return respond(Err(e)).await,
+    };
 
     // then attempt committing the transaction
     if transaction.commit().await.is_err() {
-        return responder::invoke(locale, hx, state.key, args, Err(RegistrationError::Failure))
-            .await;
+        return respond(Err(RegistrationError::Failure)).await;
     }
 
     // invoke the responder
-    responder::invoke(locale, hx, state.key, args, result).await
+    respond(Ok(result)).await
 }

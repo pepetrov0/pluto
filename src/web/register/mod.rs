@@ -7,7 +7,7 @@ use super::_core::GlobalState;
 mod action;
 mod responder;
 
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize)]
 struct Arguments {
     pub email: String,
     pub password: String,
