@@ -21,7 +21,7 @@ mod tests;
 /// Constructs the primary router to be used for serving the application.
 #[tracing::instrument(skip(database))]
 pub fn router(database: AnyDatabase, key: cookie::Key) -> Router<()> {
-    let state = _core::State { database, key };
+    let state = _core::GlobalState { database, key };
 
     // middleware
     let auth_layer =

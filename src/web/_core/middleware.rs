@@ -23,7 +23,7 @@ pub async fn cache_control_layer(req: Request, next: Next) -> Response {
 /// A middleware layer that tries to extract the authorization principle from the request
 /// and attach it as an extension.
 pub async fn auth_layer(
-    State(state): State<super::State>,
+    State(state): State<super::GlobalState>,
     mut req: Request,
     next: Next,
 ) -> Response {

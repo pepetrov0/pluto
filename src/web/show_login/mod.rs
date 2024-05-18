@@ -5,6 +5,6 @@ use axum::{routing, Router};
 mod action;
 mod responder;
 
-pub fn router() -> Router<super::_core::State> {
+pub fn router() -> Router<super::_core::GlobalState> {
     Router::new().route("/login", routing::get(action::invoke))
 }

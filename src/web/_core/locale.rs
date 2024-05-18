@@ -8,13 +8,14 @@ use axum::{
     http::{header, request::Parts},
 };
 
-use super::State;
+use super::GlobalState;
 
 /// The default locale that is used if we do not support any of the languages
 /// prefered by the user.
 const DEFAULT_LOCALE: &str = "en";
 
 /// A structure to represent the prefered locale.
+#[derive(Debug, Clone)]
 pub struct Locale(String);
 
 impl Locale {
@@ -24,13 +25,13 @@ impl Locale {
 }
 
 #[async_trait]
-impl FromRequestParts<State> for Locale {
+impl FromRequestParts<GlobalState> for Locale {
     type Rejection = Infallible;
 
     /// Perform the extraction.
     async fn from_request_parts(
         parts: &mut Parts,
-        _state: &State,
+        _state: &GlobalState,
     ) -> Result<Self, Self::Rejection> {
         // gather inputs
         let raw_languages = parts

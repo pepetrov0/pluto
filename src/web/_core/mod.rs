@@ -21,15 +21,15 @@ pub use statics::{url as static_file_url, Statics};
 /// Shared state.
 #[derive(Clone)]
 #[allow(unused)]
-pub struct State {
+pub struct GlobalState {
     /// The database.
     pub database: AnyDatabase,
     /// The key for the private cookie jars.
     pub key: cookie::Key,
 }
 
-impl FromRef<State> for cookie::Key {
-    fn from_ref(state: &State) -> Self {
+impl FromRef<GlobalState> for cookie::Key {
+    fn from_ref(state: &GlobalState) -> Self {
         state.key.clone()
     }
 }

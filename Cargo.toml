@@ -19,10 +19,11 @@ chrono = "0"
 config = "0"
 crockford = "1"
 dotenv = "0"
-rust-i18n = "3"
+email_address = "0"
 hex = "0"
 maud = { version = "0", features = ["axum"] }
 rust-embed = { version = "8", features = ["mime-guess"] }
+rust-i18n = "3"
 serde = { version = "1", features = ["derive"] }
 sha2 = "0"
 sqlx = { version = "0", features = ["runtime-tokio", "postgres", "sqlite", "chrono"] }
@@ -31,6 +32,7 @@ tower = "0"
 tower-http = { version = "0", features = ["compression-full"] }
 tracing = "0"
 tracing-subscriber = { version = "0", features = ["env-filter"] }
+zxcvbn = "2"
 
 [build-dependencies]
 reqwest = { version = "0", features = ["blocking"] }

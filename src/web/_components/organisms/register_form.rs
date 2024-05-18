@@ -9,7 +9,7 @@ pub fn register_form(locale: &str) -> Markup {
     const FIELD_CONTAINER_STYLES: &str = "w-full flex flex-col gap-1";
 
     html! {
-        form .(STYLES) method="POST" {
+        form .(STYLES) method="POST" hx-disabled-elt="[type='submit']" hx-indicator="[type='submit']" {
             h1 .mb-4 { (t!("register.title", locale = locale)) }
 
             div .(FIELD_CONTAINER_STYLES) {
@@ -24,7 +24,7 @@ pub fn register_form(locale: &str) -> Markup {
 
             div .(FIELD_CONTAINER_STYLES) {
                 label for="confirm-password" { (t!("register.confirm-password.label", locale = locale)) };
-                input #confirm-password type="password" name="confirm-password" minlength="8" placeholder=(t!("register.confirm-password.placeholder", locale = locale));
+                input #confirm-password type="password" name="confirm_password" minlength="8" placeholder=(t!("register.confirm-password.placeholder", locale = locale));
             }
 
             input .mt-4 type="submit" value=(t!("register.title", locale = locale));

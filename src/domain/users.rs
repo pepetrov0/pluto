@@ -1,5 +1,7 @@
 //! This module implements the business logic for working with users.
 
+use tracing::instrument;
+
 use super::{
     database::{self, users::Users, AnyTransaction},
     identifier::Id,
@@ -22,9 +24,17 @@ impl From<database::users::User> for User {
 }
 
 /// An error returned by all user operations.
+#[derive(Debug)]
 pub enum UserError {
     Database(database::Error),
     UserNotFound,
+}
+
+impl std::error::Error for UserError {}
+impl std::fmt::Display for UserError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{self:?}")
+    }
 }
 
 impl From<database::Error> for UserError {
@@ -34,6 +44,7 @@ impl From<database::Error> for UserError {
 }
 
 /// Finds a user by their identifier.
+#[instrument(err, skip_all)]
 pub async fn find_user_by_id(transaction: &mut AnyTransaction, id: Id) -> Result<User, UserError> {
     transaction
         .find_user_by_id(id)
@@ -41,4 +52,32 @@ pub async fn find_user_by_id(transaction: &mut AnyTransaction, id: Id) -> Result
         .map_err(UserError::from)?
         .ok_or(UserError::UserNotFound)
         .map(User::from)
+}
+
+/// Finds a user by their email.
+#[instrument(err, skip_all)]
+pub async fn find_user_by_email(
+    transaction: &mut AnyTransaction,
+    email: &str,
+) -> Result<User, UserError> {
+    transaction
+        .find_user_by_email(email)
+        .await
+        .map_err(UserError::from)?
+        .ok_or(UserError::UserNotFound)
+        .map(User::from)
+}
+
+/// Creates a new user.
+#[instrument(err, skip_all)]
+pub async fn create_user(
+    transaction: &mut AnyTransaction,
+    email: &str,
+    password: Option<&str>,
+) -> Result<User, UserError> {
+    transaction
+        .create_user(email, password)
+        .await
+        .map(User::from)
+        .map_err(UserError::from)
 }

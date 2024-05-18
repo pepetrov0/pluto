@@ -2,11 +2,18 @@
 
 use axum::{routing, Router};
 
-use super::_core::State;
+use super::_core::GlobalState;
 
 mod action;
 mod responder;
 
-pub fn router() -> Router<State> {
+#[derive(Debug, serde::Deserialize)]
+struct Arguments {
+    pub email: String,
+    pub password: String,
+    pub confirm_password: String,
+}
+
+pub fn router() -> Router<GlobalState> {
     Router::new().route("/register", routing::post(action::invoke))
 }

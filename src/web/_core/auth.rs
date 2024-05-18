@@ -25,7 +25,7 @@ use crate::domain::{
     Id,
 };
 
-use super::{Hx, Redirect, State};
+use super::{Hx, Redirect, GlobalState};
 
 const COOKIE_NAME: &str = "x-pluto-session";
 
@@ -42,7 +42,7 @@ pub struct CreateAuth(pub cookie::Key, pub Id);
 pub struct DeleteAuth(pub cookie::Key);
 
 impl Auth {
-    pub async fn try_from_request(state: &State, request: &mut Request) -> Option<Self> {
+    pub async fn try_from_request(state: &GlobalState, request: &mut Request) -> Option<Self> {
         let jar: PrivateCookieJar = request.extract_parts_with_state(state).await.ok()?;
         let session: Id = jar.get(COOKIE_NAME)?.value_trimmed().try_into().ok()?;
         let agent: TypedHeader<UserAgent> = request.extract_parts().await.ok()?;
@@ -62,12 +62,12 @@ impl Auth {
 }
 
 #[async_trait]
-impl FromRequestParts<State> for Auth {
+impl FromRequestParts<GlobalState> for Auth {
     type Rejection = Response;
 
     async fn from_request_parts(
         parts: &mut Parts,
-        state: &super::State,
+        state: &super::GlobalState,
     ) -> Result<Self, Self::Rejection> {
         let hx = Hx::from_request_parts(parts, state).await.unwrap();
 
