@@ -1,3 +1,5 @@
+//! This module implements the action of showing the dashboard to the user.
+
 use axum::{routing, Router};
 
 use super::_core::State;

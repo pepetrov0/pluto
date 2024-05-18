@@ -6,20 +6,19 @@ use pluto::{
     web,
 };
 use tokio::net::TcpListener;
-use tracing::Level;
+use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
 async fn main() {
     #[cfg(debug_assertions)]
-    tracing_subscriber::fmt()
-        .compact()
-        .with_max_level(Level::TRACE)
-        .init();
+    let log_filter = EnvFilter::from_default_env().add_directive("pluto=trace".parse().unwrap());
 
     #[cfg(not(debug_assertions))]
+    let log_filter = EnvFilter::from_default_env().add_directive("pluto=info".parse().unwrap());
+
     tracing_subscriber::fmt()
-        .compact()
-        .with_max_level(Level::INFO)
+        .pretty()
+        .with_env_filter(log_filter)
         .init();
 
     let config = Configuration::try_load().unwrap_or_default();

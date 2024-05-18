@@ -1,14 +1,14 @@
 //! pluto is a personal finance management application
 //!
 //! # STRUCTURE
-//! pluto follows Action-Domain-Response pattern where the domain logic is 
-//! separated from the the representation logic and thus the core is 
+//! pluto follows Action-Domain-Response pattern where the domain logic is
+//! separated from the the representation logic and thus the core is
 //! separated into two modules: domain and web.
 //!
 //! The domain logic lives in the `domain` module and is further divided
 //! by features and/or layer.
 //!
-//! The presentation logic lives in the `web` module and is further divided 
+//! The presentation logic lives in the `web` module and is further divided
 //! into features - which in turn are divided into action and responder pair.
 //!
 

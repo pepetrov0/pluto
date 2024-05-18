@@ -3,7 +3,7 @@
 use maud::{html, Markup, DOCTYPE};
 use rust_i18n::t;
 
-use crate::web::{_components::organisms, static_file_url};
+use crate::web::{_components::organisms, _core::static_file_url};
 
 /// Constructs a generic page.
 pub fn page(locale: &str, title: &str, has_navigation: bool, content: Markup) -> Markup {

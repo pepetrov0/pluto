@@ -1,0 +1,34 @@
+_version = 2
+
+[register.title]
+  en = "Sign up"
+  bg = "Регистрирай се"
+
+[register.email.placeholder]
+  en = "Email.."
+  bg = "Електронна поща.."
+
+[register.email.label]
+  en = "Email:"
+  bg = "Електронна поща:"
+
+[register.password.placeholder]
+  en = "Password.."
+  bg = "Парола.."
+
+[register.password.label]
+  en = "Password:"
+  bg = "Парола:"
+
+[register.confirm-password.placeholder]
+  en = "Confirm password.."
+  bg = "Потвърди парола.."
+
+[register.confirm-password.label]
+  en = "Confirm password:"
+  bg = "Потвърди парола:"
+
+[register.already-have-an-account]
+  en = "Already a member? Sign in to continue!"
+  bg = "Вече имате акаунт? Влезте тук, за да продължите!"
+

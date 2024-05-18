@@ -25,11 +25,9 @@ impl Configuration {
     #[tracing::instrument]
     pub fn try_load() -> Option<Self> {
         // phase 1: load .env if exists
-        tracing::debug!("loading .env file..");
         let _ = dotenv::dotenv();
 
         // phase 2: configure a builder and try deserializing the configuration
-        tracing::debug!("loading configuration..");
         let config = Config::builder()
             .add_source(
                 Environment::default()

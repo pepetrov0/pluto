@@ -25,6 +25,7 @@
     @apply w-full focus:outline-0 focus:ring-0;
     @apply shadow rounded border-2 bg-stone-100 border-stone-300 focus:border-black dark:bg-stone-700 dark:border-stone-500 dark:focus:border-white;
     @apply placeholder:text-stone-400 dark:placeholder:text-stone-400;
+    @apply invalid:border-red-500;
   }
 
   [type="submit"] {

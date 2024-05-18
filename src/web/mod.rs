@@ -12,8 +12,7 @@ mod _core;
 mod get_static_file;
 mod show_dashboard;
 mod show_login;
-
-use get_static_file::url as static_file_url;
+mod show_register;
 
 #[cfg(test)]
 mod tests;
@@ -21,7 +20,6 @@ mod tests;
 /// Constructs the primary router to be used for serving the application.
 #[tracing::instrument(skip(database))]
 pub fn router(database: AnyDatabase, key: cookie::Key) -> Router<()> {
-    tracing::debug!("constructing router..");
     let state = _core::State { database, key };
 
     // middleware
@@ -32,6 +30,7 @@ pub fn router(database: AnyDatabase, key: cookie::Key) -> Router<()> {
     Router::new()
         .route("/health", routing::any(()))
         .merge(show_login::router())
+        .merge(show_register::router())
         .merge(show_dashboard::router())
         .merge(get_static_file::router())
         .layer(auth_layer)

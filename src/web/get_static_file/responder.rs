@@ -9,10 +9,12 @@ use axum_extra::{
     TypedHeader,
 };
 
+use crate::web::_core::Statics;
+
 const CACHE_MAX_AGE: u64 = 31_536_000; // in seconds, equals ~1 year
 
 pub async fn invoke(path: &str) -> Response {
-    match super::core::Statics::get(path) {
+    match Statics::get(path) {
         Some(file) => {
             let content_type = ContentType::from_str(file.metadata.mimetype())
                 .unwrap_or_else(|_| ContentType::octet_stream());

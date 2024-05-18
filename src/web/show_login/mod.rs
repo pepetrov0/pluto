@@ -1,3 +1,5 @@
+//! This module implements the action of showing the login page to the user.
+
 use axum::{routing, Router};
 
 mod action;

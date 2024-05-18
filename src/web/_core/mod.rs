@@ -8,9 +8,11 @@ use crate::domain::database::AnyDatabase;
 mod auth;
 mod locale;
 pub mod middleware;
+mod statics;
 
 pub use auth::*;
 pub use locale::*;
+pub use statics::{url as static_file_url, Statics};
 
 /// Shared state.
 #[derive(Clone)]

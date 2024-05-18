@@ -1,7 +1,10 @@
+//! Implements the core of the static file management.
+
 use cached::proc_macro::cached;
 use rust_embed::RustEmbed;
 use sha2::{Digest, Sha256};
 
+/// A structure of embeded static files
 #[derive(RustEmbed)]
 #[folder = "static"]
 pub struct Statics;
