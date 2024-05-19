@@ -6,20 +6,23 @@ use crate::{
         database::{Database, Transaction},
         registration::{self, RegistrationError},
     },
-    web::_core::{GlobalState, Hx, Locale},
+    web::{
+        _components::organisms::RegisterFormData,
+        _core::{GlobalState, Hx, Locale},
+    },
 };
 
 use super::responder;
 
-#[tracing::instrument(skip(state, args))]
+#[tracing::instrument(skip(state, data))]
 pub async fn invoke(
     State(state): State<GlobalState>,
     locale: Locale,
     hx: Hx,
     agent: TypedHeader<UserAgent>,
-    Form(args): Form<super::Arguments>,
+    Form(data): Form<RegisterFormData>,
 ) -> Response {
-    let respond = |r| responder::invoke(locale.clone(), hx, state.key.clone(), args.clone(), r);
+    let respond = |r| responder::invoke(locale.clone(), hx, state.key.clone(), data.clone(), r);
 
     // first attempt creating a transaction
     let mut transaction = match state.database.begin().await {
@@ -30,9 +33,9 @@ pub async fn invoke(
     // then attempt registering the user
     let (_, result) = match registration::register_and_authenticate(
         &mut transaction,
-        &args.email,
-        &args.password,
-        &args.confirm_password,
+        &data.email,
+        &data.password,
+        &data.confirm_password,
         agent.0.as_str(),
     )
     .await

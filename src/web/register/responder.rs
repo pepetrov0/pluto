@@ -4,7 +4,10 @@ use axum_extra::extract::cookie;
 use crate::{
     domain::{registration::RegistrationError, sessions::Session},
     web::{
-        _components::pages,
+        _components::{
+            organisms::{self, RegisterFormData},
+            pages,
+        },
         _core::{CreateAuth, Hx, Locale, Redirect},
     },
 };
@@ -13,11 +16,16 @@ pub async fn invoke(
     locale: Locale,
     hx: Hx,
     key: cookie::Key,
-    _args: super::Arguments,
+    data: RegisterFormData,
     result: Result<Session, RegistrationError>,
 ) -> Response {
     match result {
-        Ok(s) => (CreateAuth(key, s.id), Redirect::see_other(hx, "/")).into_response(),
-        Err(_) => pages::register(locale.as_str()).into_response(),
+        Ok(session) => (CreateAuth(key, session.id), Redirect::see_other(hx, "/")).into_response(),
+        Err(error) => match hx.request && !hx.boosted {
+            true => {
+                organisms::register_form(locale.as_str(), Some(data), Some(error)).into_response()
+            }
+            false => pages::register(locale.as_str(), Some(data), Some(error)).into_response(),
+        },
     }
 }

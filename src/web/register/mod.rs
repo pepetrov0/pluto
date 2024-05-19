@@ -7,13 +7,6 @@ use super::_core::GlobalState;
 mod action;
 mod responder;
 
-#[derive(Debug, Clone, serde::Deserialize)]
-struct Arguments {
-    pub email: String,
-    pub password: String,
-    pub confirm_password: String,
-}
-
 pub fn router() -> Router<GlobalState> {
     Router::new().route("/register", routing::post(action::invoke))
 }
