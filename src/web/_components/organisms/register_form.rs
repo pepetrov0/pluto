@@ -81,7 +81,7 @@ pub fn register_form(
 
             input .mt-4 type="submit" hx-post="/register" value=(t!("register.title", locale = locale));
 
-            a href="/login" hx-get="/login" {
+            a href="/login" hx-get="/login" hx-push-url="true" {
                 (t!("register.already-have-an-account", locale = locale))
             }
         }
