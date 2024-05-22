@@ -14,6 +14,7 @@ mod register;
 mod show_dashboard;
 mod show_login;
 mod show_register;
+mod logout;
 
 #[cfg(test)]
 mod tests;
@@ -29,11 +30,16 @@ pub fn router(database: AnyDatabase, key: cookie::Key) -> Router<()> {
     let cache_control_layer = axum::middleware::from_fn(_core::middleware::cache_control_layer);
 
     Router::new()
+        // ops
         .route("/health", routing::any(()))
+        // auth
         .merge(show_login::router())
         .merge(show_register::router())
         .merge(register::router())
+        .merge(logout::router())
+        // home
         .merge(show_dashboard::router())
+        // other
         .merge(get_static_file::router())
         .layer(auth_layer)
         .layer(cache_control_layer)

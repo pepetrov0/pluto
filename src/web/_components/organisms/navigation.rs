@@ -78,6 +78,8 @@ pub fn navigation(locale: &str) -> Markup {
         nav .(STYLES) x-data="{ open: false }" "@click.outside"="open = false" {
             (header())
             (item(locale, Icon::Newspaper, "dashboard.title", "/"))
+            div .mt-auto {}
+            (item(locale, Icon::Logout, "logout", "/logout"))
         }
     }
 }

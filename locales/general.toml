@@ -1,0 +1,5 @@
+_version = 2
+
+[logout]
+  en = "Logout"
+  bg = "Излизане"
