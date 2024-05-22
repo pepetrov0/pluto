@@ -25,6 +25,7 @@ pub fn page(locale: &str, title: &str, has_navigation: bool, content: Markup) ->
                 link rel="manifest" href=(static_file_url("site.webmanifest"));
                 link rel="stylesheet" href=(static_file_url("styles.css"));
                 script src=(static_file_url("htmx.min.js")) {}
+                script src=(static_file_url("alpine.min.js")) defer {}
 
                 title { (t!(title, locale = locale)) }
             }

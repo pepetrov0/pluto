@@ -27,7 +27,7 @@ fn header() -> Markup {
     html! {
         div .(STYLES) {
             div .(TOGGLE_CONTAINER_STYLES) {
-                input #nav-toggle type="checkbox" aria-label="menu" .(TOGGLE_STYLES);
+                input #nav-toggle type="checkbox" aria-label="menu" x-model="open" .(TOGGLE_STYLES);
                 span ."inline group-has-[#nav-toggle:checked]/nav:hidden" {
                     (Icon::Menu)
                 }
@@ -75,7 +75,7 @@ pub fn navigation(locale: &str) -> Markup {
     );
 
     html! {
-        nav .(STYLES) {
+        nav .(STYLES) x-data="{ open: false }" "@click.outside"="open = false" {
             (header())
             (item(locale, Icon::Newspaper, "dashboard.title", "/"))
         }
