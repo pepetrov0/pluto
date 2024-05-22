@@ -23,8 +23,8 @@ mod tests;
 
 /// Constructs the primary router to be used for serving the application.
 #[tracing::instrument(skip(database))]
-pub fn router(cfg: Configuration, database: AnyDatabase, key: cookie::Key) -> Router<()> {
-    let state = _core::GlobalState { cfg, database, key };
+pub fn router(cfg: Configuration, database: AnyDatabase, cookie_key: cookie::Key) -> Router<()> {
+    let state = _core::GlobalState { cfg, database, cookie_key };
 
     // middleware
     let header_authorization_layer = axum::middleware::from_fn_with_state(

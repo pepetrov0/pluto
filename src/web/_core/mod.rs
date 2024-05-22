@@ -25,11 +25,11 @@ pub struct GlobalState {
     /// The database.
     pub database: AnyDatabase,
     /// The key for the private cookie jars.
-    pub key: cookie::Key,
+    pub cookie_key: cookie::Key,
 }
 
 impl FromRef<GlobalState> for cookie::Key {
     fn from_ref(state: &GlobalState) -> Self {
-        state.key.clone()
+        state.cookie_key.clone()
     }
 }

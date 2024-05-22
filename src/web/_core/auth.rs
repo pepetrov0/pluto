@@ -120,7 +120,7 @@ impl CreateAuth {
             .permanent()
             .build();
 
-        PrivateCookieJar::new(state.key.clone()).add(cookie)
+        PrivateCookieJar::new(state.cookie_key.clone()).add(cookie)
     }
 }
 
@@ -147,7 +147,7 @@ impl DeleteAuth {
             .removal()
             .build();
 
-        PrivateCookieJar::new(state.key.clone()).add(cookie)
+        PrivateCookieJar::new(state.cookie_key.clone()).add(cookie)
     }
 }
 
