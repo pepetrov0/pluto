@@ -23,3 +23,12 @@ _version = 2
 [login.new-here]
   en = "New here? Sign up to get started!"
   bg = "Нов тук? Регистрирайте се, за да започнете!"
+
+[login.errors.something-went-wrong]
+  en = "An unknown error has occurred; please try again later."
+  bg = "Възникна неизвестна грешка; моля, опитайте отново по-късно."
+
+[login.errors.invalid-credentials]
+  en = "The credentials you entered are not valid; please try again."
+  bg = "Въведените от вас данни не са валидни; моля, опитайте отново."
+

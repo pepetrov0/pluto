@@ -10,6 +10,7 @@ mod _components;
 mod _core;
 
 mod get_static_file;
+mod login;
 mod logout;
 mod register;
 mod show_dashboard;
@@ -36,6 +37,7 @@ pub fn router(database: AnyDatabase, key: cookie::Key) -> Router<()> {
         .route("/health", routing::any(()))
         // auth
         .merge(show_login::router())
+        .merge(login::router())
         .merge(show_register::router())
         .merge(validate_register::router())
         .merge(register::router())

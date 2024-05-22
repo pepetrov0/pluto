@@ -1,13 +1,10 @@
 //! This module facilitates user registration.
 
-use argon2::{
-    password_hash::{rand_core::OsRng, SaltString},
-    Argon2, PasswordHasher,
-};
 use tracing::instrument;
 
 use super::{
     database::AnyTransaction,
+    passwords::{self, PasswordError},
     sessions::{create_session, Session, SessionError},
     users::{create_user, find_user_by_email, User, UserError},
     validations,
@@ -23,13 +20,13 @@ pub enum RegistrationError {
 }
 
 pub async fn validate_register(
-    transaction: &mut AnyTransaction,
+    tx: &mut AnyTransaction,
     email: &str,
     password: &str,
     confirm_password: &str,
 ) -> Result<(), RegistrationError> {
     // test if email is taken
-    if find_user_by_email(transaction, email).await.is_ok() {
+    if find_user_by_email(tx, email).await.is_ok() {
         return Err(RegistrationError::EmailTaken);
     }
 
@@ -54,21 +51,15 @@ pub async fn validate_register(
 /// Registers a new user.
 #[instrument(err, skip_all)]
 pub async fn register(
-    transaction: &mut AnyTransaction,
+    tx: &mut AnyTransaction,
     email: &str,
     password: &str,
     confirm_password: &str,
 ) -> Result<User, RegistrationError> {
-    validate_register(transaction, email, password, confirm_password).await?;
+    validate_register(tx, email, password, confirm_password).await?;
 
-    let salt = SaltString::generate(&mut OsRng);
-    let argon = Argon2::default();
-    let password = argon
-        .hash_password(password.as_bytes(), &salt)
-        .map_err(RegistrationError::from)?
-        .to_string();
-
-    create_user(transaction, email, Some(&password))
+    let password = passwords::hash_password(password).map_err(RegistrationError::from)?;
+    create_user(tx, email, Some(&password))
         .await
         .map_err(RegistrationError::from)
 }
@@ -76,14 +67,14 @@ pub async fn register(
 /// Registers a new user and immediately authenticate them.
 #[instrument(err, skip_all)]
 pub async fn register_and_authenticate(
-    transaction: &mut AnyTransaction,
+    tx: &mut AnyTransaction,
     email: &str,
     password: &str,
     confirm_password: &str,
     agent: &str,
 ) -> Result<(User, Session), RegistrationError> {
-    let user = register(transaction, email, password, confirm_password).await?;
-    let session = create_session(transaction, user.id, agent)
+    let user = register(tx, email, password, confirm_password).await?;
+    let session = create_session(tx, user.id, agent)
         .await
         .map_err(RegistrationError::from)?;
     Ok((user, session))
@@ -96,8 +87,8 @@ impl std::fmt::Display for RegistrationError {
     }
 }
 
-impl From<argon2::password_hash::Error> for RegistrationError {
-    fn from(_: argon2::password_hash::Error) -> Self {
+impl From<PasswordError> for RegistrationError {
+    fn from(_: PasswordError) -> Self {
         Self::Failure
     }
 }

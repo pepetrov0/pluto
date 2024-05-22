@@ -20,6 +20,7 @@
     @apply px-1 underline;
   }
 
+  [type="text"], 
   [type="email"], 
   [type="password"] {
     @apply w-full focus:outline-0 focus:ring-0;

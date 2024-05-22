@@ -6,5 +6,5 @@ pub async fn invoke(locale: Locale, is_authorized: bool) -> Response {
         return Redirect::to("/").into_response();
     }
 
-    pages::login(locale.as_str()).into_response()
+    pages::login(locale.as_str(), None).into_response()
 }

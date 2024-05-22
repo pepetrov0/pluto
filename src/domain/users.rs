@@ -14,8 +14,35 @@ pub struct User {
     pub email: String,
 }
 
+/// A user with password.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct UserWithPassword {
+    pub id: Id,
+    pub email: String,
+    pub password: Option<String>,
+}
+
 impl From<database::users::User> for User {
     fn from(value: database::users::User) -> Self {
+        Self {
+            id: value.id,
+            email: value.email,
+        }
+    }
+}
+
+impl From<database::users::User> for UserWithPassword {
+    fn from(value: database::users::User) -> Self {
+        Self {
+            id: value.id,
+            email: value.email,
+            password: value.password,
+        }
+    }
+}
+
+impl From<UserWithPassword> for User {
+    fn from(value: UserWithPassword) -> Self {
         Self {
             id: value.id,
             email: value.email,
@@ -66,6 +93,20 @@ pub async fn find_user_by_email(
         .map_err(UserError::from)?
         .ok_or(UserError::UserNotFound)
         .map(User::from)
+}
+
+/// Finds a user by their email including password.
+#[instrument(err, skip_all)]
+pub async fn find_user_with_password_by_email(
+    transaction: &mut AnyTransaction,
+    email: &str,
+) -> Result<UserWithPassword, UserError> {
+    transaction
+        .find_user_by_email(email)
+        .await
+        .map_err(UserError::from)?
+        .ok_or(UserError::UserNotFound)
+        .map(UserWithPassword::from)
 }
 
 /// Creates a new user.
