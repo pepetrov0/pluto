@@ -81,7 +81,7 @@ pub fn register_form(
 
             input .mt-4 type="submit" value=(t!("register.title", locale = locale));
 
-            a href="/login" {
+            a href="/login" hx-disabled-elt="this" hx-indicator="this" {
                 (t!("register.already-have-an-account", locale = locale))
             }
         }

@@ -24,7 +24,7 @@ pub fn login_form(locale: &str) -> Markup {
 
             input .mt-4 type="submit" value=(t!("login.title", locale = locale));
 
-            a href="/register" {
+            a href="/register" hx-disabled-elt="this" hx-indicator="this" {
                 (t!("login.new-here", locale = locale))
             }
         }
