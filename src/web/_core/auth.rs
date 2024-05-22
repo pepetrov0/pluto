@@ -11,7 +11,7 @@ use axum::{
 };
 use axum_extra::{
     extract::{
-        cookie::{self, Cookie, SameSite},
+        cookie::{Cookie, SameSite},
         PrivateCookieJar,
     },
     headers::UserAgent,
