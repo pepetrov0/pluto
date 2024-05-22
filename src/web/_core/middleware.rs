@@ -21,16 +21,35 @@ pub async fn cache_control_layer(req: Request, next: Next) -> Response {
     }
 }
 
-/// A middleware layer that tries to extract the authorization principle from the request
+/// A middleware layer that tries to extract the authorization principle from the header
 /// and attach it as an extension.
-pub async fn auth_layer(
+pub async fn header_authorization_layer(
     State(state): State<super::GlobalState>,
     mut req: Request,
     next: Next,
 ) -> Response {
-    // extract auth from request
-    if let Some(auth) = Auth::try_from_request(&state, &mut req).await {
-        req.extensions_mut().insert(auth);
+    // extract auth from request only if it is missing form the request.
+    if req.extensions().get::<Auth>().is_none() {
+        if let Some(auth) = Auth::try_from_request_header(&state, &mut req).await {
+            req.extensions_mut().insert(auth);
+        }
+    }
+
+    next.run(req).await
+}
+
+/// A middleware layer that tries to extract the authorization principle from the cookies
+/// and attach it as an extension.
+pub async fn cookie_authorization_layer(
+    State(state): State<super::GlobalState>,
+    mut req: Request,
+    next: Next,
+) -> Response {
+    // extract auth from request only if it is missing form the request.
+    if req.extensions().get::<Auth>().is_none() {
+        if let Some(auth) = Auth::try_from_request_cookies(&state, &mut req).await {
+            req.extensions_mut().insert(auth);
+        }
     }
 
     let response = next.run(req).await;
@@ -53,7 +72,7 @@ pub async fn redirects_layer(mut req: Request, next: Next) -> Response {
     // run the rest of the chain
     let mut response = next.run(req).await;
 
-    // if a htmx request header and status code is SEE_OTHER, 
+    // if a htmx request header and status code is SEE_OTHER,
     // set status and HX-Location
     if hx.request && response.status() == StatusCode::SEE_OTHER {
         // set status

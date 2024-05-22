@@ -19,9 +19,9 @@ use axum_extra::{
 };
 
 use crate::domain::{
-    database::Database,
+    database::{Database, Transaction},
     sessions::{find_session_by_id, Session},
-    users::{find_user_by_id, User},
+    users::{create_user, find_user_by_email, find_user_by_id, User, UserError},
     Id,
 };
 
@@ -45,20 +45,45 @@ pub struct CreateAuth(pub Session);
 pub struct DeleteAuth;
 
 impl Auth {
-    pub async fn try_from_request(state: &GlobalState, request: &mut Request) -> Option<Self> {
+    pub async fn try_from_request_header(
+        state: &GlobalState,
+        request: &mut Request,
+    ) -> Option<Self> {
+        let header = state.cfg.authorization_header.as_ref()?;
+        let email = request.headers().get(header)?.to_str().ok()?;
+
+        let mut tx = state.database.begin().await.ok()?;
+        let user = match find_user_by_email(&mut tx, email).await {
+            Ok(user) => user,
+            Err(UserError::Database(_)) => return None,
+            Err(UserError::UserNotFound) => {
+                let user = create_user(&mut tx, email, None).await.ok()?;
+                tx.commit().await.ok()?;
+                user
+            }
+        };
+
+        Some(Self {
+            user,
+            session: None,
+        })
+    }
+
+    pub async fn try_from_request_cookies(
+        state: &GlobalState,
+        request: &mut Request,
+    ) -> Option<Self> {
         let jar: PrivateCookieJar = request.extract_parts_with_state(state).await.ok()?;
         let session: Id = jar.get(COOKIE_NAME)?.value_trimmed().try_into().ok()?;
         let agent: TypedHeader<UserAgent> = request.extract_parts().await.ok()?;
 
-        let mut transaction = state.database.begin().await.ok()?;
-        let session = find_session_by_id(&mut transaction, session)
+        let mut tx = state.database.begin().await.ok()?;
+        let session = find_session_by_id(&mut tx, session)
             .await
             .ok()
             // filter based on whether the agents match
             .filter(|v| v.agent == agent.0.as_str())?;
-        let user = find_user_by_id(&mut transaction, session.user_id)
-            .await
-            .ok()?;
+        let user = find_user_by_id(&mut tx, session.user_id).await.ok()?;
 
         Some(Self {
             user,

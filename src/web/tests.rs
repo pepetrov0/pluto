@@ -2,12 +2,12 @@ use axum::{body::Body, extract::Request, http::StatusCode};
 use axum_extra::extract::cookie;
 use tower::ServiceExt;
 
-use crate::domain::database::AnyDatabase;
+use crate::domain::{database::AnyDatabase, Configuration};
 
 #[tokio::test]
 async fn health() {
     let database = AnyDatabase::in_memory().await.unwrap();
-    let router = crate::web::router(database, cookie::Key::generate());
+    let router = crate::web::router(Configuration::default(), database, cookie::Key::generate());
 
     let request = Request::builder()
         .uri("/health")

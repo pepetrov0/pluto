@@ -4,7 +4,7 @@ use axum::{routing, Router};
 use axum_extra::extract::cookie;
 use tower_http::compression::CompressionLayer;
 
-use crate::domain::database::AnyDatabase;
+use crate::domain::{database::AnyDatabase, Configuration};
 
 mod _components;
 mod _core;
@@ -23,12 +23,18 @@ mod tests;
 
 /// Constructs the primary router to be used for serving the application.
 #[tracing::instrument(skip(database))]
-pub fn router(database: AnyDatabase, key: cookie::Key) -> Router<()> {
-    let state = _core::GlobalState { database, key };
+pub fn router(cfg: Configuration, database: AnyDatabase, key: cookie::Key) -> Router<()> {
+    let state = _core::GlobalState { cfg, database, key };
 
     // middleware
-    let auth_layer =
-        axum::middleware::from_fn_with_state(state.clone(), _core::middleware::auth_layer);
+    let header_authorization_layer = axum::middleware::from_fn_with_state(
+        state.clone(),
+        _core::middleware::header_authorization_layer,
+    );
+    let cookie_authorization_layer = axum::middleware::from_fn_with_state(
+        state.clone(),
+        _core::middleware::cookie_authorization_layer,
+    );
     let cache_control_layer = axum::middleware::from_fn(_core::middleware::cache_control_layer);
     let redirects_layer = axum::middleware::from_fn(_core::middleware::redirects_layer);
 
@@ -46,9 +52,10 @@ pub fn router(database: AnyDatabase, key: cookie::Key) -> Router<()> {
         .merge(show_dashboard::router())
         // other
         .merge(get_static_file::router())
-        .layer(auth_layer)
-        .layer(cache_control_layer)
+        .layer(cookie_authorization_layer)
+        .layer(header_authorization_layer)
         .layer(redirects_layer)
+        .layer(cache_control_layer)
         .layer(CompressionLayer::new())
         .with_state(state)
 }

@@ -16,6 +16,8 @@ pub struct Configuration {
     pub secret: Option<String>,
     /// Options for configuring a database.
     pub database: Option<String>,
+    /// Authorization header
+    pub authorization_header: Option<String>,
 }
 
 impl Configuration {
