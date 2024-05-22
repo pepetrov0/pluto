@@ -53,19 +53,19 @@ pub async fn redirects_layer(mut req: Request, next: Next) -> Response {
     // run the rest of the chain
     let mut response = next.run(req).await;
 
-    // match on htmx request header and status code
-    match hx.request && response.status() == StatusCode::SEE_OTHER {
-        // if a redirect on htmx request -> set appropriate header
-        true => {
-            if let Some(location) = response.headers_mut().remove(header::LOCATION) {
-                response
-                    .headers_mut()
-                    .insert(HTMX_LOCATION_HEADER, location);
-            }
+    // if a htmx request header and status code is SEE_OTHER, 
+    // set status and HX-Location
+    if hx.request && response.status() == StatusCode::SEE_OTHER {
+        // set status
+        *response.status_mut() = StatusCode::NO_CONTENT;
 
-            (StatusCode::NO_CONTENT, response).into_response()
+        // set headers
+        if let Some(location) = response.headers_mut().remove(header::LOCATION) {
+            response
+                .headers_mut()
+                .insert(HTMX_LOCATION_HEADER, location);
         }
-        // else, just passthrou the response
-        false => response,
     }
+
+    response
 }
