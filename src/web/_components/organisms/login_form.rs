@@ -9,7 +9,7 @@ pub fn login_form(locale: &str) -> Markup {
     const FIELD_CONTAINER_STYLES: &str = "w-full flex flex-col gap-1";
 
     html! {
-        form .(STYLES) method="POST" hx-target="this" hx-swap="outerHTML" hx-disabled-elt="[type='submit']" hx-indicator="[type='submit']" {
+        form .(STYLES) method="POST" hx-boost="true" hx-disabled-elt="[type='submit']" hx-indicator="[type='submit']" {
             h1 .mb-4 { (t!("login.title", locale = locale)) }
 
             div .(FIELD_CONTAINER_STYLES) {
@@ -22,9 +22,9 @@ pub fn login_form(locale: &str) -> Markup {
                 input #password type="password" name="password" placeholder=(t!("login.password.placeholder", locale = locale));
             }
 
-            input .mt-4 type="submit" hx-post="/login" value=(t!("login.title", locale = locale));
+            input .mt-4 type="submit" value=(t!("login.title", locale = locale));
 
-            a href="/register" hx-get="/register" hx-push-url="true" {
+            a href="/register" {
                 (t!("login.new-here", locale = locale))
             }
         }

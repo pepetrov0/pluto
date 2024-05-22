@@ -20,26 +20,29 @@ use axum_extra::{
 
 use crate::domain::{
     database::Database,
-    sessions::find_session_by_id,
+    sessions::{find_session_by_id, Session},
     users::{find_user_by_id, User},
     Id,
 };
 
-use super::{Hx, Redirect, GlobalState};
+use super::{GlobalState, Hx, Redirect};
 
 const COOKIE_NAME: &str = "x-pluto-session";
 
 /// A authentication/authorization principal.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Auth(pub User);
+pub struct Auth {
+    pub user: User,
+    pub session: Option<Session>,
+}
 
 /// Creates a session.
 #[derive(Debug, Clone)]
-pub struct CreateAuth(pub cookie::Key, pub Id);
+pub struct CreateAuth(pub Session);
 
 /// Deletes a session.
 #[derive(Debug, Clone)]
-pub struct DeleteAuth(pub cookie::Key);
+pub struct DeleteAuth;
 
 impl Auth {
     pub async fn try_from_request(state: &GlobalState, request: &mut Request) -> Option<Self> {
@@ -57,7 +60,10 @@ impl Auth {
             .await
             .ok()?;
 
-        Some(Self(user))
+        Some(Self {
+            user,
+            session: Some(session),
+        })
     }
 }
 
@@ -78,29 +84,39 @@ impl FromRequestParts<GlobalState> for Auth {
     }
 }
 
-impl IntoResponseParts for CreateAuth {
-    type Error = Infallible;
+impl CreateAuth {
+    pub fn from_response(resp: &Response) -> Option<&Self> {
+        resp.extensions().get()
+    }
 
-    /// Set parts of the response
-    fn into_response_parts(self, res: ResponseParts) -> Result<ResponseParts, Self::Error> {
-        let cookie = Cookie::build((COOKIE_NAME, self.1.to_string()))
+    pub fn to_response_parts(&self, state: &GlobalState) -> impl IntoResponseParts {
+        let cookie = Cookie::build((COOKIE_NAME, self.0.id.to_string()))
             .path("/")
             .http_only(true)
             .same_site(SameSite::Strict)
             .permanent()
             .build();
 
-        PrivateCookieJar::new(self.0)
-            .add(cookie)
-            .into_response_parts(res)
+        PrivateCookieJar::new(state.key.clone()).add(cookie)
     }
 }
 
-impl IntoResponseParts for DeleteAuth {
+impl IntoResponseParts for CreateAuth {
     type Error = Infallible;
 
     /// Set parts of the response
-    fn into_response_parts(self, res: ResponseParts) -> Result<ResponseParts, Self::Error> {
+    fn into_response_parts(self, mut res: ResponseParts) -> Result<ResponseParts, Self::Error> {
+        res.extensions_mut().insert(self);
+        Ok(res)
+    }
+}
+
+impl DeleteAuth {
+    pub fn from_response(resp: &Response) -> Option<&Self> {
+        resp.extensions().get()
+    }
+
+    pub fn to_response_parts(&self, state: &GlobalState) -> impl IntoResponseParts {
         let cookie = Cookie::build(COOKIE_NAME)
             .path("/")
             .http_only(true)
@@ -108,8 +124,16 @@ impl IntoResponseParts for DeleteAuth {
             .removal()
             .build();
 
-        PrivateCookieJar::new(self.0)
-            .add(cookie)
-            .into_response_parts(res)
+        PrivateCookieJar::new(state.key.clone()).add(cookie)
+    }
+}
+
+impl IntoResponseParts for DeleteAuth {
+    type Error = Infallible;
+
+    /// Set parts of the response
+    fn into_response_parts(self, mut res: ResponseParts) -> Result<ResponseParts, Self::Error> {
+        res.extensions_mut().insert(self);
+        Ok(res)
     }
 }

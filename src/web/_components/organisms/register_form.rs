@@ -45,7 +45,7 @@ pub fn register_form(
     };
 
     html! {
-        form #register-form .(STYLES) method="POST" hx-target="this" hx-swap="outerHTML" hx-disabled-elt="[type='submit']" hx-indicator="[type='submit']" {
+        form #register-form .(STYLES) method="POST" hx-boost="true" hx-disabled-elt="[type='submit']" hx-indicator="[type='submit']" {
             h1 .mb-4 { (t!("register.title", locale = locale)) }
 
             div .(FIELD_CONTAINER_STYLES) {
@@ -79,9 +79,9 @@ pub fn register_form(
                 span .(ERROR_LABEL_STYLES) { (t!("register.errors.something-went-wrong", locale = locale)) };
             }
 
-            input .mt-4 type="submit" hx-post="/register" value=(t!("register.title", locale = locale));
+            input .mt-4 type="submit" value=(t!("register.title", locale = locale));
 
-            a href="/login" hx-get="/login" hx-push-url="true" {
+            a href="/login" {
                 (t!("register.already-have-an-account", locale = locale))
             }
         }

@@ -8,7 +8,7 @@ use axum::{
 };
 use axum_extra::{headers::CacheControl, TypedHeader};
 
-use super::Auth;
+use super::{Auth, CreateAuth, DeleteAuth};
 
 /// A middleware layer that adds cache control header to all responses that do not have one.
 pub async fn cache_control_layer(req: Request, next: Next) -> Response {
@@ -27,9 +27,18 @@ pub async fn auth_layer(
     mut req: Request,
     next: Next,
 ) -> Response {
+    // extract auth from request
     if let Some(auth) = Auth::try_from_request(&state, &mut req).await {
         req.extensions_mut().insert(auth);
     }
 
-    next.run(req).await
+    let response = next.run(req).await;
+
+    // cookie jars
+    let create_jar = CreateAuth::from_response(&response).map(|v| v.to_response_parts(&state));
+
+    // delete auth
+    let delete_jar = DeleteAuth::from_response(&response).map(|v| v.to_response_parts(&state));
+
+    (delete_jar, create_jar, response).into_response()
 }

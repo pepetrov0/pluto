@@ -48,7 +48,7 @@ _version = 2
   en = "Your password is too weak!"
   bg = "Паролата ви е твърде слаба!"
 
-[register.errors.failure]
+[register.errors.something-went-wrong]
   en = "An unknown error has occurred; please try again later."
   bg = "Възникна неизвестна грешка; моля, опитайте отново по-късно."
 

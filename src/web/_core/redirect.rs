@@ -55,7 +55,7 @@ impl IntoResponse for Redirect {
     fn into_response(self) -> axum::response::Response {
         match self.is_htmx_request {
             // If the request is a HTMX request, return OK with HX-Location
-            true => (StatusCode::OK, [(HTMX_LOCATION_HEADER, self.to)], ()).into_response(),
+            true => (StatusCode::NO_CONTENT, [(HTMX_LOCATION_HEADER, self.to)], ()).into_response(),
             // Otherwise, return a standard redirect
             false => {
                 match self.ty {

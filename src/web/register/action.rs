@@ -22,7 +22,7 @@ pub async fn invoke(
     agent: TypedHeader<UserAgent>,
     Form(data): Form<RegisterFormData>,
 ) -> Response {
-    let respond = |r| responder::invoke(locale.clone(), hx, state.key.clone(), data.clone(), r);
+    let respond = |r| responder::invoke(locale.clone(), hx, data.clone(), r);
 
     // first attempt creating a transaction
     let mut transaction = match state.database.begin().await {

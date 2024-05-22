@@ -28,7 +28,7 @@ pub fn page(locale: &str, title: &str, has_navigation: bool, content: Markup) ->
 
                 title { (t!(title, locale = locale)) }
             }
-            body hx-boost="true" .(BODY_STYLES) .(BODY_WITH_NAVIGATION_STYLES)[has_navigation] {
+            body .(BODY_STYLES) .(BODY_WITH_NAVIGATION_STYLES)[has_navigation] {
                 @if has_navigation {
                     (organisms::navigation(locale))
                 }

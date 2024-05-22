@@ -7,6 +7,6 @@ use crate::web::{
 };
 
 pub fn invoke(locale: Locale, auth: Auth) -> Response {
-    let content = html! { "Hello, " (auth.0.email) " 👋" };
+    let content = html! { "Hello, " (auth.user.email) " 👋" };
     _components::templates::page(locale.as_str(), "dashboard.title", true, content).into_response()
 }
