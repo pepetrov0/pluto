@@ -15,6 +15,7 @@ mod register;
 mod show_dashboard;
 mod show_login;
 mod show_register;
+mod validate_register;
 
 #[cfg(test)]
 mod tests;
@@ -36,6 +37,7 @@ pub fn router(database: AnyDatabase, key: cookie::Key) -> Router<()> {
         // auth
         .merge(show_login::router())
         .merge(show_register::router())
+        .merge(validate_register::router())
         .merge(register::router())
         .merge(logout::router())
         // home

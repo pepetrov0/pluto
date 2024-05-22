@@ -24,7 +24,7 @@ impl From<database::users::User> for User {
 }
 
 /// An error returned by all user operations.
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum UserError {
     Database(database::Error),
     UserNotFound,

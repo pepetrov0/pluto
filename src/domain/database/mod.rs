@@ -31,7 +31,7 @@ const MAX_POOL_IDLE_LIFETIME: u64 = 1;
 const MAX_POOL_CONNECTION_LIFETIME: u64 = 5;
 
 /// An error that might occur when working with the database layer.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Error {
     /// A general error described by a message.
     Message(String),

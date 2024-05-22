@@ -22,14 +22,12 @@ pub enum RegistrationError {
     Failure,
 }
 
-/// Registers a new user.
-#[instrument(err, skip_all)]
-pub async fn register(
+pub async fn validate_register(
     transaction: &mut AnyTransaction,
     email: &str,
     password: &str,
     confirm_password: &str,
-) -> Result<User, RegistrationError> {
+) -> Result<(), RegistrationError> {
     // test if email is taken
     if find_user_by_email(transaction, email).await.is_ok() {
         return Err(RegistrationError::EmailTaken);
@@ -49,6 +47,19 @@ pub async fn register(
     if !validations::password_strength(password, &[email]) {
         return Err(RegistrationError::WeakPassword);
     }
+
+    Ok(())
+}
+
+/// Registers a new user.
+#[instrument(err, skip_all)]
+pub async fn register(
+    transaction: &mut AnyTransaction,
+    email: &str,
+    password: &str,
+    confirm_password: &str,
+) -> Result<User, RegistrationError> {
+    validate_register(transaction, email, password, confirm_password).await?;
 
     let salt = SaltString::generate(&mut OsRng);
     let argon = Argon2::default();
