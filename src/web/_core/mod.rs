@@ -9,12 +9,10 @@ mod auth;
 mod locale;
 pub mod middleware;
 mod statics;
-mod redirect;
 mod htmx;
 
 pub use auth::*;
 pub use locale::*;
-pub use redirect::*;
 pub use htmx::Hx;
 pub use statics::{url as static_file_url, Statics};
 

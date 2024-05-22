@@ -1,12 +1,9 @@
-use crate::web::{
-    _components::pages,
-    _core::{Hx, Locale, Redirect},
-};
-use axum::response::{IntoResponse, Response};
+use crate::web::{_components::pages, _core::Locale};
+use axum::response::{IntoResponse, Redirect, Response};
 
-pub async fn invoke(locale: Locale, hx: Hx, is_authorized: bool) -> Response {
+pub async fn invoke(locale: Locale, is_authorized: bool) -> Response {
     if is_authorized {
-        return Redirect::see_other(hx, "/").into_response();
+        return Redirect::to("/").into_response();
     }
 
     pages::login(locale.as_str()).into_response()

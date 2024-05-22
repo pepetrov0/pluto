@@ -29,6 +29,11 @@
     @apply disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-stone-500 dark:disabled:bg-stone-500 dark:disabled:text-stone-700;
   }
 
+  [type="email"].error, 
+  [type="password"].error {
+    @apply border-red-500;
+  }
+
   [type="submit"] {
     @apply w-full px-3 py-2;
     @apply cursor-pointer shadow rounded bg-black text-white dark:bg-white dark:text-black;

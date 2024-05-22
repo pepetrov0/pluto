@@ -2,13 +2,14 @@
 
 use axum::{
     extract::{Request, State},
-    http::header,
+    http::{header, StatusCode},
     middleware::Next,
     response::{IntoResponse, Response},
+    RequestExt,
 };
 use axum_extra::{headers::CacheControl, TypedHeader};
 
-use super::{Auth, CreateAuth, DeleteAuth};
+use super::{Auth, CreateAuth, DeleteAuth, Hx};
 
 /// A middleware layer that adds cache control header to all responses that do not have one.
 pub async fn cache_control_layer(req: Request, next: Next) -> Response {
@@ -41,4 +42,30 @@ pub async fn auth_layer(
     let delete_jar = DeleteAuth::from_response(&response).map(|v| v.to_response_parts(&state));
 
     (delete_jar, create_jar, response).into_response()
+}
+
+pub async fn redirects_layer(mut req: Request, next: Next) -> Response {
+    const HTMX_LOCATION_HEADER: &str = "HX-Location";
+
+    // try and extract htmx headers
+    let hx: Hx = req.extract_parts().await.unwrap();
+
+    // run the rest of the chain
+    let mut response = next.run(req).await;
+
+    // match on htmx request header and status code
+    match hx.request && response.status() == StatusCode::SEE_OTHER {
+        // if a redirect on htmx request -> set appropriate header
+        true => {
+            if let Some(location) = response.headers_mut().remove(header::LOCATION) {
+                response
+                    .headers_mut()
+                    .insert(HTMX_LOCATION_HEADER, location);
+            }
+
+            (StatusCode::NO_CONTENT, response).into_response()
+        }
+        // else, just passthrou the response
+        false => response,
+    }
 }

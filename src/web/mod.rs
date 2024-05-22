@@ -10,11 +10,11 @@ mod _components;
 mod _core;
 
 mod get_static_file;
+mod logout;
 mod register;
 mod show_dashboard;
 mod show_login;
 mod show_register;
-mod logout;
 
 #[cfg(test)]
 mod tests;
@@ -28,6 +28,7 @@ pub fn router(database: AnyDatabase, key: cookie::Key) -> Router<()> {
     let auth_layer =
         axum::middleware::from_fn_with_state(state.clone(), _core::middleware::auth_layer);
     let cache_control_layer = axum::middleware::from_fn(_core::middleware::cache_control_layer);
+    let redirects_layer = axum::middleware::from_fn(_core::middleware::redirects_layer);
 
     Router::new()
         // ops
@@ -43,6 +44,7 @@ pub fn router(database: AnyDatabase, key: cookie::Key) -> Router<()> {
         .merge(get_static_file::router())
         .layer(auth_layer)
         .layer(cache_control_layer)
+        .layer(redirects_layer)
         .layer(CompressionLayer::new())
         .with_state(state)
 }

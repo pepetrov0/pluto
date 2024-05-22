@@ -1,7 +1,7 @@
-use axum::response::{IntoResponse, Response};
+use axum::response::{IntoResponse, Redirect, Response};
 
-use crate::web::_core::{DeleteAuth, Hx, Redirect};
+use crate::web::_core::DeleteAuth;
 
-pub async fn invoke(hx: Hx) -> Response {
-    (DeleteAuth, Redirect::see_other(hx, "/")).into_response()
+pub async fn invoke() -> Response {
+    (DeleteAuth, Redirect::to("/")).into_response()
 }

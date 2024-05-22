@@ -51,7 +51,8 @@ pub fn register_form(
             div .(FIELD_CONTAINER_STYLES) {
                 label for="email" { (t!("register.email.label", locale = locale)) };
                 input #email type="email" name="email" minlength="5" value=(data.email)
-                    placeholder=(t!("register.email.placeholder", locale = locale));
+                    placeholder=(t!("register.email.placeholder", locale = locale))
+                    .error[email_error.is_some()];
                 @if let Some(copy) = email_error {
                     span .(ERROR_LABEL_STYLES) { (t!(copy, locale = locale)) };
                 }
@@ -60,7 +61,8 @@ pub fn register_form(
             div .(FIELD_CONTAINER_STYLES) {
                 label for="password" { (t!("register.password.label", locale = locale)) };
                 input #password type="password" name="password" minlength="1" value=(data.password)
-                    placeholder=(t!("register.password.placeholder", locale = locale));
+                    placeholder=(t!("register.password.placeholder", locale = locale))
+                    .error[password_error.is_some()];
                 @if let Some(copy) = password_error {
                     span .(ERROR_LABEL_STYLES) { (t!(copy, locale = locale)) };
                 }
@@ -69,7 +71,8 @@ pub fn register_form(
             div .(FIELD_CONTAINER_STYLES) {
                 label for="confirm-password" { (t!("register.confirm-password.label", locale = locale)) };
                 input #confirm-password type="password" name="confirm_password" minlength="1" value=(data.confirm_password)
-                    placeholder=(t!("register.confirm-password.placeholder", locale = locale));
+                    placeholder=(t!("register.confirm-password.placeholder", locale = locale))
+                    .error[confirm_password_error.is_some()];
                 @if let Some(copy) = confirm_password_error {
                     span .(ERROR_LABEL_STYLES) { (t!(copy, locale = locale)) };
                 }
