@@ -9,7 +9,7 @@ use crate::web::{_components::organisms, _core::static_file_url};
 pub fn page(locale: &str, title: &str, has_navigation: bool, content: Markup) -> Markup {
     const BODY_STYLES: &str = "bg-stone-200 text-black dark:bg-stone-900 dark:text-white";
     const BODY_WITH_NAVIGATION_STYLES: &str = "pl-12";
-    const CONTENT_STYLES: &str = "flex flex-col items-center mx-auto gap-4 p-2 max-w-3xl";
+    const CONTENT_STYLES: &str = "flex flex-col items-center mx-auto gap-4 p-4 max-w-3xl";
 
     html! {
         (DOCTYPE)
@@ -34,6 +34,7 @@ pub fn page(locale: &str, title: &str, has_navigation: bool, content: Markup) ->
                     (organisms::navigation(locale))
                 }
                 main .(CONTENT_STYLES) {
+                    h1 .w-full { (t!(title, locale = locale)) }
                     (content)
                 }
             }

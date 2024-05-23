@@ -79,6 +79,7 @@ pub fn navigation(locale: &str) -> Markup {
             (header())
             (item(locale, Icon::Newspaper, "dashboard.title", "/"))
             div .mt-auto {}
+            (item(locale, Icon::User, "profile.title", "/profile"))
             (item(locale, Icon::Logout, "logout", "/logout"))
         }
     }
