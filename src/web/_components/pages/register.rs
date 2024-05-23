@@ -16,10 +16,9 @@ pub fn register(
     data: Option<RegisterFormData>,
     error: Option<RegistrationError>,
 ) -> Markup {
-    templates::page(
+    templates::blank_page(
         locale,
         "register.title",
-        false,
         organisms::register_form(locale, data, error),
     )
 }

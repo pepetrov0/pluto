@@ -15,6 +15,7 @@ mod logout;
 mod register;
 mod show_dashboard;
 mod show_login;
+mod show_profile;
 mod show_register;
 mod validate_register;
 
@@ -24,7 +25,11 @@ mod tests;
 /// Constructs the primary router to be used for serving the application.
 #[tracing::instrument(skip(database))]
 pub fn router(cfg: Configuration, database: AnyDatabase, cookie_key: cookie::Key) -> Router<()> {
-    let state = _core::GlobalState { cfg, database, cookie_key };
+    let state = _core::GlobalState {
+        cfg,
+        database,
+        cookie_key,
+    };
 
     // middleware
     let header_authorization_layer = axum::middleware::from_fn_with_state(
@@ -48,6 +53,8 @@ pub fn router(cfg: Configuration, database: AnyDatabase, cookie_key: cookie::Key
         .merge(validate_register::router())
         .merge(register::router())
         .merge(logout::router())
+        // profile
+        .merge(show_profile::router())
         // home
         .merge(show_dashboard::router())
         // other

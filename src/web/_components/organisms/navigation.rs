@@ -12,7 +12,7 @@ fn header() -> Markup {
 
     // toggle styles
     const TOGGLE_CONTAINER_STYLES: &str = concat!(
-        "w-12 h-12 p-3 xl:hidden ",
+        "icon-xl p-3 xl:hidden ",
         "transition-colors hover:bg-black hover:text-white hover:dark:bg-white hover:dark:text-black"
     );
     const TOGGLE_STYLES: &str = "absolute left-0 top-0 w-12 h-12 opacity-0 cursor-pointer z-[55]";
@@ -50,7 +50,7 @@ fn item(locale: &str, icon: Icon, text: &str, url: &str) -> Markup {
         "flex flex-row z-50 ",
         "hover:cursor-pointer hover:bg-black hover:text-white hover:dark:bg-white hover:dark:text-black"
     );
-    const ICON_STYLES: &str = "w-12 h-12 p-3";
+    const ICON_STYLES: &str = "icon-xl p-3";
     const TEXT_STYLES: &str =
         "flex-grow items-center hidden xl:flex group-has-[#nav-toggle:checked]/nav:flex";
 
