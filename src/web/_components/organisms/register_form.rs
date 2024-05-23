@@ -49,11 +49,11 @@ pub fn register_form(
             h1 .mb-4 { (t!("register.title", locale = locale)) }
 
             div .(FIELD_CONTAINER_STYLES) {
-                label for="email" { (t!("register.email.label", locale = locale)) };
+                label for="email" { (t!("register.labels.email", locale = locale)) };
                 input #email 
                     .error[email_error.is_some()]
                     type="email" name="email" minlength="5" value=(data.email)
-                    placeholder=(t!("register.email.placeholder", locale = locale))
+                    placeholder=(t!("register.placeholders.email", locale = locale))
                     hx-post="/register/validate"
                     hx-target="#register-form"
                     hx-swap="outerHTML"
@@ -64,11 +64,11 @@ pub fn register_form(
             }
 
             div .(FIELD_CONTAINER_STYLES) {
-                label for="password" { (t!("register.password.label", locale = locale)) };
+                label for="password" { (t!("register.labels.password", locale = locale)) };
                 input #password 
                     .error[password_error.is_some()]
                     type="password" name="password" minlength="1" value=(data.password)
-                    placeholder=(t!("register.password.placeholder", locale = locale))
+                    placeholder=(t!("register.placeholders.password", locale = locale))
                     hx-post="/register/validate"
                     hx-target="#register-form"
                     hx-swap="outerHTML"
@@ -79,11 +79,11 @@ pub fn register_form(
             }
 
             div .(FIELD_CONTAINER_STYLES) {
-                label for="confirm-password" { (t!("register.confirm-password.label", locale = locale)) };
+                label for="confirm-password" { (t!("register.labels.confirm-password", locale = locale)) };
                 input #confirm-password
                     .error[confirm_password_error.is_some()]
                     type="password" name="confirm_password" minlength="1" value=(data.confirm_password)
-                    placeholder=(t!("register.confirm-password.placeholder", locale = locale))
+                    placeholder=(t!("register.placeholders.confirm-password", locale = locale))
                     hx-post="/register/validate"
                     hx-target="#register-form"
                     hx-swap="outerHTML"
@@ -100,7 +100,7 @@ pub fn register_form(
             input .mt-4 type="submit" value=(t!("register.title", locale = locale));
 
             a href="/login" hx-disabled-elt="this" hx-indicator="this" {
-                (t!("register.already-have-an-account", locale = locale))
+                (t!("register.labels.login", locale = locale))
             }
         }
     }

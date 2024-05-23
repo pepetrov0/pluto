@@ -4,23 +4,23 @@ _version = 2
   en = "Sign in"
   bg = "Вписване"
 
-[login.email.placeholder]
+[login.placeholders.email]
   en = "Email.."
   bg = "Електронна поща.."
 
-[login.email.label]
+[login.labels.email]
   en = "Email:"
   bg = "Електронна поща:"
 
-[login.password.placeholder]
+[login.placeholders.password]
   en = "Password.."
   bg = "Парола.."
 
-[login.password.label]
+[login.labels.password]
   en = "Password:"
   bg = "Парола:"
 
-[login.new-here]
+[login.labels.register]
   en = "New here? Sign up to get started!"
   bg = "Нов тук? Регистрирайте се, за да започнете!"
 

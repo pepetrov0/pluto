@@ -29,13 +29,13 @@ pub fn login_form(locale: &str, error: Option<AuthenticationError>) -> Markup {
             h1 .mb-4 { (t!("login.title", locale = locale)) }
 
             div .(FIELD_CONTAINER_STYLES) {
-                label for="email" { (t!("login.email.label", locale = locale)) };
-                input #email type="text" name="email" placeholder=(t!("login.email.placeholder", locale = locale));
+                label for="email" { (t!("login.labels.email", locale = locale)) };
+                input #email type="text" name="email" placeholder=(t!("login.placeholders.email", locale = locale));
             }
 
             div .(FIELD_CONTAINER_STYLES) {
-                label for="password" { (t!("login.password.label", locale = locale)) };
-                input #password type="password" name="password" placeholder=(t!("login.password.placeholder", locale = locale));
+                label for="password" { (t!("login.labels.password", locale = locale)) };
+                input #password type="password" name="password" placeholder=(t!("login.placeholders.password", locale = locale));
             }
 
             @if let Some(error) = error {
@@ -45,7 +45,7 @@ pub fn login_form(locale: &str, error: Option<AuthenticationError>) -> Markup {
             input .mt-4 type="submit" value=(t!("login.title", locale = locale));
 
             a href="/register" hx-disabled-elt="this" hx-indicator="this" {
-                (t!("login.new-here", locale = locale))
+                (t!("login.labels.register", locale = locale))
             }
         }
     }

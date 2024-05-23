@@ -4,31 +4,31 @@ _version = 2
   en = "Sign up"
   bg = "Регистрирай се"
 
-[register.email.placeholder]
+[register.placeholders.email]
   en = "Email.."
   bg = "Електронна поща.."
 
-[register.email.label]
+[register.labels.email]
   en = "Email:"
   bg = "Електронна поща:"
 
-[register.password.placeholder]
+[register.placeholders.password]
   en = "Password.."
   bg = "Парола.."
 
-[register.password.label]
+[register.labels.password]
   en = "Password:"
   bg = "Парола:"
 
-[register.confirm-password.placeholder]
+[register.placeholders.confirm-password]
   en = "Confirm password.."
   bg = "Потвърди парола.."
 
-[register.confirm-password.label]
+[register.labels.confirm-password]
   en = "Confirm password:"
   bg = "Потвърди парола:"
 
-[register.already-have-an-account]
+[register.labels.login]
   en = "Already a member? Sign in to continue!"
   bg = "Вече имате акаунт? Влезте тук, за да продължите!"
 
