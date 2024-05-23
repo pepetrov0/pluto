@@ -42,7 +42,6 @@ impl std::fmt::Display for SessionError {
     }
 }
 
-
 impl From<database::Error> for SessionError {
     fn from(value: database::Error) -> Self {
         Self::Database(value)
@@ -77,3 +76,14 @@ pub async fn create_session(
         .map_err(SessionError::from)
 }
 
+/// Deletes a session by its identifier.
+#[instrument(err, skip_all)]
+pub async fn delete_session_by_id(
+    transaction: &mut AnyTransaction,
+    id: Id,
+) -> Result<(), SessionError> {
+    transaction
+        .delete_session_by_id(id)
+        .await
+        .map_err(SessionError::from)
+}

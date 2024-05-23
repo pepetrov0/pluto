@@ -1,4 +1,4 @@
-use std::{fs, path::PathBuf};
+use std::{fs, path::PathBuf, time::Duration};
 
 #[cfg(target_os = "windows")]
 const TAILWIND_EXECUTABLE_PATH: &str = "target/tailwindcss.exe";
@@ -25,7 +25,13 @@ fn check_and_download_tailwind() {
     // check if already exists - if not - extract
     if !PathBuf::from(TAILWIND_EXECUTABLE_PATH).exists() {
         // download
-        let bytes = reqwest::blocking::get(TAILWIND_EXECUTABLE_URL)
+        let client = reqwest::blocking::Client::builder()
+            .timeout(Duration::from_secs(300)) // 5 mins
+            .build()
+            .unwrap();
+        let bytes = client
+            .get(TAILWIND_EXECUTABLE_URL)
+            .send()
             .unwrap()
             .error_for_status()
             .unwrap()
