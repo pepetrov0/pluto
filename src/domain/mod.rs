@@ -5,17 +5,17 @@
 //! manipulating data as needed. It contains the business logic.
 //!
 
+pub mod authentication;
 mod configuration;
 pub mod database;
 mod identifier;
 pub mod keys;
+pub mod passwords;
+pub mod registration;
 pub mod sessions;
 pub mod shutdown;
 pub mod users;
-pub mod registration;
-pub mod authentication;
 pub mod validations;
-pub mod passwords;
 
 pub use configuration::Configuration;
 pub use identifier::Id;

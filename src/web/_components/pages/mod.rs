@@ -1,9 +1,9 @@
 //! Pages
 
 mod login;
-mod register;
 mod profile;
+mod register;
 
 pub use login::login;
-pub use register::register;
 pub use profile::*;
+pub use register::register;

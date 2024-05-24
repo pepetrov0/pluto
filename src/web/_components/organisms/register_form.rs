@@ -3,7 +3,7 @@
 use maud::{html, Markup};
 use rust_i18n::t;
 
-use crate::domain::registration::RegistrationError;
+use crate::{domain::registration::RegistrationError, web::_components::atoms::Icon};
 
 /// Represents the data in a register form.
 #[derive(Debug, Default, Clone, serde::Deserialize)]
@@ -22,6 +22,7 @@ pub fn register_form(
     const STYLES: &str = "card mt-4 w-full max-w-md flex flex-col items-center gap-4";
     const ERROR_LABEL_STYLES: &str = "text-sm text-red-500";
     const FIELD_CONTAINER_STYLES: &str = "w-full flex flex-col gap-1";
+    const FIELD_LABEL_STYLES: &str = "flex flex-row gap-2 items-center";
 
     let data = data.unwrap_or_default();
 
@@ -49,8 +50,11 @@ pub fn register_form(
             h1 .mb-4 { (t!("register.title", locale = locale)) }
 
             div .(FIELD_CONTAINER_STYLES) {
-                label for="email" { (t!("register.labels.email", locale = locale)) };
-                input #email 
+                span .(FIELD_LABEL_STYLES) {
+                    span ."icon-xs" { (Icon::AtSymbol) }
+                    label for="email" { (t!("register.labels.email", locale = locale)) };
+                }
+                input #email
                     .error[email_error.is_some()]
                     type="email" name="email" minlength="5" value=(data.email)
                     placeholder=(t!("register.placeholders.email", locale = locale))
@@ -64,8 +68,11 @@ pub fn register_form(
             }
 
             div .(FIELD_CONTAINER_STYLES) {
-                label for="password" { (t!("register.labels.password", locale = locale)) };
-                input #password 
+                span .(FIELD_LABEL_STYLES) {
+                    span ."icon-xs" { (Icon::Key) }
+                    label for="password" { (t!("register.labels.password", locale = locale)) };
+                }
+                input #password
                     .error[password_error.is_some()]
                     type="password" name="password" minlength="1" value=(data.password)
                     placeholder=(t!("register.placeholders.password", locale = locale))
@@ -79,7 +86,10 @@ pub fn register_form(
             }
 
             div .(FIELD_CONTAINER_STYLES) {
-                label for="confirm-password" { (t!("register.labels.confirm-password", locale = locale)) };
+                span .(FIELD_LABEL_STYLES) {
+                    span ."icon-xs" { (Icon::Key) }
+                    label for="confirm-password" { (t!("register.labels.confirm-password", locale = locale)) };
+                }
                 input #confirm-password
                     .error[confirm_password_error.is_some()]
                     type="password" name="confirm_password" minlength="1" value=(data.confirm_password)

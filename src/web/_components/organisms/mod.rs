@@ -2,8 +2,8 @@
 
 mod login_form;
 mod navigation;
-mod register_form;
 mod profile_details_card;
+mod register_form;
 
 pub use login_form::*;
 pub(in crate::web::_components) use navigation::navigation;

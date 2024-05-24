@@ -11,7 +11,8 @@ pub enum Icon {
     User,
     Identification,
     AtSymbol,
-    Pencil
+    Pencil,
+    Key,
 }
 
 impl maud::Render for Icon {
@@ -58,6 +59,11 @@ impl maud::Render for Icon {
             Icon::Pencil => html! {
                 svg .(STYLES) xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {
                   path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z";
+                }
+            },
+            Icon::Key => html! {
+                svg .(STYLES) xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {
+                  path fill-rule="evenodd" d="M15.75 1.5a6.75 6.75 0 0 0-6.651 7.906c.067.39-.032.717-.221.906l-6.5 6.499a3 3 0 0 0-.878 2.121v2.818c0 .414.336.75.75.75H6a.75.75 0 0 0 .75-.75v-1.5h1.5A.75.75 0 0 0 9 19.5V18h1.5a.75.75 0 0 0 .53-.22l2.658-2.658c.19-.189.517-.288.906-.22A6.75 6.75 0 1 0 15.75 1.5Zm0 3a.75.75 0 0 0 0 1.5A2.25 2.25 0 0 1 18 8.25a.75.75 0 0 0 1.5 0 3.75 3.75 0 0 0-3.75-3.75Z" clip-rule="evenodd";
                 }
             },
         };

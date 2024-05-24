@@ -3,7 +3,7 @@
 use maud::{html, Markup};
 use rust_i18n::t;
 
-use crate::domain::authentication::AuthenticationError;
+use crate::{domain::authentication::AuthenticationError, web::_components::atoms::Icon};
 
 /// Represents the data in a login form.
 #[derive(Debug, Default, Clone, serde::Deserialize)]
@@ -17,6 +17,7 @@ pub fn login_form(locale: &str, error: Option<AuthenticationError>) -> Markup {
     const STYLES: &str = "card mt-4 w-full max-w-md flex flex-col items-center gap-4";
     const ERROR_LABEL_STYLES: &str = "text-sm text-red-500";
     const FIELD_CONTAINER_STYLES: &str = "w-full flex flex-col gap-1";
+    const FIELD_LABEL_STYLES: &str = "flex flex-row gap-2 items-center";
 
     let error = match error {
         Some(AuthenticationError::Failure) => Some("login.errors.something-went-wrong"),
@@ -29,12 +30,18 @@ pub fn login_form(locale: &str, error: Option<AuthenticationError>) -> Markup {
             h1 .mb-4 { (t!("login.title", locale = locale)) }
 
             div .(FIELD_CONTAINER_STYLES) {
-                label for="email" { (t!("login.labels.email", locale = locale)) };
+                span .(FIELD_LABEL_STYLES) {
+                    span ."icon-xs" { (Icon::AtSymbol) }
+                    label for="email" { (t!("login.labels.email", locale = locale)) };
+                }
                 input #email type="text" name="email" placeholder=(t!("login.placeholders.email", locale = locale));
             }
 
             div .(FIELD_CONTAINER_STYLES) {
-                label for="password" { (t!("login.labels.password", locale = locale)) };
+                span .(FIELD_LABEL_STYLES) {
+                    span ."icon-xs" { (Icon::Key) }
+                    label for="password" { (t!("login.labels.password", locale = locale)) };
+                }
                 input #password type="password" name="password" placeholder=(t!("login.placeholders.password", locale = locale));
             }
 
