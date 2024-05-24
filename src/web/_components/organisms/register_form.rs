@@ -46,7 +46,8 @@ pub fn register_form(
     };
 
     html! {
-        form #register-form .(STYLES) method="POST" hx-boost="true" hx-disabled-elt="[type='submit']" hx-indicator="[type='submit']" {
+        form #register-form .(STYLES) method="POST" 
+            hx-boost="true" hx-disabled-elt="#register-form input" hx-indicator="#register-form input" {
             h1 .mb-4 { (t!("register.title", locale = locale)) }
 
             div .(FIELD_CONTAINER_STYLES) {
@@ -61,7 +62,8 @@ pub fn register_form(
                     hx-post="/register/validate"
                     hx-target="#register-form"
                     hx-swap="outerHTML"
-                    hx-trigger="change";
+                    hx-trigger="change"
+                    hx-disabled-elt="#register-form input" hx-indicator="#register-form input";
                 @if let Some(copy) = email_error {
                     span .(ERROR_LABEL_STYLES) { (t!(copy, locale = locale)) };
                 }
@@ -79,7 +81,8 @@ pub fn register_form(
                     hx-post="/register/validate"
                     hx-target="#register-form"
                     hx-swap="outerHTML"
-                    hx-trigger="change";
+                    hx-trigger="change"
+                    hx-disabled-elt="#register-form input" hx-indicator="#register-form input";
                 @if let Some(copy) = password_error {
                     span .(ERROR_LABEL_STYLES) { (t!(copy, locale = locale)) };
                 }
@@ -97,7 +100,8 @@ pub fn register_form(
                     hx-post="/register/validate"
                     hx-target="#register-form"
                     hx-swap="outerHTML"
-                    hx-trigger="change";
+                    hx-trigger="change"
+                    hx-disabled-elt="#register-form input" hx-indicator="#register-form input";
                 @if let Some(copy) = confirm_password_error {
                     span .(ERROR_LABEL_STYLES) { (t!(copy, locale = locale)) };
                 }
@@ -107,7 +111,9 @@ pub fn register_form(
                 span .(ERROR_LABEL_STYLES) { (t!("register.errors.something-went-wrong", locale = locale)) };
             }
 
-            input .mt-4 type="submit" value=(t!("register.title", locale = locale));
+            input .mt-4 type="submit" value=(t!("register.title", locale = locale))
+                hx-post="/register" hx-target="#register-form" hx-swap="outerHTML"
+                hx-disabled-elt="#register-form input" hx-indicator="#register-form input";
 
             a href="/login" hx-disabled-elt="this" hx-indicator="this" {
                 (t!("register.labels.login", locale = locale))

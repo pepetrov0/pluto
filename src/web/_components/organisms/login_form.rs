@@ -26,7 +26,8 @@ pub fn login_form(locale: &str, error: Option<AuthenticationError>) -> Markup {
     };
 
     html! {
-        form .(STYLES) method="POST" hx-boost="true" hx-disabled-elt="[type='submit']" hx-indicator="[type='submit']" {
+        form #login-form .(STYLES) method="POST" 
+            hx-boost="true" hx-disabled-elt="#login-form input" hx-indicator="#login-form input" {
             h1 .mb-4 { (t!("login.title", locale = locale)) }
 
             div .(FIELD_CONTAINER_STYLES) {
@@ -49,7 +50,9 @@ pub fn login_form(locale: &str, error: Option<AuthenticationError>) -> Markup {
                 span .(ERROR_LABEL_STYLES) { (t!(error, locale = locale)) };
             }
 
-            input .mt-4 type="submit" value=(t!("login.title", locale = locale));
+            input .mt-4 type="submit" value=(t!("login.title", locale = locale))
+                hx-post="/login" hx-target="#login-form" hx-swap="outerHTML" 
+                hx-disabled-elt="#login-form input" hx-indicator="#login-form input";
 
             a href="/register" hx-disabled-elt="this" hx-indicator="this" {
                 (t!("login.labels.register", locale = locale))

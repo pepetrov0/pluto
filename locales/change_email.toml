@@ -1,0 +1,25 @@
+_version = 2
+
+[change-email.title]
+  en = "Change email address"
+  bg = "Смяна на имейл адреса"
+
+[change-email.placeholders.new-email]
+  en = "New email.."
+  bg = "Нова електронна поща.."
+
+[change-email.labels.new-email]
+  en = "New email:"
+  bg = "Нова електронна поща:"
+
+[change-email.placeholders.current-password]
+  en = "Current password.."
+  bg = "Текуща парола.."
+
+[change-email.labels.current-password]
+  en = "Current password:"
+  bg = "Текуща парола:"
+
+[change-email.labels.save]
+  en = "Save"
+  bg = "Запази"

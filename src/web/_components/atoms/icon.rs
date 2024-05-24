@@ -3,6 +3,7 @@
 use maud::html;
 
 /// An enumeration of all possible icons in our application.
+#[allow(unused)]
 pub enum Icon {
     Menu,
     X,

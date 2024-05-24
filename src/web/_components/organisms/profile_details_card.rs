@@ -10,8 +10,6 @@ pub fn profile_details_card(locale: &str, user: User) -> Markup {
     const TITLE_STYLES: &str = "sm:col-span-2 flex flex-row gap-2 items-center mb-4";
     const FIELDS_STYLES: &str = "flex flex-col";
     const FIELD_TITLE_STYLES: &str = "flex flex-row gap-1 items-center";
-    const ACTIONS_STYLES: &str = "sm:col-span-2 flex flex-row gap-2 items-center justify-end mt-4";
-    const ACTION_STYLES: &str = "flex flex-row gap-2 items-center";
 
     html! {
         section .(STYLES) {
@@ -26,13 +24,6 @@ pub fn profile_details_card(locale: &str, user: User) -> Markup {
                     span { (t!("profile-details.labels.email", locale = locale)) }
                 }
                 span { (user.email) }
-            }
-
-            div .(ACTIONS_STYLES) hx-boost="true" {
-                a .(ACTION_STYLES) href="/profile/edit" {
-                    span .icon-xs { (Icon::Pencil) }
-                    span { (t!("profile-details.labels.edit", locale = locale)) }
-                }
             }
         }
     }

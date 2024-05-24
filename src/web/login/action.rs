@@ -8,7 +8,7 @@ use crate::{
     },
     web::{
         _components::organisms::LoginFormData,
-        _core::{GlobalState, Locale},
+        _core::{GlobalState, Hx, Locale},
     },
 };
 
@@ -18,10 +18,11 @@ use super::responder;
 pub async fn invoke(
     State(state): State<GlobalState>,
     locale: Locale,
+    hx: Hx,
     agent: TypedHeader<UserAgent>,
     Form(data): Form<LoginFormData>,
 ) -> Response {
-    let respond = |r| responder::invoke(locale.clone(), r);
+    let respond = |r| responder::invoke(locale.clone(), hx, r);
 
     // first attempt creating a transaction
     let mut transaction = match state.database.begin().await {
