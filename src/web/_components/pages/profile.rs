@@ -3,7 +3,7 @@
 use maud::{html, Markup};
 
 use crate::{
-    domain::users::User,
+    domain::{change_email::ChangeEmailError, users::User},
     web::_components::{
         organisms::{change_email_form, profile_details_card, ChangeEmailFormData},
         templates,
@@ -14,11 +14,12 @@ use crate::{
 pub fn profile(
     locale: &str,
     user: User,
-    change_email_form_data: Option<ChangeEmailFormData>,
+    change_email_data: Option<ChangeEmailFormData>,
+    change_email_error: Option<ChangeEmailError>,
 ) -> Markup {
     let content = html! {
         (profile_details_card(locale, user))
-        (change_email_form(locale, change_email_form_data))
+        (change_email_form(locale, change_email_data, change_email_error))
     };
     templates::page(locale, "profile.title", content)
 }

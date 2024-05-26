@@ -16,6 +16,7 @@ pub fn invoke(locale: Locale, user: User) -> Response {
             new_email: user.email.clone(),
             ..Default::default()
         }),
+        None,
     )
     .into_response()
 }

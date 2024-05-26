@@ -17,6 +17,7 @@ mod show_dashboard;
 mod show_login;
 mod show_profile;
 mod show_register;
+mod validate_change_email;
 mod validate_register;
 
 #[cfg(test)]
@@ -48,13 +49,14 @@ pub fn router(cfg: Configuration, database: AnyDatabase, cookie_key: cookie::Key
         .route("/health", routing::any(()))
         // auth
         .merge(show_login::router())
-        .merge(login::router())
         .merge(show_register::router())
         .merge(validate_register::router())
+        .merge(login::router())
         .merge(register::router())
         .merge(logout::router())
         // profile
         .merge(show_profile::router())
+        .merge(validate_change_email::router())
         // home
         .merge(show_dashboard::router())
         // other
