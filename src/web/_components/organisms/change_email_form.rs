@@ -18,7 +18,7 @@ pub fn change_email_form(locale: &str, data: Option<ChangeEmailFormData>) -> Mar
     const TITLE_STYLES: &str = "sm:col-span-2 flex flex-row gap-2 items-center mb-4";
     // const ERROR_LABEL_STYLES: &str = "text-sm text-red-500";
     const FIELD_CONTAINER_STYLES: &str = "w-full flex flex-col gap-1";
-    const FIELD_LABEL_STYLES: &str = "flex flex-row gap-2 items-center";
+    const FIELD_LABEL_STYLES: &str = "flex flex-row gap-1 items-center";
     const ACTIONS_STYLES: &str = "sm:col-span-2 flex flex-row items-center justify-end mt-4";
     const ACTION_STYLES: &str = "sm:w-fit";
 

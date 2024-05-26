@@ -17,7 +17,7 @@ pub fn login_form(locale: &str, error: Option<AuthenticationError>) -> Markup {
     const STYLES: &str = "card mt-4 w-full max-w-md flex flex-col items-center gap-4";
     const ERROR_LABEL_STYLES: &str = "text-sm text-red-500";
     const FIELD_CONTAINER_STYLES: &str = "w-full flex flex-col gap-1";
-    const FIELD_LABEL_STYLES: &str = "flex flex-row gap-2 items-center";
+    const FIELD_LABEL_STYLES: &str = "flex flex-row gap-1 items-center";
 
     let error = match error {
         Some(AuthenticationError::Failure) => Some("login.errors.something-went-wrong"),

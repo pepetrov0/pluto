@@ -9,7 +9,7 @@ pub fn profile_details_card(locale: &str, user: User) -> Markup {
     const STYLES: &str = "card grid gap-2 grid-cols-1 sm:grid-cols-2";
     const TITLE_STYLES: &str = "sm:col-span-2 flex flex-row gap-2 items-center mb-4";
     const FIELDS_STYLES: &str = "flex flex-col";
-    const FIELD_TITLE_STYLES: &str = "flex flex-row gap-1 items-center";
+    const FIELD_LABEL_STYLES: &str = "flex flex-row gap-1 items-center";
 
     html! {
         section .(STYLES) {
@@ -19,7 +19,7 @@ pub fn profile_details_card(locale: &str, user: User) -> Markup {
             }
 
             div .(FIELDS_STYLES) {
-                strong .(FIELD_TITLE_STYLES) {
+                strong .(FIELD_LABEL_STYLES) {
                     span ."icon-xs" { (Icon::AtSymbol) }
                     span { (t!("profile-details.labels.email", locale = locale)) }
                 }
