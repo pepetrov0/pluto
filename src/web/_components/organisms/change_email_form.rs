@@ -14,7 +14,7 @@ pub struct ChangeEmailFormData {
 
 /// A form that allows the user to change their email.
 pub fn change_email_form(locale: &str, data: Option<ChangeEmailFormData>) -> Markup {
-    const STYLES: &str = "card grid gap-4 grid-cols-1 sm:grid-cols-2";
+    const STYLES: &str = "card grid gap-2 grid-cols-1 sm:grid-cols-2";
     const TITLE_STYLES: &str = "sm:col-span-2 flex flex-row gap-2 items-center mb-2";
     // const ERROR_LABEL_STYLES: &str = "text-sm text-red-500";
     const FIELD_CONTAINER_STYLES: &str = "w-full flex flex-col gap-1";
