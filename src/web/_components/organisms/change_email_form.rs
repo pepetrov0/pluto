@@ -25,7 +25,7 @@ pub fn change_email_form(locale: &str, data: Option<ChangeEmailFormData>) -> Mar
     let data = data.unwrap_or_default();
 
     html! {
-        form .(STYLES) action="/profile/change-email" method="POST" 
+        form .(STYLES) action="/profile/change-email" method="POST"
             hx-boost="true" hx-disabled-elt="[type='submit']" hx-indicator="[type='submit']" {
             h2 .(TITLE_STYLES) {
                 span ."icon-sm" { (Icon::AtSymbol) }
@@ -37,7 +37,7 @@ pub fn change_email_form(locale: &str, data: Option<ChangeEmailFormData>) -> Mar
                     span ."icon-xs" { (Icon::AtSymbol) }
                     label for="new-email" { (t!("change-email.labels.new-email", locale = locale)) };
                 }
-                input #new-email type="text" name="email" value=(data.new_email) 
+                input #new-email type="email" name="new_email" value=(data.new_email) minlength="5"
                     placeholder=(t!("change-email.placeholders.new-email", locale = locale));
             }
 
@@ -46,7 +46,8 @@ pub fn change_email_form(locale: &str, data: Option<ChangeEmailFormData>) -> Mar
                     span ."icon-xs" { (Icon::Key) }
                     label for="current-password" { (t!("change-email.labels.current-password", locale = locale)) };
                 }
-                input #current-password type="password" name="password" placeholder=(t!("change-email.placeholders.current-password", locale = locale));
+                input #current-password type="password" name="current_password"
+                    placeholder=(t!("change-email.placeholders.current-password", locale = locale));
             }
 
             div .(ACTIONS_STYLES) {

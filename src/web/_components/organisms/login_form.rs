@@ -26,7 +26,7 @@ pub fn login_form(locale: &str, error: Option<AuthenticationError>) -> Markup {
     };
 
     html! {
-        form #login-form .(STYLES) method="POST" 
+        form #login-form .(STYLES) method="POST"
             hx-boost="true" hx-disabled-elt="#login-form input" hx-indicator="#login-form input" {
             h1 .mb-4 { (t!("login.title", locale = locale)) }
 
@@ -35,7 +35,8 @@ pub fn login_form(locale: &str, error: Option<AuthenticationError>) -> Markup {
                     span ."icon-xs" { (Icon::AtSymbol) }
                     label for="email" { (t!("login.labels.email", locale = locale)) };
                 }
-                input #email type="text" name="email" placeholder=(t!("login.placeholders.email", locale = locale));
+                input #email type="text" name="email"
+                    placeholder=(t!("login.placeholders.email", locale = locale));
             }
 
             div .(FIELD_CONTAINER_STYLES) {
@@ -43,7 +44,8 @@ pub fn login_form(locale: &str, error: Option<AuthenticationError>) -> Markup {
                     span ."icon-xs" { (Icon::Key) }
                     label for="password" { (t!("login.labels.password", locale = locale)) };
                 }
-                input #password type="password" name="password" placeholder=(t!("login.placeholders.password", locale = locale));
+                input #password type="password" name="password"
+                    placeholder=(t!("login.placeholders.password", locale = locale));
             }
 
             @if let Some(error) = error {
@@ -51,8 +53,7 @@ pub fn login_form(locale: &str, error: Option<AuthenticationError>) -> Markup {
             }
 
             input .mt-4 type="submit" value=(t!("login.title", locale = locale))
-                hx-post="/login" hx-target="#login-form" hx-swap="outerHTML" 
-                hx-disabled-elt="#login-form input" hx-indicator="#login-form input";
+                hx-post="/login" hx-target="#login-form" hx-swap="outerHTML";
 
             a href="/register" hx-disabled-elt="this" hx-indicator="this" {
                 (t!("login.labels.register", locale = locale))

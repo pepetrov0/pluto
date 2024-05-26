@@ -46,7 +46,7 @@ pub fn register_form(
     };
 
     html! {
-        form #register-form .(STYLES) method="POST" 
+        form #register-form .(STYLES) method="POST"
             hx-boost="true" hx-disabled-elt="#register-form input" hx-indicator="#register-form input" {
             h1 .mb-4 { (t!("register.title", locale = locale)) }
 
@@ -62,8 +62,7 @@ pub fn register_form(
                     hx-post="/register/validate"
                     hx-target="#register-form"
                     hx-swap="outerHTML"
-                    hx-trigger="change"
-                    hx-disabled-elt="#register-form input" hx-indicator="#register-form input";
+                    hx-trigger="change";
                 @if let Some(copy) = email_error {
                     span .(ERROR_LABEL_STYLES) { (t!(copy, locale = locale)) };
                 }
@@ -81,8 +80,7 @@ pub fn register_form(
                     hx-post="/register/validate"
                     hx-target="#register-form"
                     hx-swap="outerHTML"
-                    hx-trigger="change"
-                    hx-disabled-elt="#register-form input" hx-indicator="#register-form input";
+                    hx-trigger="change";
                 @if let Some(copy) = password_error {
                     span .(ERROR_LABEL_STYLES) { (t!(copy, locale = locale)) };
                 }
@@ -100,8 +98,7 @@ pub fn register_form(
                     hx-post="/register/validate"
                     hx-target="#register-form"
                     hx-swap="outerHTML"
-                    hx-trigger="change"
-                    hx-disabled-elt="#register-form input" hx-indicator="#register-form input";
+                    hx-trigger="change";
                 @if let Some(copy) = confirm_password_error {
                     span .(ERROR_LABEL_STYLES) { (t!(copy, locale = locale)) };
                 }
@@ -112,8 +109,7 @@ pub fn register_form(
             }
 
             input .mt-4 type="submit" value=(t!("register.title", locale = locale))
-                hx-post="/register" hx-target="#register-form" hx-swap="outerHTML"
-                hx-disabled-elt="#register-form input" hx-indicator="#register-form input";
+                hx-post="/register" hx-target="#register-form" hx-swap="outerHTML";
 
             a href="/login" hx-disabled-elt="this" hx-indicator="this" {
                 (t!("register.labels.login", locale = locale))
