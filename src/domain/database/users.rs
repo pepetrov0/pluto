@@ -34,4 +34,11 @@ pub trait Users {
 
     /// Create a user.
     async fn create_user(&mut self, email: &str, password: Option<&str>) -> super::Result<User>;
+
+    /// Update a user's email by their identifier.
+    async fn update_user_email_by_id(
+        &mut self,
+        id: Id,
+        new_email: &str,
+    ) -> super::Result<Option<User>>;
 }

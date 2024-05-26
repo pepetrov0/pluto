@@ -2,7 +2,10 @@
 
 use super::{
     database::AnyTransaction,
-    users::{find_user_by_email, User},
+    passwords,
+    users::{
+        find_user_by_email, find_user_with_password_by_id, update_user_email_by_id, User, UserError,
+    },
     validations,
 };
 
@@ -10,6 +13,7 @@ use super::{
 pub enum ChangeEmailError {
     EmailTaken,
     EmailInvalid,
+    InvalidCredentials,
     Failure,
 }
 
@@ -40,7 +44,7 @@ pub async fn change_email(
     tx: &mut AnyTransaction,
     user: &User,
     new_email: &str,
-    _current_password: &str,
+    current_password: &str,
 ) -> Result<(), ChangeEmailError> {
     // test if the new email is the same as the old one
     if user.email == new_email {
@@ -49,5 +53,26 @@ pub async fn change_email(
 
     validate_change_email(tx, user, new_email).await?;
 
-    Err(ChangeEmailError::Failure)
+    let user = find_user_with_password_by_id(tx, user.id)
+        .await
+        .map_err(ChangeEmailError::from)?;
+
+    // validate password
+    user.password
+        .as_ref()
+        .and_then(|v| passwords::verify_password(current_password, v.as_str()).ok())
+        .ok_or(ChangeEmailError::InvalidCredentials)?;
+
+    update_user_email_by_id(tx, user.id, new_email)
+        .await
+        .map(|_| ())
+        .map_err(ChangeEmailError::from)
+}
+
+impl From<UserError> for ChangeEmailError {
+    fn from(value: UserError) -> Self {
+        match value {
+            UserError::Database(_) | UserError::UserNotFound => Self::Failure,
+        }
+    }
 }

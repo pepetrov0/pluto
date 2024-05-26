@@ -32,6 +32,10 @@ _version = 2
   en = "The email address you entered is invalid; please enter a valid email address."
   bg = "Въведеният от вас имейл адрес е невалиден; моля, въведете валиден имейл адрес."
 
+[change-email.errors.invalid-credentials]
+  en = "The password you entered is not valid; please try again."
+  bg = "Въведената от вас парола не е валидна; моля, опитайте отново."
+
 [change-email.errors.something-went-wrong]
   en = "An unknown error has occurred; please try again later."
   bg = "Възникна неизвестна грешка; моля, опитайте отново по-късно."

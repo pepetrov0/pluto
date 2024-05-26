@@ -3,7 +3,7 @@ use axum::{extract::State, response::Response, Form};
 use crate::{
     domain::{
         change_email::{change_email, ChangeEmailError},
-        database::Database,
+        database::{Database, Transaction},
     },
     web::{
         _components::organisms::ChangeEmailFormData,
@@ -31,5 +31,8 @@ pub async fn invoke(
         return respond(Some(error)).await;
     }
 
-    respond(None).await
+    match tx.commit().await.is_ok() {
+        true => respond(None).await,
+        false => respond(Some(ChangeEmailError::Failure)).await,
+    }
 }

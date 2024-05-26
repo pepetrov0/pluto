@@ -35,6 +35,14 @@ pub fn change_email_form(
         _ => None,
     };
 
+    // extract current password error
+    let current_password_error = match error {
+        Some(ChangeEmailError::InvalidCredentials) => {
+            Some("change-email.errors.invalid-credentials")
+        }
+        _ => None,
+    };
+
     html! {
         form #change-email-form .(STYLES) action="/profile/change-email" method="POST"
             hx-boost="true" hx-disabled-elt="#change-email-form input" hx-indicator="#change-email-form input" {
@@ -68,6 +76,9 @@ pub fn change_email_form(
                 }
                 input #current-password type="password" name="current_password"
                     placeholder=(t!("change-email.placeholders.current-password", locale = locale));
+                @if let Some(copy) = current_password_error {
+                    span .(ERROR_LABEL_STYLES) { (t!(copy, locale = locale)) };
+                }
             }
 
             @if let Some(ChangeEmailError::Failure) = error {
@@ -77,7 +88,7 @@ pub fn change_email_form(
             }
 
             div .(ACTIONS_STYLES) {
-                input .(ACTION_STYLES) 
+                input .(ACTION_STYLES)
                     type="submit" value=(t!("change-email.labels.save", locale = locale))
                     hx-post="/profile/change-email"
                     hx-target="#change-email-form"

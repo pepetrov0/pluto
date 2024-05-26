@@ -98,6 +98,20 @@ pub async fn find_user_by_email(
         .map(User::from)
 }
 
+/// Finds a user by their identifier including password.
+#[instrument(err, skip_all)]
+pub async fn find_user_with_password_by_id(
+    transaction: &mut AnyTransaction,
+    id: Id,
+) -> Result<UserWithPassword, UserError> {
+    transaction
+        .find_user_by_id(id)
+        .await
+        .map_err(UserError::from)?
+        .ok_or(UserError::UserNotFound)
+        .map(UserWithPassword::from)
+}
+
 /// Finds a user by their email including password.
 #[instrument(err, skip_all)]
 pub async fn find_user_with_password_by_email(
@@ -124,4 +138,19 @@ pub async fn create_user(
         .await
         .map(User::from)
         .map_err(UserError::from)
+}
+
+/// Updates a user's email by their identifier.
+#[instrument(err, skip_all)]
+pub async fn update_user_email_by_id(
+    transaction: &mut AnyTransaction,
+    id: Id,
+    new_email: &str,
+) -> Result<User, UserError> {
+    transaction
+        .update_user_email_by_id(id, new_email)
+        .await
+        .map_err(UserError::from)?
+        .ok_or(UserError::UserNotFound)
+        .map(User::from)
 }

@@ -46,4 +46,15 @@ impl Users for SqliteTransaction {
             .await
             .map_err(Error::from)
     }
+
+    /// Update a user's email by their identifier.
+    #[tracing::instrument(skip(self))]
+    async fn update_user_email_by_id(&mut self, id: Id, new_email: &str) -> Result<Option<User>> {
+        sqlx::query_as(include_str!("update_user_email_by_id.sql"))
+            .bind(id)
+            .bind(new_email)
+            .fetch_optional(&mut *self.0)
+            .await
+            .map_err(Error::from)
+    }
 }
