@@ -13,13 +13,16 @@ use crate::{
 // A profile page
 pub fn profile(
     locale: &str,
-    user: User,
+    user: &User,
     change_email_data: Option<ChangeEmailFormData>,
     change_email_error: Option<ChangeEmailError>,
 ) -> Markup {
     let content = html! {
-        (profile_details_card(locale, user))
-        (change_email_form(locale, change_email_data, change_email_error))
+        (profile_details_card(locale, &user))
+
+        @if user.has_password {
+            (change_email_form(locale, change_email_data, change_email_error))
+        }
     };
     templates::page(locale, "profile.title", content)
 }

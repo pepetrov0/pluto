@@ -12,6 +12,7 @@ use super::{
 pub struct User {
     pub id: Id,
     pub email: String,
+    pub has_password: bool,
 }
 
 /// A user with password.
@@ -27,6 +28,7 @@ impl From<database::users::User> for User {
         Self {
             id: value.id,
             email: value.email,
+            has_password: value.password.is_some(),
         }
     }
 }
@@ -46,6 +48,7 @@ impl From<UserWithPassword> for User {
         Self {
             id: value.id,
             email: value.email,
+            has_password: value.password.is_some(),
         }
     }
 }

@@ -11,7 +11,7 @@ use crate::{
 pub fn invoke(locale: Locale, user: User) -> Response {
     pages::profile(
         locale.as_str(),
-        user.clone(),
+        &user,
         Some(ChangeEmailFormData {
             new_email: user.email.clone(),
             ..Default::default()
