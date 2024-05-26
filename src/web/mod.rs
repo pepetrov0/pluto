@@ -9,6 +9,7 @@ use crate::domain::{database::AnyDatabase, Configuration};
 mod _components;
 mod _core;
 
+mod change_email;
 mod get_static_file;
 mod login;
 mod logout;
@@ -57,6 +58,7 @@ pub fn router(cfg: Configuration, database: AnyDatabase, cookie_key: cookie::Key
         // profile
         .merge(show_profile::router())
         .merge(validate_change_email::router())
+        .merge(change_email::router())
         // home
         .merge(show_dashboard::router())
         // other

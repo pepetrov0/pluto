@@ -48,7 +48,7 @@ pub fn change_email_form(
                     span ."icon-xs" { (Icon::AtSymbol) }
                     label for="new-email" { (t!("change-email.labels.new-email", locale = locale)) };
                 }
-                input #new-email 
+                input #new-email
                     .error[new_email_error.is_some()]
                     type="email" name="new_email" minlength="5" value=(data.new_email)
                     placeholder=(t!("change-email.placeholders.new-email", locale = locale))
@@ -71,13 +71,17 @@ pub fn change_email_form(
             }
 
             @if let Some(ChangeEmailError::Failure) = error {
-                span ."sm:col-span-2 text-center" .(ERROR_LABEL_STYLES) { 
-                    (t!("change-email.errors.something-went-wrong", locale = locale)) 
+                span ."sm:col-span-2 text-center" .(ERROR_LABEL_STYLES) {
+                    (t!("change-email.errors.something-went-wrong", locale = locale))
                 };
             }
 
             div .(ACTIONS_STYLES) {
-                input .(ACTION_STYLES) type="submit" value=(t!("change-email.labels.save", locale = locale));
+                input .(ACTION_STYLES) 
+                    type="submit" value=(t!("change-email.labels.save", locale = locale))
+                    hx-post="/profile/change-email"
+                    hx-target="#change-email-form"
+                    hx-swap="outerHTML";
             }
         }
     }
