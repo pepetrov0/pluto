@@ -5,7 +5,7 @@ use maud::{html, Markup};
 use crate::{
     domain::{change_email::ChangeEmailError, users::User},
     web::_components::{
-        organisms::{change_email_form, profile_details_card, ChangeEmailFormData},
+        organisms::{change_email_form, change_password_form, profile_details_card, ChangeEmailFormData},
         templates,
     },
 };
@@ -22,6 +22,7 @@ pub fn profile(
 
         @if user.has_password {
             (change_email_form(locale, change_email_data, change_email_error))
+            (change_password_form(locale, None))
         }
     };
     templates::page(locale, "profile.title", content)
