@@ -48,4 +48,17 @@ impl Users for AnyTransaction {
             AnyTransaction::Pg(v) => v.update_user_email_by_id(id, new_email).await,
         }
     }
+
+    /// Update a user's password by their identifier.
+    #[tracing::instrument(skip(self))]
+    async fn update_user_password_by_id(
+        &mut self,
+        id: Id,
+        new_password: Option<&str>,
+    ) -> Result<Option<User>> {
+        match self {
+            AnyTransaction::Sqlite(v) => v.update_user_password_by_id(id, new_password).await,
+            AnyTransaction::Pg(v) => v.update_user_password_by_id(id, new_password).await,
+        }
+    }
 }

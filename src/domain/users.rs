@@ -96,6 +96,20 @@ pub async fn update_user_email_by_id(
         .map(User::from)
 }
 
+/// Updates a user's password by their identifier.
+#[instrument(err, skip(tx, new_password))]
+pub async fn update_user_password_by_id(
+    tx: &mut AnyTransaction,
+    id: Id,
+    new_password: Option<&str>,
+) -> Result<User, UserError> {
+    tx.update_user_password_by_id(id, new_password)
+        .await
+        .map_err(UserError::from)?
+        .ok_or(UserError::UserNotFound)
+        .map(User::from)
+}
+
 impl From<database::users::User> for User {
     fn from(value: database::users::User) -> Self {
         Self {

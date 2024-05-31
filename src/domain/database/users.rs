@@ -41,4 +41,7 @@ pub trait Users {
         id: Id,
         new_email: &str,
     ) -> super::Result<Option<User>>;
+
+    /// Update a user's password by their identifier.
+    async fn update_user_password_by_id(&mut self, id: Id, new_password: Option<&str>) -> super::Result<Option<User>>;
 }

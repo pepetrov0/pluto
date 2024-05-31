@@ -57,4 +57,19 @@ impl Users for PgTransaction {
             .await
             .map_err(Error::from)
     }
+
+    /// Update a user's password by their identifier.
+    #[tracing::instrument(skip(self))]
+    async fn update_user_password_by_id(
+        &mut self,
+        id: Id,
+        new_password: Option<&str>,
+    ) -> Result<Option<User>> {
+        sqlx::query_as(include_str!("update_user_password_by_id.sql"))
+            .bind(id)
+            .bind(new_password)
+            .fetch_optional(&mut *self.0)
+            .await
+            .map_err(Error::from)
+    }
 }
