@@ -16,7 +16,7 @@ pub struct User {
 }
 
 /// A user with password.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct UserWithPassword {
     pub id: Id,
     pub email: String,

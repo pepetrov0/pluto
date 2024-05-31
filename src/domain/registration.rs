@@ -19,30 +19,32 @@ pub enum RegistrationError {
     Failure,
 }
 
+/// Validates register data.
+#[instrument(err, skip_all)]
 pub async fn validate_register(
     tx: &mut AnyTransaction,
     email: &str,
     password: &str,
     confirm_password: &str,
 ) -> Result<(), RegistrationError> {
-    // test if email is taken
-    if find_user_by_email(tx, email).await.is_ok() {
-        return Err(RegistrationError::EmailTaken);
-    }
-
     // test whether the email address is valid
     if !validations::email(email) {
         return Err(RegistrationError::EmailInvalid);
     }
 
-    // test if passwords match
-    if password != confirm_password {
-        return Err(RegistrationError::PasswordsMismatch);
+    // test if email is taken
+    if find_user_by_email(tx, email).await.is_ok() {
+        return Err(RegistrationError::EmailTaken);
     }
 
     // assess password
     if !validations::password_strength(password, &[email]) {
         return Err(RegistrationError::WeakPassword);
+    }
+
+    // test if passwords match
+    if password != confirm_password {
+        return Err(RegistrationError::PasswordsMismatch);
     }
 
     Ok(())

@@ -19,6 +19,7 @@ mod show_login;
 mod show_profile;
 mod show_register;
 mod validate_change_email;
+mod validate_change_password;
 mod validate_register;
 
 #[cfg(test)]
@@ -58,6 +59,7 @@ pub fn router(cfg: Configuration, database: AnyDatabase, cookie_key: cookie::Key
         // profile
         .merge(show_profile::router())
         .merge(validate_change_email::router())
+        .merge(validate_change_password::router())
         .merge(change_email::router())
         // home
         .merge(show_dashboard::router())

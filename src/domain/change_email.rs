@@ -1,5 +1,7 @@
 //! This module provides a implementation to change a user's email.
 
+use tracing::instrument;
+
 use super::{
     database::AnyTransaction,
     passwords,
@@ -10,6 +12,7 @@ use super::{
 };
 
 /// An error that might occur while changing a user's email.
+#[derive(Debug, Clone, Copy)]
 pub enum ChangeEmailError {
     EmailTaken,
     EmailInvalid,
@@ -17,6 +20,8 @@ pub enum ChangeEmailError {
     Failure,
 }
 
+/// Validates the date required for a email change.
+#[instrument(err, skip(tx))]
 pub async fn validate_change_email(
     tx: &mut AnyTransaction,
     user: &User,
@@ -40,6 +45,8 @@ pub async fn validate_change_email(
     Ok(())
 }
 
+/// Changes a user's email.
+#[instrument(err, skip(tx, current_password))]
 pub async fn change_email(
     tx: &mut AnyTransaction,
     user: &User,
@@ -67,6 +74,13 @@ pub async fn change_email(
         .await
         .map(|_| ())
         .map_err(ChangeEmailError::from)
+}
+
+impl std::error::Error for ChangeEmailError {}
+impl std::fmt::Display for ChangeEmailError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{self:?}")
+    }
 }
 
 impl From<UserError> for ChangeEmailError {

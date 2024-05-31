@@ -17,6 +17,8 @@ pub fn invoke(locale: Locale, user: User) -> Response {
             ..Default::default()
         }),
         None,
+        None,
+        None,
     )
     .into_response()
 }

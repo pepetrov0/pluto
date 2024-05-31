@@ -17,6 +17,7 @@ pub mod sessions;
 pub mod shutdown;
 pub mod users;
 pub mod validations;
+pub mod change_password;
 
 pub use configuration::Configuration;
 pub use identifier::Id;

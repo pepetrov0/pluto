@@ -22,9 +22,8 @@ pub async fn invoke(
         Some(error) if hx.request => {
             change_email_form(locale.as_str(), Some(data), Some(error)).into_response()
         }
-        Some(error) => {
-            pages::profile(locale.as_str(), user, Some(data), Some(error)).into_response()
-        }
+        Some(error) => pages::profile(locale.as_str(), user, Some(data), Some(error), None, None)
+            .into_response(),
         None => Redirect::to("/profile").into_response(),
     }
 }
