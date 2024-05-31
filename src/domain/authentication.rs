@@ -15,7 +15,7 @@ pub enum AuthenticationError {
 
 /// Authenticates a user by their email, password and agent.
 /// Returns the user authenticated as well as a new session.
-#[instrument(err, skip_all)]
+#[instrument(err, skip(tx, password))]
 pub async fn authenticate(
     tx: &mut AnyTransaction,
     email: &str,

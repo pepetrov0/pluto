@@ -20,7 +20,7 @@ pub enum RegistrationError {
 }
 
 /// Validates register data.
-#[instrument(err, skip_all)]
+#[instrument(err, skip(tx, password, confirm_password))]
 pub async fn validate_register(
     tx: &mut AnyTransaction,
     email: &str,
@@ -51,7 +51,7 @@ pub async fn validate_register(
 }
 
 /// Registers a new user.
-#[instrument(err, skip_all)]
+#[instrument(err, skip(tx, password, confirm_password))]
 pub async fn register(
     tx: &mut AnyTransaction,
     email: &str,

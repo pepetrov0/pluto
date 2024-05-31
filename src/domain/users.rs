@@ -23,6 +23,79 @@ pub struct UserWithPassword {
     pub password: Option<String>,
 }
 
+/// Finds a user by their identifier.
+#[instrument(err, skip(tx))]
+pub async fn find_user_by_id(tx: &mut AnyTransaction, id: Id) -> Result<User, UserError> {
+    tx.find_user_by_id(id)
+        .await
+        .map_err(UserError::from)?
+        .ok_or(UserError::UserNotFound)
+        .map(User::from)
+}
+
+/// Finds a user by their email.
+#[instrument(err, skip(tx))]
+pub async fn find_user_by_email(tx: &mut AnyTransaction, email: &str) -> Result<User, UserError> {
+    tx.find_user_by_email(email)
+        .await
+        .map_err(UserError::from)?
+        .ok_or(UserError::UserNotFound)
+        .map(User::from)
+}
+
+/// Finds a user by their identifier including password.
+#[instrument(err, skip(tx))]
+pub async fn find_user_with_password_by_id(
+    tx: &mut AnyTransaction,
+    id: Id,
+) -> Result<UserWithPassword, UserError> {
+    tx.find_user_by_id(id)
+        .await
+        .map_err(UserError::from)?
+        .ok_or(UserError::UserNotFound)
+        .map(UserWithPassword::from)
+}
+
+/// Finds a user by their email including password.
+#[instrument(err, skip(tx))]
+pub async fn find_user_with_password_by_email(
+    tx: &mut AnyTransaction,
+    email: &str,
+) -> Result<UserWithPassword, UserError> {
+    tx.find_user_by_email(email)
+        .await
+        .map_err(UserError::from)?
+        .ok_or(UserError::UserNotFound)
+        .map(UserWithPassword::from)
+}
+
+/// Creates a new user.
+#[instrument(err, skip(tx, password))]
+pub async fn create_user(
+    tx: &mut AnyTransaction,
+    email: &str,
+    password: Option<&str>,
+) -> Result<User, UserError> {
+    tx.create_user(email, password)
+        .await
+        .map(User::from)
+        .map_err(UserError::from)
+}
+
+/// Updates a user's email by their identifier.
+#[instrument(err, skip(tx))]
+pub async fn update_user_email_by_id(
+    tx: &mut AnyTransaction,
+    id: Id,
+    new_email: &str,
+) -> Result<User, UserError> {
+    tx.update_user_email_by_id(id, new_email)
+        .await
+        .map_err(UserError::from)?
+        .ok_or(UserError::UserNotFound)
+        .map(User::from)
+}
+
 impl From<database::users::User> for User {
     fn from(value: database::users::User) -> Self {
         Self {
@@ -71,86 +144,4 @@ impl From<database::Error> for UserError {
     fn from(value: database::Error) -> Self {
         Self::Database(value)
     }
-}
-
-/// Finds a user by their identifier.
-#[instrument(err, skip_all)]
-pub async fn find_user_by_id(transaction: &mut AnyTransaction, id: Id) -> Result<User, UserError> {
-    transaction
-        .find_user_by_id(id)
-        .await
-        .map_err(UserError::from)?
-        .ok_or(UserError::UserNotFound)
-        .map(User::from)
-}
-
-/// Finds a user by their email.
-#[instrument(err, skip_all)]
-pub async fn find_user_by_email(
-    transaction: &mut AnyTransaction,
-    email: &str,
-) -> Result<User, UserError> {
-    transaction
-        .find_user_by_email(email)
-        .await
-        .map_err(UserError::from)?
-        .ok_or(UserError::UserNotFound)
-        .map(User::from)
-}
-
-/// Finds a user by their identifier including password.
-#[instrument(err, skip_all)]
-pub async fn find_user_with_password_by_id(
-    transaction: &mut AnyTransaction,
-    id: Id,
-) -> Result<UserWithPassword, UserError> {
-    transaction
-        .find_user_by_id(id)
-        .await
-        .map_err(UserError::from)?
-        .ok_or(UserError::UserNotFound)
-        .map(UserWithPassword::from)
-}
-
-/// Finds a user by their email including password.
-#[instrument(err, skip_all)]
-pub async fn find_user_with_password_by_email(
-    transaction: &mut AnyTransaction,
-    email: &str,
-) -> Result<UserWithPassword, UserError> {
-    transaction
-        .find_user_by_email(email)
-        .await
-        .map_err(UserError::from)?
-        .ok_or(UserError::UserNotFound)
-        .map(UserWithPassword::from)
-}
-
-/// Creates a new user.
-#[instrument(err, skip_all)]
-pub async fn create_user(
-    transaction: &mut AnyTransaction,
-    email: &str,
-    password: Option<&str>,
-) -> Result<User, UserError> {
-    transaction
-        .create_user(email, password)
-        .await
-        .map(User::from)
-        .map_err(UserError::from)
-}
-
-/// Updates a user's email by their identifier.
-#[instrument(err, skip_all)]
-pub async fn update_user_email_by_id(
-    transaction: &mut AnyTransaction,
-    id: Id,
-    new_email: &str,
-) -> Result<User, UserError> {
-    transaction
-        .update_user_email_by_id(id, new_email)
-        .await
-        .map_err(UserError::from)?
-        .ok_or(UserError::UserNotFound)
-        .map(User::from)
 }
