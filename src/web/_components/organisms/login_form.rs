@@ -6,7 +6,7 @@ use rust_i18n::t;
 use crate::{domain::authentication::AuthenticationError, web::_components::atoms::Icon};
 
 /// Represents the data in a login form.
-#[derive(Debug, Default, Clone, serde::Deserialize)]
+#[derive(Default, Clone, serde::Deserialize)]
 pub struct LoginFormData {
     pub email: String,
     pub password: String,

@@ -50,12 +50,8 @@ impl From<database::Error> for SessionError {
 
 /// Finds a session by its identifier.
 #[instrument(err, skip(tx))]
-pub async fn find_session_by_id(
-    tx: &mut AnyTransaction,
-    id: Id,
-) -> Result<Session, SessionError> {
-    tx
-        .find_session_by_id(id)
+pub async fn find_session_by_id(tx: &mut AnyTransaction, id: Id) -> Result<Session, SessionError> {
+    tx.find_session_by_id(id)
         .await
         .map_err(SessionError::from)?
         .ok_or(SessionError::SessionNotFound)
@@ -69,8 +65,7 @@ pub async fn create_session(
     user: Id,
     agent: &str,
 ) -> Result<Session, SessionError> {
-    tx
-        .create_session(user, agent)
+    tx.create_session(user, agent)
         .await
         .map(Session::from)
         .map_err(SessionError::from)
@@ -78,12 +73,8 @@ pub async fn create_session(
 
 /// Deletes a session by its identifier.
 #[instrument(err, skip(tx))]
-pub async fn delete_session_by_id(
-    tx: &mut AnyTransaction,
-    id: Id,
-) -> Result<(), SessionError> {
-    tx
-        .delete_session_by_id(id)
+pub async fn delete_session_by_id(tx: &mut AnyTransaction, id: Id) -> Result<(), SessionError> {
+    tx.delete_session_by_id(id)
         .await
         .map_err(SessionError::from)
 }

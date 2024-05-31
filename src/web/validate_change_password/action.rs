@@ -8,6 +8,7 @@ use crate::{
     },
 };
 
+#[tracing::instrument(skip(data))]
 pub async fn invoke(
     locale: Locale,
     auth: Auth,

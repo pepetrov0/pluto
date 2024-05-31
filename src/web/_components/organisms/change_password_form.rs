@@ -6,7 +6,7 @@ use rust_i18n::t;
 use crate::{domain::change_password::ChangePasswordError, web::_components::atoms::Icon};
 
 /// Represents the data in a change password form.
-#[derive(Debug, Default, Clone, serde::Deserialize)]
+#[derive(Default, Clone, serde::Deserialize)]
 pub struct ChangePasswordFormData {
     pub new_password: String,
     pub confirm_new_password: String,

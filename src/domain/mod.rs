@@ -7,6 +7,7 @@
 
 pub mod authentication;
 pub mod change_email;
+pub mod change_password;
 mod configuration;
 pub mod database;
 mod identifier;
@@ -17,7 +18,6 @@ pub mod sessions;
 pub mod shutdown;
 pub mod users;
 pub mod validations;
-pub mod change_password;
 
 pub use configuration::Configuration;
 pub use identifier::Id;

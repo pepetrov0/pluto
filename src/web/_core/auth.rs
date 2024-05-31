@@ -45,6 +45,7 @@ pub struct CreateAuth(pub Session);
 pub struct DeleteAuth;
 
 impl Auth {
+    #[tracing::instrument(skip(state, request))]
     pub async fn try_from_request_header(
         state: &GlobalState,
         request: &mut Request,
@@ -69,6 +70,7 @@ impl Auth {
         })
     }
 
+    #[tracing::instrument(skip(state, request))]
     pub async fn try_from_request_cookies(
         state: &GlobalState,
         request: &mut Request,

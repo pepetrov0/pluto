@@ -6,7 +6,7 @@ use rust_i18n::t;
 use crate::{domain::change_email::ChangeEmailError, web::_components::atoms::Icon};
 
 /// Represents the data in a change email form.
-#[derive(Debug, Default, Clone, serde::Deserialize)]
+#[derive(Default, Clone, serde::Deserialize)]
 pub struct ChangeEmailFormData {
     pub new_email: String,
     pub current_password: String,
@@ -74,9 +74,9 @@ pub fn change_email_form(
                     span ."icon-xs" { (Icon::Key) }
                     label for="current-password" { (t!("change-email.labels.current-password", locale = locale)) };
                 }
-                input #current-password 
+                input #current-password
                     .error[current_password_error.is_some()]
-                    type="password" 
+                    type="password"
                     name="current_password"
                     placeholder=(t!("change-email.placeholders.current-password", locale = locale));
                 @if let Some(copy) = current_password_error {

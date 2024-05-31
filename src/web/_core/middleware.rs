@@ -12,6 +12,7 @@ use axum_extra::{headers::CacheControl, TypedHeader};
 use super::{Auth, CreateAuth, DeleteAuth, Hx};
 
 /// A middleware layer that adds cache control header to all responses that do not have one.
+#[tracing::instrument(skip(req, next))]
 pub async fn cache_control_layer(req: Request, next: Next) -> Response {
     let response = next.run(req).await;
 
@@ -23,6 +24,7 @@ pub async fn cache_control_layer(req: Request, next: Next) -> Response {
 
 /// A middleware layer that tries to extract the authorization principle from the header
 /// and attach it as an extension.
+#[tracing::instrument(skip(state, req, next))]
 pub async fn header_authorization_layer(
     State(state): State<super::GlobalState>,
     mut req: Request,
@@ -40,6 +42,7 @@ pub async fn header_authorization_layer(
 
 /// A middleware layer that tries to extract the authorization principle from the cookies
 /// and attach it as an extension.
+#[tracing::instrument(skip(state, req, next))]
 pub async fn cookie_authorization_layer(
     State(state): State<super::GlobalState>,
     mut req: Request,
@@ -63,6 +66,7 @@ pub async fn cookie_authorization_layer(
     (delete_jar, create_jar, response).into_response()
 }
 
+#[tracing::instrument(skip(req, next))]
 pub async fn redirects_layer(mut req: Request, next: Next) -> Response {
     const HTMX_LOCATION_HEADER: &str = "HX-Location";
 

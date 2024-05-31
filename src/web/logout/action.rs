@@ -8,6 +8,7 @@ use crate::{
     web::_core::{Auth, GlobalState},
 };
 
+#[tracing::instrument(skip(state))]
 pub async fn invoke(State(state): State<GlobalState>, auth: Option<Auth>) -> Response {
     if let Some(session) = auth.and_then(|v| v.session) {
         if let Ok(mut tx) = state.database.begin().await {
