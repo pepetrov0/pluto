@@ -1,4 +1,4 @@
-//! Implements an action to validate a 'change email' form.
+//! Implements an action to change a user's email.
 
 use axum::{routing, Router};
 

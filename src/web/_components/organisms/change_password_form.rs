@@ -43,6 +43,15 @@ pub fn change_password_form(
         _ => None,
     };
 
+    // extract global error
+    let global_error = match error {
+        Some(ChangePasswordError::InvalidCredentials) => {
+            Some("change-password.errors.invalid-credentials")
+        }
+        Some(ChangePasswordError::Failure) => Some("change-password.errors.something-went-wrong"),
+        _ => None,
+    };
+
     html! {
         form #change-password-form .(STYLES) action="/profile/change-password" method="POST"
             hx-boost="true" hx-disabled-elt="#change-password-form input" hx-indicator="#change-password-form input" {
@@ -94,6 +103,12 @@ pub fn change_password_form(
                     type="password"
                     name="current_password"
                     placeholder=(t!("change-password.placeholders.current-password", locale = locale));
+            }
+
+            @if let Some(copy) = global_error {
+                span ."sm:col-span-2 text-center" .(ERROR_LABEL_STYLES) {
+                    (t!(copy, locale = locale))
+                };
             }
 
             div .(ACTIONS_STYLES) {
