@@ -5,7 +5,7 @@ use tracing::instrument;
 use super::{
     database::AnyTransaction,
     passwords::{self, PasswordError},
-    users::{find_user_with_password_by_id, update_user_password_by_id, User, UserError},
+    users::{User, UserError, UsersRepository},
     validations,
 };
 
@@ -48,10 +48,6 @@ pub async fn change_password(
 ) -> Result<(), ChangePasswordError> {
     validate_change_password(user, new_password, confirm_new_password)?;
 
-    let user = find_user_with_password_by_id(tx, user.id)
-        .await
-        .map_err(ChangePasswordError::from)?;
-
     // validate password
     user.password
         .as_ref()
@@ -61,7 +57,7 @@ pub async fn change_password(
     // hash password
     let password = passwords::hash_password(new_password).map_err(ChangePasswordError::from)?;
 
-    update_user_password_by_id(tx, user.id, Some(password.as_str()))
+    tx.update_user_password_by_id(user.id, Some(password.as_str()))
         .await
         .map(|_| ())
         .map_err(ChangePasswordError::from)
@@ -77,7 +73,7 @@ impl std::fmt::Display for ChangePasswordError {
 impl From<UserError> for ChangePasswordError {
     fn from(value: UserError) -> Self {
         match value {
-            UserError::Database(_) | UserError::UserNotFound => Self::Failure,
+            UserError::Message(_) | UserError::NotFound => Self::Failure,
         }
     }
 }

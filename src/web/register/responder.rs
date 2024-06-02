@@ -1,7 +1,7 @@
 use axum::response::{IntoResponse, Redirect, Response};
 
 use crate::{
-    domain::{registration::RegistrationError, sessions::Session},
+    domain::{registration::RegistrationError, Session},
     web::{
         _components::{
             organisms::{self, RegisterFormData},

@@ -1,38 +1,52 @@
 //! This module implements sessions business logic.
 
+use axum::async_trait;
 use chrono::NaiveDateTime;
-use tracing::instrument;
 
-use super::{
-    database::{self, sessions::Sessions, AnyTransaction},
-    identifier::Id,
-};
+use crate::domain::identifier::Id;
 
-/// A session.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+/// An entity representing a session.
+#[derive(Debug, Clone, sqlx::FromRow, Eq, PartialEq)]
 pub struct Session {
+    /// Identifier of the session.
     pub id: Id,
+    /// Identifier to the related user.
     pub user_id: Id,
+    /// Agent of the user.
     pub agent: String,
+    /// The timestamp of the creation of the session.
     pub created_on: NaiveDateTime,
 }
 
-impl From<database::sessions::Session> for Session {
-    fn from(value: database::sessions::Session) -> Self {
-        Self {
-            id: value.id,
-            user_id: value.user_id,
-            agent: value.agent,
-            created_on: value.created_on,
-        }
-    }
+/// An error that might occur while working with sessions.
+#[derive(Debug, Clone, Eq, PartialEq, PartialOrd, Ord)]
+pub enum SessionError {
+    /// A general error described by a message.
+    Message(String),
+    /// An error indicating that no row was found by the query.
+    NotFound,
 }
 
-/// An error related to session operations.
-#[derive(Debug)]
-pub enum SessionError {
-    Database(database::Error),
-    SessionNotFound,
+/// A trait describing a repository of sessions.
+#[async_trait]
+pub trait SessionsRepository {
+    /// Finds a session by identifier.
+    async fn find_session_by_id(&mut self, id: Id) -> Result<Session, SessionError>;
+
+    /// Finds all sessions for the specified user.
+    async fn find_all_sessions_by_user_id(
+        &mut self,
+        user_id: Id,
+    ) -> Result<Vec<Session>, SessionError>;
+
+    /// Create a session.
+    async fn create_session(&mut self, user_id: Id, agent: &str) -> Result<Session, SessionError>;
+
+    /// Deletes a session by ID.
+    async fn delete_session_by_id(&mut self, id: Id) -> Result<(), SessionError>;
+
+    /// Deletes all sessions of the specified user.
+    async fn delete_all_sessions_by_user_id(&mut self, user_id: Id) -> Result<(), SessionError>;
 }
 
 impl std::error::Error for SessionError {}
@@ -42,39 +56,11 @@ impl std::fmt::Display for SessionError {
     }
 }
 
-impl From<database::Error> for SessionError {
-    fn from(value: database::Error) -> Self {
-        Self::Database(value)
+impl From<sqlx::Error> for SessionError {
+    fn from(value: sqlx::Error) -> Self {
+        match value {
+            sqlx::Error::RowNotFound => Self::NotFound,
+            e => Self::Message(format!("{e:?}")),
+        }
     }
-}
-
-/// Finds a session by its identifier.
-#[instrument(err, skip(tx))]
-pub async fn find_session_by_id(tx: &mut AnyTransaction, id: Id) -> Result<Session, SessionError> {
-    tx.find_session_by_id(id)
-        .await
-        .map_err(SessionError::from)?
-        .ok_or(SessionError::SessionNotFound)
-        .map(Session::from)
-}
-
-/// Creates a session.
-#[instrument(err, skip(tx))]
-pub async fn create_session(
-    tx: &mut AnyTransaction,
-    user: Id,
-    agent: &str,
-) -> Result<Session, SessionError> {
-    tx.create_session(user, agent)
-        .await
-        .map(Session::from)
-        .map_err(SessionError::from)
-}
-
-/// Deletes a session by its identifier.
-#[instrument(err, skip(tx))]
-pub async fn delete_session_by_id(tx: &mut AnyTransaction, id: Id) -> Result<(), SessionError> {
-    tx.delete_session_by_id(id)
-        .await
-        .map_err(SessionError::from)
 }

@@ -1,7 +1,7 @@
 use axum::response::{IntoResponse, Response};
 
 use crate::{
-    domain::users::User,
+    domain::User,
     web::{
         _components::{organisms::ChangeEmailFormData, pages},
         _core::Locale,

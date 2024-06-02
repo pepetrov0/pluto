@@ -5,8 +5,8 @@ use tracing::instrument;
 use super::{
     database::AnyTransaction,
     passwords::{self, PasswordError},
-    sessions::{create_session, Session, SessionError},
-    users::{create_user, find_user_by_email, User, UserError},
+    sessions::{Session, SessionError, SessionsRepository},
+    users::{User, UserError, UsersRepository},
     validations,
 };
 
@@ -33,7 +33,7 @@ pub async fn validate_register(
     }
 
     // test if email is taken
-    if find_user_by_email(tx, email).await.is_ok() {
+    if tx.find_user_by_email(email).await.is_ok() {
         return Err(RegistrationError::EmailTaken);
     }
 
@@ -61,7 +61,7 @@ pub async fn register(
     validate_register(tx, email, password, confirm_password).await?;
 
     let password = passwords::hash_password(password).map_err(RegistrationError::from)?;
-    create_user(tx, email, Some(&password))
+    tx.create_user(email, Some(&password))
         .await
         .map_err(RegistrationError::from)
 }
@@ -76,7 +76,8 @@ pub async fn register_and_authenticate(
     agent: &str,
 ) -> Result<(User, Session), RegistrationError> {
     let user = register(tx, email, password, confirm_password).await?;
-    let session = create_session(tx, user.id, agent)
+    let session = tx
+        .create_session(user.id, agent)
         .await
         .map_err(RegistrationError::from)?;
     Ok((user, session))
@@ -98,7 +99,7 @@ impl From<PasswordError> for RegistrationError {
 impl From<UserError> for RegistrationError {
     fn from(value: UserError) -> Self {
         match value {
-            UserError::Database(_) | UserError::UserNotFound => Self::Failure,
+            UserError::Message(_) | UserError::NotFound => Self::Failure,
         }
     }
 }
@@ -106,7 +107,7 @@ impl From<UserError> for RegistrationError {
 impl From<SessionError> for RegistrationError {
     fn from(value: SessionError) -> Self {
         match value {
-            SessionError::Database(_) | SessionError::SessionNotFound => Self::Failure,
+            SessionError::Message(_) | SessionError::NotFound => Self::Failure,
         }
     }
 }

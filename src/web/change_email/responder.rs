@@ -1,7 +1,7 @@
 use axum::response::{IntoResponse, Redirect, Response};
 
 use crate::{
-    domain::{change_email::ChangeEmailError, users::User},
+    domain::{change_email::ChangeEmailError, User},
     web::{
         _components::{
             organisms::{change_email_form, ChangeEmailFormData},

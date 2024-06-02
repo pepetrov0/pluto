@@ -4,62 +4,62 @@
 use axum::async_trait;
 
 use crate::domain::{
-    database::{
-        sessions::{Session, Sessions},
-        Error, Result,
-    },
     identifier::Id,
+    sessions::{Session, SessionError, SessionsRepository},
 };
 
 use super::PgTransaction;
 
 #[async_trait]
-impl Sessions for PgTransaction {
+impl SessionsRepository for PgTransaction {
     #[tracing::instrument(err, skip(self))]
-    async fn find_session_by_id(&mut self, id: Id) -> Result<Option<Session>> {
+    async fn find_session_by_id(&mut self, id: Id) -> Result<Session, SessionError> {
         sqlx::query_as(include_str!("find_session_by_id.sql"))
             .bind(id)
-            .fetch_optional(&mut *self.0)
+            .fetch_one(&mut *self.0)
             .await
-            .map_err(Error::from)
+            .map_err(SessionError::from)
     }
 
     #[tracing::instrument(err, skip(self))]
-    async fn find_all_sessions_by_user_id(&mut self, user_id: Id) -> Result<Vec<Session>> {
+    async fn find_all_sessions_by_user_id(
+        &mut self,
+        user_id: Id,
+    ) -> Result<Vec<Session>, SessionError> {
         sqlx::query_as(include_str!("find_all_sessions_by_user_id.sql"))
             .bind(user_id)
             .fetch_all(&mut *self.0)
             .await
-            .map_err(Error::from)
+            .map_err(SessionError::from)
     }
 
     #[tracing::instrument(err, skip(self))]
-    async fn create_session(&mut self, user_id: Id, agent: &str) -> Result<Session> {
+    async fn create_session(&mut self, user_id: Id, agent: &str) -> Result<Session, SessionError> {
         sqlx::query_as(include_str!("create_session.sql"))
             .bind(user_id)
             .bind(agent)
             .fetch_one(&mut *self.0)
             .await
-            .map_err(Error::from)
+            .map_err(SessionError::from)
     }
 
     #[tracing::instrument(err, skip(self))]
-    async fn delete_session_by_id(&mut self, id: Id) -> Result<()> {
+    async fn delete_session_by_id(&mut self, id: Id) -> Result<(), SessionError> {
         sqlx::query(include_str!("delete_session_by_id.sql"))
             .bind(id)
             .execute(&mut *self.0)
             .await
             .map(|_| ())
-            .map_err(Error::from)
+            .map_err(SessionError::from)
     }
 
     #[tracing::instrument(err, skip(self))]
-    async fn delete_all_sessions_by_user_id(&mut self, user_id: Id) -> Result<()> {
+    async fn delete_all_sessions_by_user_id(&mut self, user_id: Id) -> Result<(), SessionError> {
         sqlx::query(include_str!("delete_all_sessions_by_user_id.sql"))
             .bind(user_id)
             .execute(&mut *self.0)
             .await
             .map(|_| ())
-            .map_err(Error::from)
+            .map_err(SessionError::from)
     }
 }

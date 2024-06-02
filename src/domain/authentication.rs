@@ -2,9 +2,9 @@ use tracing::instrument;
 
 use super::{
     database::AnyTransaction,
-    passwords::{self},
-    sessions::{create_session, Session, SessionError},
-    users::{find_user_with_password_by_email, User, UserError},
+    passwords,
+    sessions::{Session, SessionError, SessionsRepository},
+    users::{User, UserError, UsersRepository},
 };
 
 #[derive(Debug, Clone)]
@@ -22,7 +22,8 @@ pub async fn authenticate(
     password: &str,
     agent: &str,
 ) -> Result<(User, Session), AuthenticationError> {
-    let user = find_user_with_password_by_email(tx, email)
+    let user = tx
+        .find_user_by_email(email)
         .await
         .map_err(AuthenticationError::from)?;
 
@@ -33,11 +34,12 @@ pub async fn authenticate(
         .ok_or(AuthenticationError::InvalidCredentials)?;
 
     // create session
-    let session = create_session(tx, user.id, agent)
+    let session = tx
+        .create_session(user.id, agent)
         .await
         .map_err(AuthenticationError::from)?;
 
-    Ok((user.into(), session))
+    Ok((user, session))
 }
 
 impl std::error::Error for AuthenticationError {}
@@ -50,8 +52,8 @@ impl std::fmt::Display for AuthenticationError {
 impl From<UserError> for AuthenticationError {
     fn from(value: UserError) -> Self {
         match value {
-            UserError::Database(_) => Self::Failure,
-            UserError::UserNotFound => Self::InvalidCredentials,
+            UserError::Message(_) => Self::Failure,
+            UserError::NotFound => Self::InvalidCredentials,
         }
     }
 }
@@ -59,7 +61,7 @@ impl From<UserError> for AuthenticationError {
 impl From<SessionError> for AuthenticationError {
     fn from(value: SessionError) -> Self {
         match value {
-            SessionError::Database(_) | SessionError::SessionNotFound => Self::Failure,
+            SessionError::Message(_) | SessionError::NotFound => Self::Failure,
         }
     }
 }

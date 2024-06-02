@@ -1,7 +1,7 @@
 use axum::response::{IntoResponse, Redirect, Response};
 
 use crate::{
-    domain::{authentication::AuthenticationError, sessions::Session},
+    domain::{authentication::AuthenticationError, Session},
     web::{
         _components::{organisms, pages},
         _core::{CreateAuth, Hx, Locale},

@@ -19,18 +19,17 @@ use axum_extra::{
 };
 
 use crate::domain::{
+    authorization::{authorize_by_session, force_authorize_by_email},
     database::{Database, Transaction},
-    sessions::{find_session_by_id, Session},
-    users::{create_user, find_user_by_email, find_user_by_id, User, UserError},
-    Id,
+    Id, Session, User,
 };
 
 use super::GlobalState;
 
 const COOKIE_NAME: &str = "x-pluto-session";
 
-/// A authentication/authorization principal.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+/// A authorization principal.
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Auth {
     pub user: User,
     pub session: Option<Session>,
@@ -54,16 +53,9 @@ impl Auth {
         let email = request.headers().get(header)?.to_str().ok()?;
 
         let mut tx = state.database.begin().await.ok()?;
-        let user = match find_user_by_email(&mut tx, email).await {
-            Ok(user) => user,
-            Err(UserError::Database(_)) => return None,
-            Err(UserError::UserNotFound) => {
-                let user = create_user(&mut tx, email, None).await.ok()?;
-                tx.commit().await.ok()?;
-                user
-            }
-        };
+        let user = force_authorize_by_email(&mut tx, email).await.ok()?;
 
+        tx.commit().await.ok()?;
         Some(Self {
             user,
             session: None,
@@ -80,12 +72,9 @@ impl Auth {
         let agent: TypedHeader<UserAgent> = request.extract_parts().await.ok()?;
 
         let mut tx = state.database.begin().await.ok()?;
-        let session = find_session_by_id(&mut tx, session)
+        let (user, session) = authorize_by_session(&mut tx, session, agent.as_str())
             .await
-            .ok()
-            // filter based on whether the agents match
-            .filter(|v| v.agent == agent.0.as_str())?;
-        let user = find_user_by_id(&mut tx, session.user_id).await.ok()?;
+            .ok()?;
 
         Some(Self {
             user,

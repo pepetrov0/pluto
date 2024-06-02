@@ -61,7 +61,7 @@ fn compile_tailwind_styles() {
     #[cfg(debug_assertions)]
     const ARGS: [&str; 4] = ["-i", "src/styles.css", "-o", "static/styles.css"];
     let output = std::process::Command::new(TAILWIND_EXECUTABLE_PATH)
-        .args(&ARGS)
+        .args(ARGS)
         .output()
         .unwrap();
     if output.status.code().unwrap_or_default() != 0 {

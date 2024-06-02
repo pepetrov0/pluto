@@ -3,7 +3,7 @@
 use maud::{html, Markup};
 use rust_i18n::t;
 
-use crate::{domain::users::User, web::_components::atoms::Icon};
+use crate::{domain::User, web::_components::atoms::Icon};
 
 pub fn profile_details_card(locale: &str, user: &User) -> Markup {
     const STYLES: &str = "card grid gap-2 grid-cols-1 sm:grid-cols-2";

@@ -1,150 +1,60 @@
 //! This module implements the business logic for working with users.
 
-use tracing::instrument;
+use axum::async_trait;
 
-use super::{
-    database::{self, users::Users, AnyTransaction},
-    identifier::Id,
-};
+use crate::domain::identifier::Id;
 
-/// A user.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+/// An entity representing a user.
+#[derive(Debug, Clone, sqlx::FromRow, Eq, PartialEq)]
 pub struct User {
+    /// Identifier of the user.
     pub id: Id,
+    /// Email.
     pub email: String,
-    pub has_password: bool,
-}
-
-/// A user with password.
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct UserWithPassword {
-    pub id: Id,
-    pub email: String,
+    /// Argon hash of the password.
     pub password: Option<String>,
 }
 
-/// Finds a user by their identifier.
-#[instrument(err, skip(tx))]
-pub async fn find_user_by_id(tx: &mut AnyTransaction, id: Id) -> Result<User, UserError> {
-    tx.find_user_by_id(id)
-        .await
-        .map_err(UserError::from)?
-        .ok_or(UserError::UserNotFound)
-        .map(User::from)
-}
-
-/// Finds a user by their email.
-#[instrument(err, skip(tx))]
-pub async fn find_user_by_email(tx: &mut AnyTransaction, email: &str) -> Result<User, UserError> {
-    tx.find_user_by_email(email)
-        .await
-        .map_err(UserError::from)?
-        .ok_or(UserError::UserNotFound)
-        .map(User::from)
-}
-
-/// Finds a user by their identifier including password.
-#[instrument(err, skip(tx))]
-pub async fn find_user_with_password_by_id(
-    tx: &mut AnyTransaction,
-    id: Id,
-) -> Result<UserWithPassword, UserError> {
-    tx.find_user_by_id(id)
-        .await
-        .map_err(UserError::from)?
-        .ok_or(UserError::UserNotFound)
-        .map(UserWithPassword::from)
-}
-
-/// Finds a user by their email including password.
-#[instrument(err, skip(tx))]
-pub async fn find_user_with_password_by_email(
-    tx: &mut AnyTransaction,
-    email: &str,
-) -> Result<UserWithPassword, UserError> {
-    tx.find_user_by_email(email)
-        .await
-        .map_err(UserError::from)?
-        .ok_or(UserError::UserNotFound)
-        .map(UserWithPassword::from)
-}
-
-/// Creates a new user.
-#[instrument(err, skip(tx, password))]
-pub async fn create_user(
-    tx: &mut AnyTransaction,
-    email: &str,
-    password: Option<&str>,
-) -> Result<User, UserError> {
-    tx.create_user(email, password)
-        .await
-        .map(User::from)
-        .map_err(UserError::from)
-}
-
-/// Updates a user's email by their identifier.
-#[instrument(err, skip(tx))]
-pub async fn update_user_email_by_id(
-    tx: &mut AnyTransaction,
-    id: Id,
-    new_email: &str,
-) -> Result<User, UserError> {
-    tx.update_user_email_by_id(id, new_email)
-        .await
-        .map_err(UserError::from)?
-        .ok_or(UserError::UserNotFound)
-        .map(User::from)
-}
-
-/// Updates a user's password by their identifier.
-#[instrument(err, skip(tx, new_password))]
-pub async fn update_user_password_by_id(
-    tx: &mut AnyTransaction,
-    id: Id,
-    new_password: Option<&str>,
-) -> Result<User, UserError> {
-    tx.update_user_password_by_id(id, new_password)
-        .await
-        .map_err(UserError::from)?
-        .ok_or(UserError::UserNotFound)
-        .map(User::from)
-}
-
-impl From<database::users::User> for User {
-    fn from(value: database::users::User) -> Self {
-        Self {
-            id: value.id,
-            email: value.email,
-            has_password: value.password.is_some(),
-        }
-    }
-}
-
-impl From<database::users::User> for UserWithPassword {
-    fn from(value: database::users::User) -> Self {
-        Self {
-            id: value.id,
-            email: value.email,
-            password: value.password,
-        }
-    }
-}
-
-impl From<UserWithPassword> for User {
-    fn from(value: UserWithPassword) -> Self {
-        Self {
-            id: value.id,
-            email: value.email,
-            has_password: value.password.is_some(),
-        }
-    }
-}
-
-/// An error returned by all user operations.
-#[derive(Debug, PartialEq)]
+/// An error that might occur while working with users.
+#[derive(Debug, Clone, Eq, PartialEq, PartialOrd, Ord)]
 pub enum UserError {
-    Database(database::Error),
-    UserNotFound,
+    /// A general error described by a message.
+    Message(String),
+    /// An error indicating that no row was found by the query.
+    NotFound,
+}
+
+/// A trait describing a repository of users.
+#[async_trait]
+pub trait UsersRepository {
+    /// Finds a user by identifier.
+    ///
+    /// _**NOTE:** The result of this function is `Option<Option<User>>`.
+    /// The first `Option` would be `None` in case of an error, the second `Option`
+    /// would be `None` if no user was found._
+    async fn find_user_by_id(&mut self, id: Id) -> Result<User, UserError>;
+
+    /// Finds a user by email.
+    ///
+    /// _**NOTE:** The result of this function is `Option<Option<User>>`.
+    /// The first `Option` would be `None` in case of an error, the second `Option`
+    /// would be `None` if no user was found._
+    async fn find_user_by_email(&mut self, email: &str) -> Result<User, UserError>;
+
+    /// Create a user.
+    async fn create_user(&mut self, email: &str, password: Option<&str>)
+        -> Result<User, UserError>;
+
+    /// Update a user's email by their identifier.
+    async fn update_user_email_by_id(&mut self, id: Id, new_email: &str)
+        -> Result<User, UserError>;
+
+    /// Update a user's password by their identifier.
+    async fn update_user_password_by_id(
+        &mut self,
+        id: Id,
+        new_password: Option<&str>,
+    ) -> Result<User, UserError>;
 }
 
 impl std::error::Error for UserError {}
@@ -154,8 +64,11 @@ impl std::fmt::Display for UserError {
     }
 }
 
-impl From<database::Error> for UserError {
-    fn from(value: database::Error) -> Self {
-        Self::Database(value)
+impl From<sqlx::Error> for UserError {
+    fn from(value: sqlx::Error) -> Self {
+        match value {
+            sqlx::Error::RowNotFound => Self::NotFound,
+            e => Self::Message(format!("{e:?}")),
+        }
     }
 }

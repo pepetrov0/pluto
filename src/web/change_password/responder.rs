@@ -1,7 +1,7 @@
 use axum::response::{IntoResponse, Redirect, Response};
 
 use crate::{
-    domain::{change_password::ChangePasswordError, users::User},
+    domain::{change_password::ChangePasswordError, User},
     web::{
         _components::{
             organisms::{change_password_form, ChangePasswordFormData},

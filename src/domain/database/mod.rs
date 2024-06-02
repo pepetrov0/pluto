@@ -10,14 +10,9 @@ mod any;
 mod postgres;
 mod sqlite;
 
-// features
-pub(in crate::domain) mod sessions;
-pub(in crate::domain) mod users;
-
 pub use any::*;
 
-#[cfg(test)]
-mod tests;
+use super::{sessions::SessionsRepository, users::UsersRepository};
 
 /// A maximum pool connection count.
 const MAX_POOL_CONNECTIONS: u32 = 8;
@@ -71,7 +66,7 @@ pub trait Database: Clone {
 /// Provides basic transaction functionalities such as commiting and rolling
 /// a transction back.
 #[async_trait]
-pub trait Transaction: users::Users + sessions::Sessions {
+pub trait Transaction: UsersRepository + SessionsRepository {
     /// Commits the transaction.
     /// If any error occured, returns `false`.
     async fn commit(self) -> Result<()>;

@@ -5,9 +5,7 @@ use tracing::instrument;
 use super::{
     database::AnyTransaction,
     passwords,
-    users::{
-        find_user_by_email, find_user_with_password_by_id, update_user_email_by_id, User, UserError,
-    },
+    users::{User, UserError, UsersRepository},
     validations,
 };
 
@@ -33,7 +31,7 @@ pub async fn validate_change_email(
     }
 
     // test if email is taken
-    if find_user_by_email(tx, new_email).await.is_ok() {
+    if tx.find_user_by_email(new_email).await.ok().is_some() {
         return Err(ChangeEmailError::EmailTaken);
     }
 
@@ -60,17 +58,13 @@ pub async fn change_email(
 
     validate_change_email(tx, user, new_email).await?;
 
-    let user = find_user_with_password_by_id(tx, user.id)
-        .await
-        .map_err(ChangeEmailError::from)?;
-
     // validate password
     user.password
         .as_ref()
         .and_then(|v| passwords::verify_password(current_password, v.as_str()).ok())
         .ok_or(ChangeEmailError::InvalidCredentials)?;
 
-    update_user_email_by_id(tx, user.id, new_email)
+    tx.update_user_email_by_id(user.id, new_email)
         .await
         .map(|_| ())
         .map_err(ChangeEmailError::from)
@@ -86,7 +80,7 @@ impl std::fmt::Display for ChangeEmailError {
 impl From<UserError> for ChangeEmailError {
     fn from(value: UserError) -> Self {
         match value {
-            UserError::Database(_) | UserError::UserNotFound => Self::Failure,
+            UserError::Message(_) | UserError::NotFound => Self::Failure,
         }
     }
 }

@@ -13,6 +13,7 @@
 //!
 
 #![deny(unused)]
+#![allow(clippy::blocks_in_conditions)]
 
 pub mod domain;
 pub mod web;
