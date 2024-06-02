@@ -5,7 +5,7 @@ use axum::async_trait;
 use crate::domain::identifier::Id;
 
 /// An entity representing a user.
-#[derive(Debug, Clone, sqlx::FromRow, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct User {
     /// Identifier of the user.
     pub id: Id,

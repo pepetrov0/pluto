@@ -2,6 +2,7 @@
 //! SQLite data source.
 
 use axum::async_trait;
+use sqlx::prelude::FromRow;
 
 use crate::domain::{
     identifier::Id,
@@ -9,6 +10,13 @@ use crate::domain::{
 };
 
 use super::SqliteTransaction;
+
+#[derive(Debug, FromRow)]
+struct UserE {
+    pub id: Id,
+    pub email: String,
+    pub password: Option<String>,
+}
 
 /// A trait describing a repository of users.
 #[async_trait]
@@ -20,6 +28,7 @@ impl UsersRepository for SqliteTransaction {
             .bind(id)
             .fetch_one(&mut *self.0)
             .await
+            .map(UserE::into)
             .map_err(UserError::from)
     }
 
@@ -30,6 +39,7 @@ impl UsersRepository for SqliteTransaction {
             .bind(email)
             .fetch_one(&mut *self.0)
             .await
+            .map(UserE::into)
             .map_err(UserError::from)
     }
 
@@ -45,6 +55,7 @@ impl UsersRepository for SqliteTransaction {
             .bind(password)
             .fetch_one(&mut *self.0)
             .await
+            .map(UserE::into)
             .map_err(UserError::from)
     }
 
@@ -60,6 +71,7 @@ impl UsersRepository for SqliteTransaction {
             .bind(new_email)
             .fetch_one(&mut *self.0)
             .await
+            .map(UserE::into)
             .map_err(UserError::from)
     }
 
@@ -75,6 +87,17 @@ impl UsersRepository for SqliteTransaction {
             .bind(new_password)
             .fetch_one(&mut *self.0)
             .await
+            .map(UserE::into)
             .map_err(UserError::from)
+    }
+}
+
+impl Into<User> for UserE {
+    fn into(self) -> User {
+        User {
+            id: self.id,
+            email: self.email,
+            password: self.password,
+        }
     }
 }

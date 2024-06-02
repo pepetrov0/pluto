@@ -2,6 +2,8 @@
 //! PostgreSQL data source.
 
 use axum::async_trait;
+use chrono::NaiveDateTime;
+use sqlx::prelude::FromRow;
 
 use crate::domain::{
     identifier::Id,
@@ -9,6 +11,14 @@ use crate::domain::{
 };
 
 use super::PgTransaction;
+
+#[derive(FromRow)]
+struct SessionE {
+    pub id: Id,
+    pub user_id: Id,
+    pub agent: String,
+    pub created_on: NaiveDateTime,
+}
 
 #[async_trait]
 impl SessionsRepository for PgTransaction {
@@ -18,6 +28,7 @@ impl SessionsRepository for PgTransaction {
             .bind(id)
             .fetch_one(&mut *self.0)
             .await
+            .map(SessionE::into)
             .map_err(SessionError::from)
     }
 
@@ -30,6 +41,7 @@ impl SessionsRepository for PgTransaction {
             .bind(user_id)
             .fetch_all(&mut *self.0)
             .await
+            .map(|v| v.into_iter().map(SessionE::into).collect())
             .map_err(SessionError::from)
     }
 
@@ -40,6 +52,7 @@ impl SessionsRepository for PgTransaction {
             .bind(agent)
             .fetch_one(&mut *self.0)
             .await
+            .map(SessionE::into)
             .map_err(SessionError::from)
     }
 
@@ -61,5 +74,16 @@ impl SessionsRepository for PgTransaction {
             .await
             .map(|_| ())
             .map_err(SessionError::from)
+    }
+}
+
+impl Into<Session> for SessionE {
+    fn into(self) -> Session {
+        Session {
+            id: self.id,
+            user_id: self.user_id,
+            agent: self.agent,
+            created_on: self.created_on,
+        }
     }
 }

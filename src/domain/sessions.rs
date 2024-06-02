@@ -6,7 +6,7 @@ use chrono::NaiveDateTime;
 use crate::domain::identifier::Id;
 
 /// An entity representing a session.
-#[derive(Debug, Clone, sqlx::FromRow, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Session {
     /// Identifier of the session.
     pub id: Id,
