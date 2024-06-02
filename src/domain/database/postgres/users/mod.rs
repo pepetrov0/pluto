@@ -2,7 +2,7 @@
 //! PostgreSQL data source.
 
 use axum::async_trait;
-use secrecy::Secret;
+use secrecy::{ExposeSecret, Secret};
 use sqlx::FromRow;
 
 use crate::domain::{
@@ -45,12 +45,13 @@ impl UsersRepository for PgTransaction {
     }
 
     /// Create a user.
-    #[tracing::instrument(err, skip(self, password))]
+    #[tracing::instrument(err, skip(self))]
     async fn create_user(
         &mut self,
         email: &str,
-        password: Option<&str>,
+        password: Option<Secret<String>>,
     ) -> Result<User, UserError> {
+        let password = password.as_ref().map(|v| v.expose_secret().as_str());
         sqlx::query_as(include_str!("create_user.sql"))
             .bind(email)
             .bind(password)
@@ -81,8 +82,9 @@ impl UsersRepository for PgTransaction {
     async fn update_user_password_by_id(
         &mut self,
         id: Id,
-        new_password: Option<&str>,
+        new_password: Option<Secret<String>>,
     ) -> Result<User, UserError> {
+        let new_password = new_password.as_ref().map(|v| v.expose_secret().as_str());
         sqlx::query_as(include_str!("update_user_password_by_id.sql"))
             .bind(id)
             .bind(new_password)

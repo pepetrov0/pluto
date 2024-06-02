@@ -66,7 +66,7 @@ pub async fn register(
 
     let password = password.expose_secret().as_str();
     let password = passwords::hash_password(password).map_err(RegistrationError::from)?;
-    tx.create_user(email, Some(&password))
+    tx.create_user(email, Some(Secret::from(password)))
         .await
         .map_err(RegistrationError::from)
 }

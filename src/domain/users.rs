@@ -43,8 +43,11 @@ pub trait UsersRepository {
     async fn find_user_by_email(&mut self, email: &str) -> Result<User, UserError>;
 
     /// Create a user.
-    async fn create_user(&mut self, email: &str, password: Option<&str>)
-        -> Result<User, UserError>;
+    async fn create_user(
+        &mut self,
+        email: &str,
+        password: Option<Secret<String>>,
+    ) -> Result<User, UserError>;
 
     /// Update a user's email by their identifier.
     async fn update_user_email_by_id(&mut self, id: Id, new_email: &str)
@@ -54,7 +57,7 @@ pub trait UsersRepository {
     async fn update_user_password_by_id(
         &mut self,
         id: Id,
-        new_password: Option<&str>,
+        new_password: Option<Secret<String>>,
     ) -> Result<User, UserError>;
 }
 

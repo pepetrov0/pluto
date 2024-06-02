@@ -1,4 +1,5 @@
 use axum::async_trait;
+use secrecy::Secret;
 
 use crate::domain::{
     identifier::Id,
@@ -33,7 +34,7 @@ impl UsersRepository for AnyTransaction {
     async fn create_user(
         &mut self,
         email: &str,
-        password: Option<&str>,
+        password: Option<Secret<String>>,
     ) -> Result<User, UserError> {
         match self {
             AnyTransaction::Sqlite(v) => v.create_user(email, password).await,
@@ -59,7 +60,7 @@ impl UsersRepository for AnyTransaction {
     async fn update_user_password_by_id(
         &mut self,
         id: Id,
-        new_password: Option<&str>,
+        new_password: Option<Secret<String>>,
     ) -> Result<User, UserError> {
         match self {
             AnyTransaction::Sqlite(v) => v.update_user_password_by_id(id, new_password).await,

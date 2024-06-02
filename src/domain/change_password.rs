@@ -64,7 +64,7 @@ pub async fn change_password(
     // hash password
     let password = passwords::hash_password(new_password).map_err(ChangePasswordError::from)?;
 
-    tx.update_user_password_by_id(user.id, Some(password.as_str()))
+    tx.update_user_password_by_id(user.id, Some(Secret::from(password)))
         .await
         .map(|_| ())
         .map_err(ChangePasswordError::from)
