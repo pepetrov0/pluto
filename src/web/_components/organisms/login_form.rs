@@ -2,14 +2,15 @@
 
 use maud::{html, Markup};
 use rust_i18n::t;
+use secrecy::Secret;
 
 use crate::{domain::authentication::AuthenticationError, web::_components::atoms::Icon};
 
 /// Represents the data in a login form.
-#[derive(Default, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize)]
 pub struct LoginFormData {
     pub email: String,
-    pub password: String,
+    pub password: Secret<String>,
 }
 
 /// Returns a login form.
@@ -58,6 +59,15 @@ pub fn login_form(locale: &str, error: Option<AuthenticationError>) -> Markup {
             a href="/register" hx-disabled-elt="this" hx-indicator="this" {
                 (t!("login.labels.register", locale = locale))
             }
+        }
+    }
+}
+
+impl Default for LoginFormData {
+    fn default() -> Self {
+        Self {
+            email: Default::default(),
+            password: Secret::from(String::default()),
         }
     }
 }

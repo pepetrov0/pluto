@@ -1,5 +1,6 @@
 //! This module provides a implementation to change a user's email.
 
+use secrecy::{ExposeSecret, Secret};
 use tracing::instrument;
 
 use super::{
@@ -44,12 +45,12 @@ pub async fn validate_change_email(
 }
 
 /// Changes a user's email.
-#[instrument(err, skip(tx, current_password))]
+#[instrument(err, skip(tx))]
 pub async fn change_email(
     tx: &mut AnyTransaction,
     user: &User,
     new_email: &str,
-    current_password: &str,
+    current_password: &Secret<String>,
 ) -> Result<(), ChangeEmailError> {
     // test if the new email is the same as the old one
     if user.email == new_email {
@@ -57,11 +58,12 @@ pub async fn change_email(
     }
 
     validate_change_email(tx, user, new_email).await?;
+    let current_password = current_password.expose_secret().as_str();
 
     // validate password
     user.password
         .as_ref()
-        .and_then(|v| passwords::verify_password(current_password, v.as_str()).ok())
+        .and_then(|v| passwords::verify_password(current_password, v.expose_secret().as_str()).ok())
         .ok_or(ChangeEmailError::InvalidCredentials)?;
 
     tx.update_user_email_by_id(user.id, new_email)

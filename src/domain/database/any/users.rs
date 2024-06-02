@@ -29,7 +29,7 @@ impl UsersRepository for AnyTransaction {
     }
 
     /// Create a user.
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(skip(self, password))]
     async fn create_user(
         &mut self,
         email: &str,

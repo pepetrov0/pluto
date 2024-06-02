@@ -1,5 +1,6 @@
 //! This module provides a implementation to change a user's password.
 
+use secrecy::{ExposeSecret, Secret};
 use tracing::instrument;
 
 use super::{
@@ -18,12 +19,15 @@ pub enum ChangePasswordError {
 }
 
 /// Validates the date required for a password change.
-#[instrument(err, skip(new_password, confirm_new_password))]
+#[instrument(err)]
 pub fn validate_change_password(
     user: &User,
-    new_password: &str,
-    confirm_new_password: &str,
+    new_password: &Secret<String>,
+    confirm_new_password: &Secret<String>,
 ) -> Result<(), ChangePasswordError> {
+    let new_password = new_password.expose_secret().as_str();
+    let confirm_new_password = confirm_new_password.expose_secret().as_str();
+
     // assess password
     if !validations::password_strength(new_password, &[user.email.as_str()]) {
         return Err(ChangePasswordError::WeakPassword);
@@ -38,20 +42,23 @@ pub fn validate_change_password(
 }
 
 /// Changes a user's password.
-#[instrument(err, skip(tx, new_password, confirm_new_password))]
+#[instrument(err, skip(tx))]
 pub async fn change_password(
     tx: &mut AnyTransaction,
     user: &User,
-    new_password: &str,
-    confirm_new_password: &str,
-    current_password: &str,
+    new_password: &Secret<String>,
+    confirm_new_password: &Secret<String>,
+    current_password: &Secret<String>,
 ) -> Result<(), ChangePasswordError> {
     validate_change_password(user, new_password, confirm_new_password)?;
+
+    let new_password = new_password.expose_secret().as_str();
+    let current_password = current_password.expose_secret().as_str();
 
     // validate password
     user.password
         .as_ref()
-        .and_then(|v| passwords::verify_password(current_password, v.as_str()).ok())
+        .and_then(|v| passwords::verify_password(current_password, v.expose_secret().as_str()).ok())
         .ok_or(ChangePasswordError::InvalidCredentials)?;
 
     // hash password

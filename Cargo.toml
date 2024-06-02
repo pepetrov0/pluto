@@ -24,6 +24,7 @@ hex = "0"
 maud = { version = "0", features = ["axum"] }
 rust-embed = { version = "8", features = ["mime-guess"] }
 rust-i18n = "3"
+secrecy = { version = "0", features = ["serde"] }
 serde = { version = "1", features = ["derive"] }
 sha2 = "0"
 sqlx = { version = "0", features = ["runtime-tokio", "postgres", "sqlite", "chrono"] }

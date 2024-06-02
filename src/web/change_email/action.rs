@@ -11,7 +11,7 @@ use crate::{
     },
 };
 
-#[tracing::instrument(skip(state, data))]
+#[tracing::instrument(skip(state))]
 pub async fn invoke(
     State(state): State<GlobalState>,
     locale: Locale,

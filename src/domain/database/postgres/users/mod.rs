@@ -2,6 +2,7 @@
 //! PostgreSQL data source.
 
 use axum::async_trait;
+use secrecy::Secret;
 use sqlx::FromRow;
 
 use crate::domain::{
@@ -97,7 +98,7 @@ impl Into<User> for UserE {
         User {
             id: self.id,
             email: self.email,
-            password: self.password,
+            password: self.password.map(Secret::from),
         }
     }
 }

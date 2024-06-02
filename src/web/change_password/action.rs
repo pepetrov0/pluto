@@ -1,4 +1,5 @@
 use axum::{extract::State, response::Response, Form};
+use secrecy::Secret;
 
 use crate::{
     domain::{
@@ -11,7 +12,7 @@ use crate::{
     },
 };
 
-#[tracing::instrument(skip(state, data))]
+#[tracing::instrument(skip(state))]
 pub async fn invoke(
     State(state): State<GlobalState>,
     locale: Locale,
@@ -29,9 +30,9 @@ pub async fn invoke(
     if let Err(error) = change_password(
         &mut tx,
         &auth.user,
-        &data.new_password,
-        &data.confirm_new_password,
-        &data.current_password,
+        &Secret::from(data.new_password.clone()),
+        &Secret::from(data.confirm_new_password.clone()),
+        &Secret::from(data.current_password.clone()),
     )
     .await
     {

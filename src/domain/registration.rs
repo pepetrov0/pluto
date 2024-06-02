@@ -1,5 +1,6 @@
 //! This module facilitates user registration.
 
+use secrecy::{ExposeSecret, Secret};
 use tracing::instrument;
 
 use super::{
@@ -20,13 +21,16 @@ pub enum RegistrationError {
 }
 
 /// Validates register data.
-#[instrument(err, skip(tx, password, confirm_password))]
+#[instrument(err, skip(tx))]
 pub async fn validate_register(
     tx: &mut AnyTransaction,
     email: &str,
-    password: &str,
-    confirm_password: &str,
+    password: &Secret<String>,
+    confirm_password: &Secret<String>,
 ) -> Result<(), RegistrationError> {
+    let password = password.expose_secret().as_str();
+    let confirm_password = confirm_password.expose_secret().as_str();
+
     // test whether the email address is valid
     if !validations::email(email) {
         return Err(RegistrationError::EmailInvalid);
@@ -51,15 +55,16 @@ pub async fn validate_register(
 }
 
 /// Registers a new user.
-#[instrument(err, skip(tx, password, confirm_password))]
+#[instrument(err, skip(tx))]
 pub async fn register(
     tx: &mut AnyTransaction,
     email: &str,
-    password: &str,
-    confirm_password: &str,
+    password: &Secret<String>,
+    confirm_password: &Secret<String>,
 ) -> Result<User, RegistrationError> {
     validate_register(tx, email, password, confirm_password).await?;
 
+    let password = password.expose_secret().as_str();
     let password = passwords::hash_password(password).map_err(RegistrationError::from)?;
     tx.create_user(email, Some(&password))
         .await
@@ -67,12 +72,12 @@ pub async fn register(
 }
 
 /// Registers a new user and immediately authenticate them.
-#[instrument(err, skip_all)]
+#[instrument(err, skip(tx))]
 pub async fn register_and_authenticate(
     tx: &mut AnyTransaction,
     email: &str,
-    password: &str,
-    confirm_password: &str,
+    password: &Secret<String>,
+    confirm_password: &Secret<String>,
     agent: &str,
 ) -> Result<(User, Session), RegistrationError> {
     let user = register(tx, email, password, confirm_password).await?;

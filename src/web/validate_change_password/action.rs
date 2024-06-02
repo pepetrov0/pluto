@@ -1,4 +1,5 @@
 use axum::{response::Response, Form};
+use secrecy::Secret;
 
 use crate::{
     domain::change_password::validate_change_password,
@@ -8,13 +9,17 @@ use crate::{
     },
 };
 
-#[tracing::instrument(skip(data))]
+#[tracing::instrument]
 pub async fn invoke(
     locale: Locale,
     auth: Auth,
     Form(data): Form<ChangePasswordFormData>,
 ) -> Response {
-    let error =
-        validate_change_password(&auth.user, &data.new_password, &data.confirm_new_password).err();
+    let error = validate_change_password(
+        &auth.user,
+        &Secret::from(data.new_password.clone()),
+        &Secret::from(data.confirm_new_password.clone()),
+    )
+    .err();
     super::responder::invoke(locale, data, error).await
 }

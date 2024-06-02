@@ -1,5 +1,7 @@
 //! Implements authorization.
 
+use tracing::instrument;
+
 use super::{
     database::AnyTransaction,
     sessions::{SessionError, SessionsRepository},
@@ -17,6 +19,7 @@ pub enum AuthorizationError {
 
 /// Force authorizes a user by email.
 /// If the user does not exist, it is created automatically.
+#[instrument(err, skip(tx))]
 pub async fn force_authorize_by_email(
     tx: &mut AnyTransaction,
     email: &str,
@@ -34,6 +37,7 @@ pub async fn force_authorize_by_email(
 }
 
 /// Authorizes a user by session.
+#[instrument(err, skip(tx))]
 pub async fn authorize_by_session(
     tx: &mut AnyTransaction,
     id: Id,

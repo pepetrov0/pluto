@@ -2,15 +2,16 @@
 
 use maud::{html, Markup};
 use rust_i18n::t;
+use secrecy::{ExposeSecret, Secret};
 
 use crate::{domain::change_password::ChangePasswordError, web::_components::atoms::Icon};
 
 /// Represents the data in a change password form.
-#[derive(Default, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize)]
 pub struct ChangePasswordFormData {
-    pub new_password: String,
-    pub confirm_new_password: String,
-    pub current_password: String,
+    pub new_password: Secret<String>,
+    pub confirm_new_password: Secret<String>,
+    pub current_password: Secret<String>,
 }
 
 /// A form that allows the user to change their password.
@@ -66,7 +67,8 @@ pub fn change_password_form(
                     label for="new-password" { (t!("change-password.labels.new-password", locale = locale)) };
                 }
                 input #new-password
-                    type="password" name="new_password" minlength="5" value=(data.new_password)
+                    type="password" name="new_password" minlength="5"
+                    value=(data.new_password.expose_secret().as_str())
                     placeholder=(t!("change-password.placeholders.new-password", locale = locale))
                     hx-post="/profile/change-password/validate"
                     hx-target="#change-password-form"
@@ -83,7 +85,8 @@ pub fn change_password_form(
                     label for="confirm-new-password" { (t!("change-password.labels.confirm-new-password", locale = locale)) };
                 }
                 input #confirm-new-password
-                    type="password" name="confirm_new_password" minlength="5" value=(data.confirm_new_password)
+                    type="password" name="confirm_new_password" minlength="5"
+                    value=(data.confirm_new_password.expose_secret().as_str())
                     placeholder=(t!("change-password.placeholders.confirm-new-password", locale = locale))
                     hx-post="/profile/change-password/validate"
                     hx-target="#change-password-form"
@@ -118,6 +121,16 @@ pub fn change_password_form(
                     hx-target="#change-password-form"
                     hx-swap="outerHTML";
             }
+        }
+    }
+}
+
+impl Default for ChangePasswordFormData {
+    fn default() -> Self {
+        Self {
+            new_password: Secret::from(String::default()),
+            confirm_new_password: Secret::from(String::default()),
+            current_password: Secret::from(String::default()),
         }
     }
 }

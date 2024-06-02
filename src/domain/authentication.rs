@@ -1,3 +1,4 @@
+use secrecy::{ExposeSecret, Secret};
 use tracing::instrument;
 
 use super::{
@@ -15,13 +16,14 @@ pub enum AuthenticationError {
 
 /// Authenticates a user by their email, password and agent.
 /// Returns the user authenticated as well as a new session.
-#[instrument(err, skip(tx, password))]
+#[instrument(err, skip(tx))]
 pub async fn authenticate(
     tx: &mut AnyTransaction,
     email: &str,
-    password: &str,
+    password: &Secret<String>,
     agent: &str,
 ) -> Result<(User, Session), AuthenticationError> {
+    let password = password.expose_secret().as_str();
     let user = tx
         .find_user_by_email(email)
         .await
@@ -30,7 +32,7 @@ pub async fn authenticate(
     // validate password
     user.password
         .as_ref()
-        .and_then(|v| passwords::verify_password(password, v.as_str()).ok())
+        .and_then(|v| passwords::verify_password(password, v.expose_secret().as_str()).ok())
         .ok_or(AuthenticationError::InvalidCredentials)?;
 
     // create session

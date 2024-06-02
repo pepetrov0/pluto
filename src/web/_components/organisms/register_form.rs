@@ -2,15 +2,16 @@
 
 use maud::{html, Markup};
 use rust_i18n::t;
+use secrecy::{ExposeSecret, Secret};
 
 use crate::{domain::registration::RegistrationError, web::_components::atoms::Icon};
 
 /// Represents the data in a register form.
-#[derive(Default, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize)]
 pub struct RegisterFormData {
     pub email: String,
-    pub password: String,
-    pub confirm_password: String,
+    pub password: Secret<String>,
+    pub confirm_password: Secret<String>,
 }
 
 /// Returns a register form.
@@ -75,7 +76,8 @@ pub fn register_form(
                 }
                 input #password
                     .error[password_error.is_some()]
-                    type="password" name="password" minlength="1" value=(data.password)
+                    type="password" name="password" minlength="1"
+                    value=(data.password.expose_secret().as_str())
                     placeholder=(t!("register.placeholders.password", locale = locale))
                     hx-post="/register/validate"
                     hx-target="#register-form"
@@ -93,7 +95,8 @@ pub fn register_form(
                 }
                 input #confirm-password
                     .error[confirm_password_error.is_some()]
-                    type="password" name="confirm_password" minlength="1" value=(data.confirm_password)
+                    type="password" name="confirm_password" minlength="1"
+                    value=(data.confirm_password.expose_secret().as_str())
                     placeholder=(t!("register.placeholders.confirm-password", locale = locale))
                     hx-post="/register/validate"
                     hx-target="#register-form"
@@ -114,6 +117,16 @@ pub fn register_form(
             a href="/login" hx-disabled-elt="this" hx-indicator="this" {
                 (t!("register.labels.login", locale = locale))
             }
+        }
+    }
+}
+
+impl Default for RegisterFormData {
+    fn default() -> Self {
+        Self {
+            email: Default::default(),
+            password: Secret::from(String::default()),
+            confirm_password: Secret::from(String::default()),
         }
     }
 }

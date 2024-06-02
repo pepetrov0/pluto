@@ -1,4 +1,5 @@
 use axum::{extract::State, response::Response, Form};
+use secrecy::Secret;
 
 use crate::{
     domain::{
@@ -11,7 +12,7 @@ use crate::{
     },
 };
 
-#[tracing::instrument(skip(state, data))]
+#[tracing::instrument(skip(state))]
 pub async fn invoke(
     State(state): State<GlobalState>,
     locale: Locale,
@@ -29,8 +30,8 @@ pub async fn invoke(
     let error = registration::validate_register(
         &mut transaction,
         &data.email,
-        &data.password,
-        &data.confirm_password,
+        &Secret::from(data.password.clone()),
+        &Secret::from(data.confirm_password.clone()),
     )
     .await
     .err();

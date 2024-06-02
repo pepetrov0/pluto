@@ -2,14 +2,15 @@
 
 use maud::{html, Markup};
 use rust_i18n::t;
+use secrecy::Secret;
 
 use crate::{domain::change_email::ChangeEmailError, web::_components::atoms::Icon};
 
 /// Represents the data in a change email form.
-#[derive(Default, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize)]
 pub struct ChangeEmailFormData {
     pub new_email: String,
-    pub current_password: String,
+    pub current_password: Secret<String>,
 }
 
 /// A form that allows the user to change their email.
@@ -97,6 +98,15 @@ pub fn change_email_form(
                     hx-target="#change-email-form"
                     hx-swap="outerHTML";
             }
+        }
+    }
+}
+
+impl Default for ChangeEmailFormData {
+    fn default() -> Self {
+        Self {
+            new_email: Default::default(),
+            current_password: Secret::from(String::default()),
         }
     }
 }

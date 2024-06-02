@@ -1,5 +1,6 @@
 use axum::{extract::State, response::Response, Form};
 use axum_extra::{headers::UserAgent, TypedHeader};
+use secrecy::Secret;
 
 use crate::{
     domain::{
@@ -14,7 +15,7 @@ use crate::{
 
 use super::responder;
 
-#[tracing::instrument(skip(state, data))]
+#[tracing::instrument(skip(state))]
 pub async fn invoke(
     State(state): State<GlobalState>,
     locale: Locale,
@@ -34,8 +35,8 @@ pub async fn invoke(
     let (_, result) = match registration::register_and_authenticate(
         &mut transaction,
         &data.email,
-        &data.password,
-        &data.confirm_password,
+        &Secret::from(data.password.clone()),
+        &Secret::from(data.confirm_password.clone()),
         agent.0.as_str(),
     )
     .await

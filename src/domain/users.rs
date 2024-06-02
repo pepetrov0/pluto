@@ -1,18 +1,19 @@
 //! This module implements the business logic for working with users.
 
 use axum::async_trait;
+use secrecy::Secret;
 
 use crate::domain::identifier::Id;
 
 /// An entity representing a user.
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct User {
     /// Identifier of the user.
     pub id: Id,
     /// Email.
     pub email: String,
     /// Argon hash of the password.
-    pub password: Option<String>,
+    pub password: Option<Secret<String>>,
 }
 
 /// An error that might occur while working with users.
@@ -70,5 +71,12 @@ impl From<sqlx::Error> for UserError {
             sqlx::Error::RowNotFound => Self::NotFound,
             e => Self::Message(format!("{e:?}")),
         }
+    }
+}
+
+impl Eq for User {}
+impl PartialEq for User {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id && self.email == other.email
     }
 }
