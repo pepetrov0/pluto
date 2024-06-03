@@ -4,7 +4,7 @@ use crate::{
     domain::{change_password::ChangePasswordError, User},
     web::{
         _components::{
-            organisms::{change_password_form, ChangePasswordFormData},
+            organisms::{change_password, ChangePasswordData},
             pages,
         },
         _core::{Hx, Locale},
@@ -15,12 +15,12 @@ pub async fn invoke(
     locale: Locale,
     hx: Hx,
     user: &User,
-    data: ChangePasswordFormData,
+    data: ChangePasswordData,
     error: Option<ChangePasswordError>,
 ) -> Response {
     match error {
         Some(error) if hx.request => {
-            change_password_form(locale.as_str(), Some(data), Some(error)).into_response()
+            change_password(locale.as_str(), Some(data), Some(error)).into_response()
         }
         Some(error) => pages::profile(locale.as_str(), user, None, None, Some(data), Some(error))
             .into_response(),

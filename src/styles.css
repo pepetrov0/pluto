@@ -42,6 +42,11 @@
     @apply active:bg-stone-700 dark:active:bg-stone-300;
     @apply disabled:hover:outline-none disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-stone-500 dark:disabled:bg-stone-500 dark:disabled:text-stone-700;
   }
+
+  [type="submit"].danger {
+    @apply bg-red-500 text-white outline-red-500;
+    @apply active:bg-red-700;
+  }
 }
 
 @layer components {

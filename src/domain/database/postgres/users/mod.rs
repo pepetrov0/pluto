@@ -93,6 +93,17 @@ impl UsersRepository for PgTransaction {
             .map(UserE::into)
             .map_err(UserError::from)
     }
+
+    /// Delete a user.
+    #[tracing::instrument(skip(self))]
+    async fn delete_user_by_id(&mut self, id: Id) -> Result<(), UserError> {
+        sqlx::query(include_str!("delete_user_by_id.sql"))
+            .bind(id)
+            .execute(&mut *self.0)
+            .await
+            .map(|_| ())
+            .map_err(UserError::from)
+    }
 }
 
 impl Into<User> for UserE {

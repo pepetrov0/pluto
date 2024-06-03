@@ -3,7 +3,7 @@ use axum::response::{IntoResponse, Response};
 use crate::{
     domain::User,
     web::{
-        _components::{organisms::ChangeEmailFormData, pages},
+        _components::{organisms::ChangeEmailData, pages},
         _core::Locale,
     },
 };
@@ -12,7 +12,7 @@ pub fn invoke(locale: Locale, user: User) -> Response {
     pages::profile(
         locale.as_str(),
         &user,
-        Some(ChangeEmailFormData {
+        Some(ChangeEmailData {
             new_email: user.email.clone(),
             ..Default::default()
         }),

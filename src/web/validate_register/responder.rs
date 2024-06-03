@@ -3,15 +3,15 @@ use axum::response::{IntoResponse, Response};
 use crate::{
     domain::registration::RegistrationError,
     web::{
-        _components::organisms::{self, RegisterFormData},
+        _components::organisms::{self, RegisterData},
         _core::Locale,
     },
 };
 
 pub async fn invoke(
     locale: Locale,
-    data: RegisterFormData,
+    data: RegisterData,
     error: Option<RegistrationError>,
 ) -> Response {
-    organisms::register_form(locale.as_str(), Some(data), error).into_response()
+    organisms::register(locale.as_str(), Some(data), error).into_response()
 }

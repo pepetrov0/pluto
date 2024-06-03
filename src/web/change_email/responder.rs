@@ -4,7 +4,7 @@ use crate::{
     domain::{change_email::ChangeEmailError, User},
     web::{
         _components::{
-            organisms::{change_email_form, ChangeEmailFormData},
+            organisms::{change_email, ChangeEmailData},
             pages,
         },
         _core::{Hx, Locale},
@@ -15,12 +15,12 @@ pub async fn invoke(
     locale: Locale,
     hx: Hx,
     user: &User,
-    data: ChangeEmailFormData,
+    data: ChangeEmailData,
     error: Option<ChangeEmailError>,
 ) -> Response {
     match error {
         Some(error) if hx.request => {
-            change_email_form(locale.as_str(), Some(data), Some(error)).into_response()
+            change_email(locale.as_str(), Some(data), Some(error)).into_response()
         }
         Some(error) => pages::profile(locale.as_str(), user, Some(data), Some(error), None, None)
             .into_response(),

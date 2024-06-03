@@ -8,16 +8,16 @@ use crate::{domain::registration::RegistrationError, web::_components::atoms::Ic
 
 /// Represents the data in a register form.
 #[derive(Debug, Clone, serde::Deserialize)]
-pub struct RegisterFormData {
+pub struct RegisterData {
     pub email: String,
     pub password: Secret<String>,
     pub confirm_password: Secret<String>,
 }
 
 /// Returns a register form.
-pub fn register_form(
+pub fn register(
     locale: &str,
-    data: Option<RegisterFormData>,
+    data: Option<RegisterData>,
     error: Option<RegistrationError>,
 ) -> Markup {
     const STYLES: &str = "card mt-4 w-full max-w-md flex flex-col items-center gap-4";
@@ -54,9 +54,9 @@ pub fn register_form(
             div .(FIELD_CONTAINER_STYLES) {
                 span .(FIELD_LABEL_STYLES) {
                     span ."icon-xs" { (Icon::AtSymbol) }
-                    label for="email" { (t!("register.labels.email", locale = locale)) };
+                    label for="register-email" { (t!("register.labels.email", locale = locale)) };
                 }
-                input #email
+                input #register-email
                     .error[email_error.is_some()]
                     type="email" name="email" minlength="5" value=(data.email)
                     placeholder=(t!("register.placeholders.email", locale = locale))
@@ -72,9 +72,9 @@ pub fn register_form(
             div .(FIELD_CONTAINER_STYLES) {
                 span .(FIELD_LABEL_STYLES) {
                     span ."icon-xs" { (Icon::Key) }
-                    label for="password" { (t!("register.labels.password", locale = locale)) };
+                    label for="register-password" { (t!("register.labels.password", locale = locale)) };
                 }
-                input #password
+                input #register-password
                     .error[password_error.is_some()]
                     type="password" name="password" minlength="1"
                     value=(data.password.expose_secret().as_str())
@@ -91,9 +91,9 @@ pub fn register_form(
             div .(FIELD_CONTAINER_STYLES) {
                 span .(FIELD_LABEL_STYLES) {
                     span ."icon-xs" { (Icon::Key) }
-                    label for="confirm-password" { (t!("register.labels.confirm-password", locale = locale)) };
+                    label for="register-confirm-password" { (t!("register.labels.confirm-password", locale = locale)) };
                 }
-                input #confirm-password
+                input #register-confirm-password
                     .error[confirm_password_error.is_some()]
                     type="password" name="confirm_password" minlength="1"
                     value=(data.confirm_password.expose_secret().as_str())
@@ -121,7 +121,7 @@ pub fn register_form(
     }
 }
 
-impl Default for RegisterFormData {
+impl Default for RegisterData {
     fn default() -> Self {
         Self {
             email: Default::default(),

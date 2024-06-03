@@ -8,7 +8,7 @@ use crate::{
         registration::{self, RegistrationError},
     },
     web::{
-        _components::organisms::RegisterFormData,
+        _components::organisms::RegisterData,
         _core::{GlobalState, Hx, Locale},
     },
 };
@@ -21,7 +21,7 @@ pub async fn invoke(
     locale: Locale,
     hx: Hx,
     agent: TypedHeader<UserAgent>,
-    Form(data): Form<RegisterFormData>,
+    Form(data): Form<RegisterData>,
 ) -> Response {
     let respond = |r| responder::invoke(locale.clone(), hx, data.clone(), r);
 

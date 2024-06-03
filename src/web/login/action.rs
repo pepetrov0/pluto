@@ -8,7 +8,7 @@ use crate::{
         database::{Database, Transaction},
     },
     web::{
-        _components::organisms::LoginFormData,
+        _components::organisms::LoginData,
         _core::{GlobalState, Hx, Locale},
     },
 };
@@ -21,7 +21,7 @@ pub async fn invoke(
     locale: Locale,
     hx: Hx,
     agent: TypedHeader<UserAgent>,
-    Form(data): Form<LoginFormData>,
+    Form(data): Form<LoginData>,
 ) -> Response {
     let respond = |r| responder::invoke(locale.clone(), hx, r);
 

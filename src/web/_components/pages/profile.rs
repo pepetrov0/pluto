@@ -6,8 +6,8 @@ use crate::{
     domain::{change_email::ChangeEmailError, change_password::ChangePasswordError, User},
     web::_components::{
         organisms::{
-            change_email_form, change_password_form, profile_details_card, ChangeEmailFormData,
-            ChangePasswordFormData,
+            change_email, change_password, danger_zone, profile_details, ChangeEmailData,
+            ChangePasswordData,
         },
         templates,
     },
@@ -17,17 +17,18 @@ use crate::{
 pub fn profile(
     locale: &str,
     user: &User,
-    change_email_data: Option<ChangeEmailFormData>,
+    change_email_data: Option<ChangeEmailData>,
     change_email_error: Option<ChangeEmailError>,
-    change_password_data: Option<ChangePasswordFormData>,
+    change_password_data: Option<ChangePasswordData>,
     change_password_error: Option<ChangePasswordError>,
 ) -> Markup {
     let content = html! {
-        (profile_details_card(locale, &user))
+        (profile_details(locale, &user))
 
         @if user.password.is_some() {
-            (change_email_form(locale, change_email_data, change_email_error))
-            (change_password_form(locale, change_password_data, change_password_error))
+            (change_email(locale, change_email_data, change_email_error))
+            (change_password(locale, change_password_data, change_password_error))
+            (danger_zone(locale))
         }
     };
     templates::page(locale, "profile.title", content)

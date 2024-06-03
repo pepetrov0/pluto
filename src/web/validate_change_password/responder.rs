@@ -3,15 +3,15 @@ use axum::response::{IntoResponse, Response};
 use crate::{
     domain::change_password::ChangePasswordError,
     web::{
-        _components::organisms::{self, ChangePasswordFormData},
+        _components::organisms::{self, ChangePasswordData},
         _core::Locale,
     },
 };
 
 pub async fn invoke(
     locale: Locale,
-    data: ChangePasswordFormData,
+    data: ChangePasswordData,
     error: Option<ChangePasswordError>,
 ) -> Response {
-    organisms::change_password_form(locale.as_str(), Some(data), error).into_response()
+    organisms::change_password(locale.as_str(), Some(data), error).into_response()
 }

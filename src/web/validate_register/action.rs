@@ -7,7 +7,7 @@ use crate::{
         registration::{self, RegistrationError},
     },
     web::{
-        _components::organisms::RegisterFormData,
+        _components::organisms::RegisterData,
         _core::{GlobalState, Locale},
     },
 };
@@ -16,7 +16,7 @@ use crate::{
 pub async fn invoke(
     State(state): State<GlobalState>,
     locale: Locale,
-    Form(data): Form<RegisterFormData>,
+    Form(data): Form<RegisterData>,
 ) -> Response {
     // first attempt creating a transaction
     let mut transaction = match state.database.begin().await {

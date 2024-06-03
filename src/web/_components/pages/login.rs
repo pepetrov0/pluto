@@ -9,5 +9,5 @@ use crate::{
 
 /// Constructs the login page.
 pub fn login(locale: &str, error: Option<AuthenticationError>) -> Markup {
-    templates::blank_page(locale, "login.title", organisms::login_form(locale, error))
+    templates::blank_page(locale, "login.title", organisms::login(locale, error))
 }

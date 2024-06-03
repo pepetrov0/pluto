@@ -15,9 +15,7 @@ pub async fn invoke(
 ) -> Response {
     match result {
         Ok(session) => (CreateAuth(session), Redirect::to("/")).into_response(),
-        Err(error) if hx.request => {
-            organisms::login_form(locale.as_str(), Some(error)).into_response()
-        }
+        Err(error) if hx.request => organisms::login(locale.as_str(), Some(error)).into_response(),
         Err(error) => pages::login(locale.as_str(), Some(error)).into_response(),
     }
 }

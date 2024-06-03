@@ -6,7 +6,7 @@ use crate::{
         database::{Database, Transaction},
     },
     web::{
-        _components::organisms::ChangeEmailFormData,
+        _components::organisms::ChangeEmailData,
         _core::{Auth, GlobalState, Hx, Locale},
     },
 };
@@ -17,7 +17,7 @@ pub async fn invoke(
     locale: Locale,
     hx: Hx,
     auth: Auth,
-    Form(data): Form<ChangeEmailFormData>,
+    Form(data): Form<ChangeEmailData>,
 ) -> Response {
     let respond = |e| super::responder::invoke(locale, hx, &auth.user, data.clone(), e);
 

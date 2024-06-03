@@ -5,7 +5,7 @@ use rust_i18n::t;
 
 use crate::{domain::User, web::_components::atoms::Icon};
 
-pub fn profile_details_card(locale: &str, user: &User) -> Markup {
+pub fn profile_details(locale: &str, user: &User) -> Markup {
     const STYLES: &str = "card grid gap-2 grid-cols-1 sm:grid-cols-2";
     const TITLE_STYLES: &str = "sm:col-span-2 flex flex-row gap-2 items-center mb-4";
     const FIELDS_STYLES: &str = "flex flex-col";

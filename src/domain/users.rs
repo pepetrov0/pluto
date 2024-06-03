@@ -59,6 +59,9 @@ pub trait UsersRepository {
         id: Id,
         new_password: Option<Secret<String>>,
     ) -> Result<User, UserError>;
+
+    /// Delete a user.
+    async fn delete_user_by_id(&mut self, id: Id) -> Result<(), UserError>;
 }
 
 impl std::error::Error for UserError {}

@@ -67,4 +67,13 @@ impl UsersRepository for AnyTransaction {
             AnyTransaction::Pg(v) => v.update_user_password_by_id(id, new_password).await,
         }
     }
+
+    /// Delete a user.
+    #[tracing::instrument(skip(self))]
+    async fn delete_user_by_id(&mut self, id: Id) -> Result<(), UserError> {
+        match self {
+            AnyTransaction::Sqlite(v) => v.delete_user_by_id(id).await,
+            AnyTransaction::Pg(v) => v.delete_user_by_id(id).await,
+        }
+    }
 }

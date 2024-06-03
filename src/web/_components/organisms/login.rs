@@ -8,13 +8,13 @@ use crate::{domain::authentication::AuthenticationError, web::_components::atoms
 
 /// Represents the data in a login form.
 #[derive(Debug, Clone, serde::Deserialize)]
-pub struct LoginFormData {
+pub struct LoginData {
     pub email: String,
     pub password: Secret<String>,
 }
 
 /// Returns a login form.
-pub fn login_form(locale: &str, error: Option<AuthenticationError>) -> Markup {
+pub fn login(locale: &str, error: Option<AuthenticationError>) -> Markup {
     const STYLES: &str = "card mt-4 w-full max-w-md flex flex-col items-center gap-4";
     const ERROR_LABEL_STYLES: &str = "text-sm text-red-500";
     const FIELD_CONTAINER_STYLES: &str = "w-full flex flex-col gap-1";
@@ -34,18 +34,18 @@ pub fn login_form(locale: &str, error: Option<AuthenticationError>) -> Markup {
             div .(FIELD_CONTAINER_STYLES) {
                 span .(FIELD_LABEL_STYLES) {
                     span ."icon-xs" { (Icon::AtSymbol) }
-                    label for="email" { (t!("login.labels.email", locale = locale)) };
+                    label for="login-email" { (t!("login.labels.email", locale = locale)) };
                 }
-                input #email type="text" name="email"
+                input #login-email type="text" name="email"
                     placeholder=(t!("login.placeholders.email", locale = locale));
             }
 
             div .(FIELD_CONTAINER_STYLES) {
                 span .(FIELD_LABEL_STYLES) {
                     span ."icon-xs" { (Icon::Key) }
-                    label for="password" { (t!("login.labels.password", locale = locale)) };
+                    label for="login-password" { (t!("login.labels.password", locale = locale)) };
                 }
-                input #password type="password" name="password"
+                input #login-password type="password" name="password"
                     placeholder=(t!("login.placeholders.password", locale = locale));
             }
 
@@ -63,7 +63,7 @@ pub fn login_form(locale: &str, error: Option<AuthenticationError>) -> Markup {
     }
 }
 
-impl Default for LoginFormData {
+impl Default for LoginData {
     fn default() -> Self {
         Self {
             email: Default::default(),

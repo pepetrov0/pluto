@@ -8,16 +8,16 @@ use crate::{domain::change_password::ChangePasswordError, web::_components::atom
 
 /// Represents the data in a change password form.
 #[derive(Debug, Clone, serde::Deserialize)]
-pub struct ChangePasswordFormData {
+pub struct ChangePasswordData {
     pub new_password: Secret<String>,
     pub confirm_new_password: Secret<String>,
     pub current_password: Secret<String>,
 }
 
 /// A form that allows the user to change their password.
-pub fn change_password_form(
+pub fn change_password(
     locale: &str,
-    data: Option<ChangePasswordFormData>,
+    data: Option<ChangePasswordData>,
     error: Option<ChangePasswordError>,
 ) -> Markup {
     const STYLES: &str = "card grid gap-4 grid-cols-1 sm:grid-cols-2";
@@ -54,8 +54,12 @@ pub fn change_password_form(
     };
 
     html! {
-        form #change-password-form .(STYLES) action="/profile/change-password" method="POST"
-            hx-boost="true" hx-disabled-elt="#change-password-form input" hx-indicator="#change-password-form input" {
+        form #change-password-form .(STYLES)
+            action="/profile/change-password"
+            method="POST"
+            hx-boost="true"
+            hx-disabled-elt="#change-password-form input"
+            hx-indicator="#change-password-form input" {
             h2 .(TITLE_STYLES) {
                 span ."icon-sm" { (Icon::Key) }
                 span { (t!("change-password.title", locale = locale)) }
@@ -64,9 +68,9 @@ pub fn change_password_form(
             div .(FIELD_CONTAINER_STYLES) {
                 span .(FIELD_LABEL_STYLES) {
                     span ."icon-xs" { (Icon::Key) }
-                    label for="new-password" { (t!("change-password.labels.new-password", locale = locale)) };
+                    label for="change-password-new-password" { (t!("change-password.labels.new-password", locale = locale)) };
                 }
-                input #new-password
+                input #change-password-new-password
                     type="password" name="new_password" minlength="5"
                     value=(data.new_password.expose_secret().as_str())
                     placeholder=(t!("change-password.placeholders.new-password", locale = locale))
@@ -82,9 +86,11 @@ pub fn change_password_form(
             div .(FIELD_CONTAINER_STYLES) {
                 span .(FIELD_LABEL_STYLES) {
                     span ."icon-xs" { (Icon::Key) }
-                    label for="confirm-new-password" { (t!("change-password.labels.confirm-new-password", locale = locale)) };
+                    label for="change-password-confirm-new-password" {
+                        (t!("change-password.labels.confirm-new-password", locale = locale))
+                    }
                 }
-                input #confirm-new-password
+                input #change-password-confirm-new-password
                     type="password" name="confirm_new_password" minlength="5"
                     value=(data.confirm_new_password.expose_secret().as_str())
                     placeholder=(t!("change-password.placeholders.confirm-new-password", locale = locale))
@@ -100,9 +106,11 @@ pub fn change_password_form(
             div .(FIELD_CONTAINER_STYLES) ."sm:col-span-2" {
                 span .(FIELD_LABEL_STYLES) {
                     span ."icon-xs" { (Icon::Key) }
-                    label for="current-password" { (t!("change-password.labels.current-password", locale = locale)) };
+                    label for="change-password-current-password" {
+                        (t!("change-password.labels.current-password", locale = locale))
+                    }
                 }
-                input #current-password
+                input #change-password-current-password
                     type="password"
                     name="current_password"
                     placeholder=(t!("change-password.placeholders.current-password", locale = locale));
@@ -125,7 +133,7 @@ pub fn change_password_form(
     }
 }
 
-impl Default for ChangePasswordFormData {
+impl Default for ChangePasswordData {
     fn default() -> Self {
         Self {
             new_password: Secret::from(String::default()),

@@ -8,15 +8,15 @@ use crate::{domain::change_email::ChangeEmailError, web::_components::atoms::Ico
 
 /// Represents the data in a change email form.
 #[derive(Debug, Clone, serde::Deserialize)]
-pub struct ChangeEmailFormData {
+pub struct ChangeEmailData {
     pub new_email: String,
     pub current_password: Secret<String>,
 }
 
 /// A form that allows the user to change their email.
-pub fn change_email_form(
+pub fn change_email(
     locale: &str,
-    data: Option<ChangeEmailFormData>,
+    data: Option<ChangeEmailData>,
     error: Option<ChangeEmailError>,
 ) -> Markup {
     const STYLES: &str = "card grid gap-4 grid-cols-1 sm:grid-cols-2";
@@ -55,9 +55,9 @@ pub fn change_email_form(
             div .(FIELD_CONTAINER_STYLES) {
                 span .(FIELD_LABEL_STYLES) {
                     span ."icon-xs" { (Icon::AtSymbol) }
-                    label for="new-email" { (t!("change-email.labels.new-email", locale = locale)) };
+                    label for="change-email-new-email" { (t!("change-email.labels.new-email", locale = locale)) }
                 }
-                input #new-email
+                input #change-email-new-email
                     .error[new_email_error.is_some()]
                     type="email" name="new_email" minlength="5" value=(data.new_email)
                     placeholder=(t!("change-email.placeholders.new-email", locale = locale))
@@ -73,9 +73,11 @@ pub fn change_email_form(
             div .(FIELD_CONTAINER_STYLES) {
                 span .(FIELD_LABEL_STYLES) {
                     span ."icon-xs" { (Icon::Key) }
-                    label for="current-password" { (t!("change-email.labels.current-password", locale = locale)) };
+                    label for="change-email-current-password" {
+                        (t!("change-email.labels.current-password", locale = locale))
+                    }
                 }
-                input #current-password
+                input #change-email-current-password
                     .error[current_password_error.is_some()]
                     type="password"
                     name="current_password"
@@ -102,7 +104,7 @@ pub fn change_email_form(
     }
 }
 
-impl Default for ChangeEmailFormData {
+impl Default for ChangeEmailData {
     fn default() -> Self {
         Self {
             new_email: Default::default(),

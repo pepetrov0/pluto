@@ -7,7 +7,7 @@ use crate::{
         database::{Database, Transaction},
     },
     web::{
-        _components::organisms::ChangePasswordFormData,
+        _components::organisms::ChangePasswordData,
         _core::{Auth, GlobalState, Hx, Locale},
     },
 };
@@ -18,7 +18,7 @@ pub async fn invoke(
     locale: Locale,
     hx: Hx,
     auth: Auth,
-    Form(data): Form<ChangePasswordFormData>,
+    Form(data): Form<ChangePasswordData>,
 ) -> Response {
     let respond = |e| super::responder::invoke(locale, hx, &auth.user, data.clone(), e);
 

@@ -5,7 +5,7 @@ use maud::Markup;
 use crate::{
     domain::registration::RegistrationError,
     web::_components::{
-        organisms::{self, RegisterFormData},
+        organisms::{self, RegisterData},
         templates,
     },
 };
@@ -13,12 +13,12 @@ use crate::{
 /// Constructs the register page.
 pub fn register(
     locale: &str,
-    data: Option<RegisterFormData>,
+    data: Option<RegisterData>,
     error: Option<RegistrationError>,
 ) -> Markup {
     templates::blank_page(
         locale,
         "register.title",
-        organisms::register_form(locale, data, error),
+        organisms::register(locale, data, error),
     )
 }
