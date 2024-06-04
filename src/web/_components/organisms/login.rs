@@ -34,7 +34,7 @@ pub fn login(locale: &str, error: Option<AuthenticationError>) -> Markup {
             div .(FIELD_CONTAINER_STYLES) {
                 span .(FIELD_LABEL_STYLES) {
                     span ."icon-xs" { (Icon::AtSymbol) }
-                    label for="login-email" { (t!("login.labels.email", locale = locale)) };
+                    label for="login-email" { (t!("login.labels.email", locale = locale)) }
                 }
                 input #login-email type="text" name="email"
                     placeholder=(t!("login.placeholders.email", locale = locale));
@@ -43,14 +43,14 @@ pub fn login(locale: &str, error: Option<AuthenticationError>) -> Markup {
             div .(FIELD_CONTAINER_STYLES) {
                 span .(FIELD_LABEL_STYLES) {
                     span ."icon-xs" { (Icon::Key) }
-                    label for="login-password" { (t!("login.labels.password", locale = locale)) };
+                    label for="login-password" { (t!("login.labels.password", locale = locale)) }
                 }
                 input #login-password type="password" name="password"
                     placeholder=(t!("login.placeholders.password", locale = locale));
             }
 
             @if let Some(error) = error {
-                span .(ERROR_LABEL_STYLES) { (t!(error, locale = locale)) };
+                span .(ERROR_LABEL_STYLES) { (t!(error, locale = locale)) }
             }
 
             input .mt-4 type="submit" value=(t!("login.title", locale = locale))

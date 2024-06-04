@@ -68,7 +68,7 @@ pub fn change_password(
             div .(FIELD_CONTAINER_STYLES) {
                 span .(FIELD_LABEL_STYLES) {
                     span ."icon-xs" { (Icon::Key) }
-                    label for="change-password-new-password" { (t!("change-password.labels.new-password", locale = locale)) };
+                    label for="change-password-new-password" { (t!("change-password.labels.new-password", locale = locale)) }
                 }
                 input #change-password-new-password
                     type="password" name="new_password" minlength="5"
@@ -79,7 +79,7 @@ pub fn change_password(
                     hx-swap="outerHTML"
                     hx-trigger="change";
                 @if let Some(copy) = new_password_error {
-                    span .(ERROR_LABEL_STYLES) { (t!(copy, locale = locale)) };
+                    span .(ERROR_LABEL_STYLES) { (t!(copy, locale = locale)) }
                 }
             }
 
@@ -99,7 +99,7 @@ pub fn change_password(
                     hx-swap="outerHTML"
                     hx-trigger="change";
                 @if let Some(copy) = confirm_new_password_error {
-                    span .(ERROR_LABEL_STYLES) { (t!(copy, locale = locale)) };
+                    span .(ERROR_LABEL_STYLES) { (t!(copy, locale = locale)) }
                 }
             }
 

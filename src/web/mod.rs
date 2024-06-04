@@ -11,6 +11,7 @@ mod _core;
 
 mod change_email;
 mod change_password;
+mod delete_user;
 mod get_static_file;
 mod login;
 mod logout;
@@ -63,6 +64,7 @@ pub fn router(cfg: Configuration, database: AnyDatabase, cookie_key: cookie::Key
         .merge(validate_change_password::router())
         .merge(change_email::router())
         .merge(change_password::router())
+        .merge(delete_user::router())
         // home
         .merge(show_dashboard::router())
         // other

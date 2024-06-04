@@ -83,7 +83,7 @@ pub fn change_email(
                     name="current_password"
                     placeholder=(t!("change-email.placeholders.current-password", locale = locale));
                 @if let Some(copy) = current_password_error {
-                    span .(ERROR_LABEL_STYLES) { (t!(copy, locale = locale)) };
+                    span .(ERROR_LABEL_STYLES) { (t!(copy, locale = locale)) }
                 }
             }
 

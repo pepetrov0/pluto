@@ -54,7 +54,7 @@ pub fn register(
             div .(FIELD_CONTAINER_STYLES) {
                 span .(FIELD_LABEL_STYLES) {
                     span ."icon-xs" { (Icon::AtSymbol) }
-                    label for="register-email" { (t!("register.labels.email", locale = locale)) };
+                    label for="register-email" { (t!("register.labels.email", locale = locale)) }
                 }
                 input #register-email
                     .error[email_error.is_some()]
@@ -65,14 +65,14 @@ pub fn register(
                     hx-swap="outerHTML"
                     hx-trigger="change";
                 @if let Some(copy) = email_error {
-                    span .(ERROR_LABEL_STYLES) { (t!(copy, locale = locale)) };
+                    span .(ERROR_LABEL_STYLES) { (t!(copy, locale = locale)) }
                 }
             }
 
             div .(FIELD_CONTAINER_STYLES) {
                 span .(FIELD_LABEL_STYLES) {
                     span ."icon-xs" { (Icon::Key) }
-                    label for="register-password" { (t!("register.labels.password", locale = locale)) };
+                    label for="register-password" { (t!("register.labels.password", locale = locale)) }
                 }
                 input #register-password
                     .error[password_error.is_some()]
@@ -84,14 +84,14 @@ pub fn register(
                     hx-swap="outerHTML"
                     hx-trigger="change";
                 @if let Some(copy) = password_error {
-                    span .(ERROR_LABEL_STYLES) { (t!(copy, locale = locale)) };
+                    span .(ERROR_LABEL_STYLES) { (t!(copy, locale = locale)) }
                 }
             }
 
             div .(FIELD_CONTAINER_STYLES) {
                 span .(FIELD_LABEL_STYLES) {
                     span ."icon-xs" { (Icon::Key) }
-                    label for="register-confirm-password" { (t!("register.labels.confirm-password", locale = locale)) };
+                    label for="register-confirm-password" { (t!("register.labels.confirm-password", locale = locale)) }
                 }
                 input #register-confirm-password
                     .error[confirm_password_error.is_some()]
@@ -103,12 +103,12 @@ pub fn register(
                     hx-swap="outerHTML"
                     hx-trigger="change";
                 @if let Some(copy) = confirm_password_error {
-                    span .(ERROR_LABEL_STYLES) { (t!(copy, locale = locale)) };
+                    span .(ERROR_LABEL_STYLES) { (t!(copy, locale = locale)) }
                 }
             }
 
             @if let Some(RegistrationError::Failure) = error {
-                span .(ERROR_LABEL_STYLES) { (t!("register.errors.something-went-wrong", locale = locale)) };
+                span .(ERROR_LABEL_STYLES) { (t!("register.errors.something-went-wrong", locale = locale)) }
             }
 
             input .mt-4 type="submit" value=(t!("register.title", locale = locale))
