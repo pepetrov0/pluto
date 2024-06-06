@@ -28,3 +28,5 @@ mod molecules;
 pub mod organisms;
 pub mod pages;
 pub mod templates;
+
+pub use atoms::Icon;

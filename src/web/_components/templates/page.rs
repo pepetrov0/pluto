@@ -3,7 +3,7 @@
 use maud::{html, Markup, DOCTYPE};
 use rust_i18n::t;
 
-use crate::web::{_components::organisms, _core::static_file_url};
+use crate::web::{_components::{atoms::Icon, organisms}, _core::static_file_url};
 
 const BODY_STYLES: &str = "bg-stone-200 text-black dark:bg-stone-900 dark:text-white";
 const CONTENT_STYLES: &str = "flex flex-col items-center mx-auto gap-4 p-4 max-w-3xl [&>*]:w-full";
@@ -44,7 +44,8 @@ pub fn blank_page(locale: &str, title: &str, content: Markup) -> Markup {
 }
 
 /// Constructs a contentful page.
-pub fn page(locale: &str, title: &str, content: Markup) -> Markup {
+pub fn page(locale: &str, icon: Icon, title: &str, content: Markup) -> Markup {
+    const TITLE_STYLES: &str = "flex flex-row gap-2 items-center";
     html! {
         (DOCTYPE)
         html lang=(locale) {
@@ -52,7 +53,10 @@ pub fn page(locale: &str, title: &str, content: Markup) -> Markup {
             body .pl-12 .(BODY_STYLES) {
                 (organisms::navigation(locale))
                 main .(CONTENT_STYLES) {
-                    h1 { (t!(title, locale = locale)) }
+                    h1 .(TITLE_STYLES) {
+                        span ."icon-sm" { (icon) }
+                        span { (t!(title, locale = locale)) }
+                    }
                     (content)
                 }
             }

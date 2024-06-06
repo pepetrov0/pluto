@@ -3,8 +3,12 @@
 use maud::{html, Markup};
 
 use crate::{
-    domain::{change_email::ChangeEmailError, change_password::ChangePasswordError, delete_user::DeleteUserError, User},
+    domain::{
+        change_email::ChangeEmailError, change_password::ChangePasswordError,
+        delete_user::DeleteUserError, User,
+    },
     web::_components::{
+        atoms::Icon,
         organisms::{
             change_email, change_password, danger_zone, profile_details, ChangeEmailData,
             ChangePasswordData,
@@ -32,5 +36,5 @@ pub fn profile(
             (danger_zone(locale, delete_user_error))
         }
     };
-    templates::page(locale, "profile.title", content)
+    templates::page(locale, Icon::User, "profile.title", content)
 }
