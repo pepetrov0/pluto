@@ -5,6 +5,8 @@ import (
 	"embed"
 	"fmt"
 	"net/http"
+
+	"github.com/sirupsen/logrus"
 )
 
 //go:embed static/*
@@ -14,17 +16,39 @@ const staticFilesPrefix string = "/f/"
 
 var staticFilesRouter http.Handler = http.StripPrefix(staticFilesPrefix, http.FileServerFS(staticFilesFS))
 
+var hashCache map[string]string = make(map[string]string)
+
+// Returns the hash of a static file
 func getStaticFileHash(name string) string {
+	log := logrus.WithFields(logrus.Fields{
+		"file": name,
+	})
+
+	// construct the correct path
 	name = fmt.Sprintf("static/%s", name)
-	bytes, err := staticFilesFS.ReadFile(name)
-	if err != nil {
-		return fmt.Sprintf("%x", md5.Sum([]byte(name)))
+
+	// if hash is already cached - return it
+	if hash, ok := hashCache[name]; ok {
+		return hash
 	}
 
+	// read the file, in case of an error - compute the hash of the name
+	bytes, err := staticFilesFS.ReadFile(name)
+	if err != nil {
+		bytes = []byte(name)
+	}
+
+	// format the hash as hex of maximum length of 10
+	log.Traceln("computing hash..")
 	hash := fmt.Sprintf("%x", md5.Sum(bytes))
-	return fmt.Sprintf("%.10s", hash)
+	hash = fmt.Sprintf("%.10s", hash)
+
+	// insert the hash into the cache
+	hashCache[name] = hash
+	return hash
 }
 
+// Returns the URL to a static file
 func getStaticFileUrl(name string) string {
 	hash := getStaticFileHash(name)
 	return fmt.Sprintf("/f/static/%s?hash=%s", name, hash)

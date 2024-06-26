@@ -8,9 +8,8 @@ import (
 )
 
 func main() {
-	log := logrus.New()
-	log.SetLevel(logrus.DebugLevel)
+	logrus.SetLevel(logrus.TraceLevel)
 
-	log.Infoln("listening on :8000")
-	http.ListenAndServe(":8000", www.NewRouter(log))
+	logrus.Infoln("listening on :8000")
+	http.ListenAndServe(":8000", www.NewRouter())
 }
