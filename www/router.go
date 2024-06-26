@@ -1,9 +1,7 @@
 package www
 
 import (
-	"io"
 	"net/http"
-	"strings"
 )
 
 // Constructs a new router to use with the application
@@ -12,18 +10,28 @@ func NewRouter() http.Handler {
 	global := http.NewServeMux()
 
 	// handle /health endpoint
+	global.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200) })
+
+	// handle static files
+	global.Handle(staticFilesPrefix, staticFilesRouter)
+
+	// handle home and fallback
 	global.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasPrefix(r.URL.Path, staticFilesPrefix) {
-			staticFilesRouter.ServeHTTP(w, r)
+		if r.URL.Path == "/" {
+			// handle home
+			if err := templates.ExecuteTemplate(w, "page.html", nil); err != nil {
+				http.Error(w, "", 500)
+			}
 		} else {
-			io.WriteString(w, "todo!")
+			// handle fallback
+			http.Error(w, "fallback", 404)
 		}
 	})
-	global.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200) })
 
 	// apply middleware
 	var router http.Handler = global
 	router = cacheControlMiddleware(router)
+	router = redirectOnTrailingSlashMiddleware(router)
 	router = loggerMiddleware(router)
 	return router
 }

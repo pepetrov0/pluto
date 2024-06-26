@@ -15,11 +15,17 @@ func loggerMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 		elapsed := time.Since(start)
 
-		log := logrus.WithFields(logrus.Fields{
+		fields := logrus.Fields{
 			"method":  r.Method,
 			"path":    r.URL.Path,
 			"elapsed": elapsed,
-		})
+		}
+
+		if len(r.URL.RawQuery) > 0 {
+			fields["query"] = r.URL.RawQuery
+		}
+
+		log := logrus.WithFields(fields)
 		log.Traceln("processed request.")
 	})
 }
@@ -34,6 +40,21 @@ func cacheControlMiddleware(next http.Handler) http.Handler {
 			w.Header().Set("Cache-Control", "max-age=31536000, immutable")
 		}
 
+		next.ServeHTTP(w, r)
+	})
+}
+
+// A middleware that redirects on trailing slashes
+func redirectOnTrailingSlashMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// redirect on trailing  slash
+		path := r.URL.Path
+		if strings.HasSuffix(path, "/") && len(path) > 1 {
+			http.Redirect(w, r, strings.TrimSuffix(path, "/"), http.StatusMovedPermanently)
+			return
+		}
+
+		// otherwise continue that chain
 		next.ServeHTTP(w, r)
 	})
 }

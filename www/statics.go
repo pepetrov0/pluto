@@ -16,7 +16,7 @@ const staticFilesPrefix string = "/f/"
 
 var staticFilesRouter http.Handler = http.StripPrefix(staticFilesPrefix, http.FileServerFS(staticFilesFS))
 
-var hashCache map[string]string = make(map[string]string)
+var staticFileHashCache map[string]string = make(map[string]string)
 
 // Returns the hash of a static file
 func getStaticFileHash(name string) string {
@@ -28,7 +28,7 @@ func getStaticFileHash(name string) string {
 	name = fmt.Sprintf("static/%s", name)
 
 	// if hash is already cached - return it
-	if hash, ok := hashCache[name]; ok {
+	if hash, ok := staticFileHashCache[name]; ok {
 		return hash
 	}
 
@@ -44,7 +44,7 @@ func getStaticFileHash(name string) string {
 	hash = fmt.Sprintf("%.10s", hash)
 
 	// insert the hash into the cache
-	hashCache[name] = hash
+	staticFileHashCache[name] = hash
 	return hash
 }
 
