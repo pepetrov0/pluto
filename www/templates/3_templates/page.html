@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="en">
+  {{ template "head.html" }}
+
+  <body class="pl-12 bg-stone-200 text-black dark:bg-stone-900 dark:text-white">
+    {{ template "navigation.html" }}
+    <main class="flex flex-col items-center mx-auto gap-4 p-4 max-w-3xl [&>*]:w-full">
+      {{ block "page:content" . }} Content {{ end }}
+    </main>
+  </body>
+</html>

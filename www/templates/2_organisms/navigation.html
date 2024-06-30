@@ -1,0 +1,32 @@
+<nav x-data="{ open: false }" @click.outside="open = false" 
+  class="fixed left-0 top-0 h-dvh xl:w-full has-[#nav-toggle:checked]:w-full max-w-[min(16rem,90dvw)] overflow-y-auto flex flex-col group/nav bg-white text-black dark:bg-stone-800 dark:text-white"
+>
+  <!-- header -->
+  <div class="flex flex-row">
+    <div class="icon-xl p-3 xl:hidden transition-colors hover:bg-black hover:text-white hover:dark:bg-white hover:dark:text-black">
+      <input id="nav-toggle" type="checkbox" aria-label="menu" x-model="open" class="absolute left-0 top-0 w-12 h-12 opacity-0 cursor-pointer z-[55]" />
+      <span class="inline group-has-[#nav-toggle:checked]/nav:hidden">
+        {{ template "icon:menu" }}
+      </span>
+      <span class="hidden group-has-[#nav-toggle:checked]/nav:inline">
+        {{ template "icon:x" }}
+      </span>
+    </div>
+    <a href="/" class="p-0 no-underline h-12 flex-grow items-center justify-center hidden xl:flex group-has-[#nav-toggle:checked]/nav:flex font-bold hover:cursor-pointer hover:bg-black hover:text-white hover:dark:bg-white hover:dark:text-black">
+      <span>pluto</span>
+    </a>
+  </div>
+
+  <!-- top-bottom divider -->
+  <div class="mt-auto"></div>
+
+  <!-- logout -->
+  <a href="/logout" class="p-0 no-underline flex flex-row z-50 hover:cursor-pointer hover:bg-black hover:text-white hover:dark:bg-white hover:dark:text-black">
+    <div class="icon-xl p-3">
+      {{ template "icon:logout" }}
+    </div>
+    <div class="flex-grow items-center hidden xl:flex group-has-[#nav-toggle:checked]/nav:flex">
+      Logout
+    </div>
+  </a>
+</nav>

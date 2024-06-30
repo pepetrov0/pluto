@@ -2,6 +2,8 @@ package www
 
 import (
 	"net/http"
+
+	"github.com/sirupsen/logrus"
 )
 
 // Constructs a new router to use with the application
@@ -19,7 +21,8 @@ func NewRouter() http.Handler {
 	global.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
 			// handle home
-			if err := templates.ExecuteTemplate(w, "page.html", nil); err != nil {
+			if err := templates.ExecuteTemplate(w, "home.html", nil); err != nil {
+				logrus.Errorln(err)
 				http.Error(w, "", 500)
 			}
 		} else {
